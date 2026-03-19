@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="שעות עבודה"/>
+<meta name="theme-color" content="#090c14"/>
+<link rel="manifest" href="/manifest.json"/>
+<link rel="apple-touch-icon" href="/icon-192.png"/>
+<title>שעות עבודה</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+body{background:#090c14;font-family:'Heebo','Arial Hebrew',sans-serif;color:#e2e8f0;overscroll-behavior:none}
+input,select,button{font-family:inherit}
+input[type=date],input[type=time]{color-scheme:dark}
+select option{background:#0d1117;color:#e2e8f0}
+::-webkit-scrollbar{display:none}
+.app{max-width:430px;margin:0 auto;min-height:100vh}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>if("serviceWorker"in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script type="text/babel" data-presets="react">
+const {useState,useEffect,useCallback,useRef} = React;
+
+const LS = {
+  get: k=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch{return null;}},
+  set: (k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}},
+};
+const K={shifts:"wt-shifts-v5",cfg:"wt-cfg-v5",tpls:"wt-tpls-v2",als:"wt-als-v2",clockin:"wt-clockin-v1"};
+
+const DEF_CFG={
+  baseRate:34.32,overtimeThreshold:8.6,overtime125Hours:2,
+  taxRate:10,bituachLeumi:3.5,masBriut:3.1,
+  pensionEmployee:6.5,pensionEmployer:6.5,
+  kerenEmployee:2.5,kerenEmployer:7.5,
+  enableDeductions:true,
+};
+const DEF_ALS=[
+  {id:1,name:"כלכלה",type:"per_shift",amount:16,active:true},
+  {id:2,name:"נסיעות",type:"per_shift",amount:50,active:true},
+];
+const ST={
+  regular:  {label:"רגיל",  mult:1.00,color:"#34d399",bg:"#022c22",icon:"☀️"},
+  afternoon:{label:"צהריים",mult:1.17,color:"#fbbf24",bg:"#2a1800",icon:"🌤️"},
+  night:    {label:"לילה",  mult:1.40,color:"#a78bfa",bg:"#1e1040",icon:"🌙"},
+};
+
+// ── Shift type detection by hour ──
+function detectShiftType(hour){
+  if(hour>=6  && hour<14) return "regular";
+  if(hour>=14 && hour<22) return "afternoon";
+  return "night";
+}
+
+// ── Calc ──
+function pt(t){if(!t)return 0;const[h,m]=t.split(":").map(Number);return h*60+(m||0);}
+function ch(s,e){let d=pt(e)-pt(s);if(d<=0)d+=1440;return Math.max(0,d/60);}
+
+// Fixed: overtime on night shifts = 140% * 125% = 175%, afternoon = 117% * 125% = 146.25%
+function cp(hours,type,cfg,customMultPct){
+  const{baseRate,overtimeThreshold,overtime125Hours}=cfg;
+  const baseMult=customMultPct?(customMultPct/100):(ST[type]?.mult||1);
+  const regH=Math.min(hours,overtimeThreshold);
+  const ot=Math.max(0,hours-overtimeThreshold);
+  const ot125H=Math.min(ot,overtime125Hours);
+  const ot150H=Math.max(0,ot-overtime125Hours);
+  const regPay=regH*baseRate*baseMult;
+  // Overtime uses base rate × overtime multiplier (not compounded with shift mult)
+  // Per Israeli law: overtime is on top of base, shift premium is separate
+  // Total for overtime hours = baseRate * shiftMult * overtimeMult
+  const ot125Pay=ot125H*baseRate*baseMult*1.25;
+  const ot150Pay=ot150H*baseRate*baseMult*1.50;
+  return{regH,ot125H,ot150H,regPay,ot125Pay,ot150Pay,gross:regPay+ot125Pay+ot150Pay,hours};
+}
+
+function csa(ids=[],als){return als.filter(a=>a.active&&a.type==="per_shift"&&ids.includes(a.id)).reduce((s,a)=>s+a.amount,0);}
+function cma(als){return als.filter(a=>a.active&&a.type==="per_month").reduce((s,a)=>s+a.amount,0);}
+function cd(gross,c){
+  const pe=gross*c.pensionEmployee/100,pr=gross*c.pensionEmployer/100;
+  const ke=gross*c.kerenEmployee/100,kr=gross*c.kerenEmployer/100;
+  const bl=gross*c.bituachLeumi/100,br=gross*c.masBriut/100,tx=gross*c.taxRate/100;
+  const tot=pe+ke+bl+br+tx;
+  return{pe,pr,ke,kr,bl,br,tx,tot,net:gross-tot};
+}
+
+function fH(n){return n.toFixed(1).replace(/\.0$/,"");}
+function fM(n){return "₪"+n.toLocaleString("he-IL",{minimumFractionDigits:2,maximumFractionDigits:2});}
+function tdy(){return new Date().toISOString().split("T")[0];}
+function nowTime(){const n=new Date();return `${String(n.getHours()).padStart(2,"0")}:${String(n.getMinutes()).padStart(2,"0")}`;}
+function mLbl(ym){const[y,m]=ym.split("-");return["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"][parseInt(m)-1]+" "+y;}
+function fD(ds){return new Date(ds+"T12:00:00").toLocaleDateString("he-IL",{weekday:"short",day:"numeric",month:"short"});}
+function elapsed(fromISO){
+  const diff=Math.floor((Date.now()-new Date(fromISO).getTime())/1000);
+  const h=Math.floor(diff/3600),m=Math.floor((diff%3600)/60),s=diff%60;
+  return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+}
+
+const SI={width:"100%",background:"#0d1117",border:"1px solid #2a2d3e",borderRadius:"10px",padding:"12px 14px",color:"#e2e8f0",fontSize:"16px",outline:"none",display:"block"};
+const CARD={background:"#111827",border:"1px solid #1f2937",borderRadius:"14px",padding:"14px"};
+const SEC={fontSize:"12px",color:"#6b7280",fontWeight:"700",letterSpacing:"0.8px",marginBottom:"12px",textTransform:"uppercase"};
+const LBL={fontSize:"11px",color:"#6b7280",marginBottom:"6px",fontWeight:"700",letterSpacing:"0.8px",textTransform:"uppercase"};
+
+function Btn({onClick,color="#22c55e",textColor="#000",children,style={}}){
+  return <button onClick={onClick} style={{width:"100%",padding:"14px",background:color,border:"none",borderRadius:"12px",color:textColor,fontSize:"15px",fontWeight:"800",cursor:"pointer",...style}}>{children}</button>;
+}
+function Field({label,hint,children}){
+  return(
+    <div style={{marginBottom:"14px"}}>
+      <div style={{display:"flex",justifyContent:"space-between",marginBottom:"6px"}}>
+        <div style={LBL}>{label}</div>
+        {hint&&<div style={{fontSize:"10px",color:"#4b5563"}}>{hint}</div>}
+      </div>
+      {children}
+    </div>
+  );
+}
+function Toggle({on,onToggle}){
+  return(
+    <button onClick={onToggle} style={{background:on?"#052e16":"#1f2937",border:`1.5px solid ${on?"#22c55e":"#374151"}`,color:on?"#22c55e":"#6b7280",borderRadius:"20px",padding:"3px 12px",cursor:"pointer",fontWeight:"700",fontSize:"12px"}}>
+      {on?"✓ פעיל":"כבוי"}
+    </button>
+  );
+}
+// Fixed number input — clears to empty instead of showing 0
+function NumInput({value,onChange,step=1,min=0,max,style={}}){
+  return(
+    <input
+      type="number" step={step} min={min} max={max}
+      value={value===0?"":value}
+      onChange={e=>{
+        const v=e.target.value;
+        onChange(v===""?0:parseFloat(v)||0);
+      }}
+      onFocus={e=>{ if(e.target.value==="0")e.target.value=""; }}
+      style={{...SI,...style}}
+    />
+  );
+}
+
+// ── Funny messages ──
+const IN_MSGS = [
+  {emoji:"💪", text:"בוא נעשה היסטוריה. או לפחות תלוש שכר טוב."},
+  {emoji:"🦸", text:"גיבורים לא מחכים להרגיש מוכנים. הם לוחצים כניסה."},
+  {emoji:"👑", text:"המלך נכנס לארמון. הארמון מתחפש לעבודה."},
+  {emoji:"😈", text:"המשמרת לא תעשה את עצמה. למזלה — יש אותך."},
+  {emoji:"🎬", text:"אקשן! המצלמות לא מצלמות, אבל הכסף בטח בא."},
+  {emoji:"⚔️", text:"לא מלחמה. רק משמרת. אבל אותה אנרגיה."},
+  {emoji:"🧃", text:"רענן, ממוקד, מוכן. ועוד לא שתית קפה? נו."},
+  {emoji:"🌅", text:"יום חדש, הזדמנות חדשה לעשות כסף. תנצל אותה."},
+  {emoji:"🏃", text:"המרוץ התחיל. הפרס? כרגיל — שקלים."},
+  {emoji:"🎵", text:"המשמרת הזאת? היא הלהיט שלך. תמכור אותה."},
+];
+const OUT_MSGS = [
+  {emoji:"🥳", text:"המשמרת מתה. יחי השכר!"},
+  {emoji:"🛁", text:"מגיע לך מקלחת, ספה, ואולי גם קינוח. הרווחת."},
+  {emoji:"🤑", text:"הכסף לא עדיין בחשבון, אבל הוא בדרך. תאמין."},
+  {emoji:"🧘", text:"נשום. המשמרת מאחוריך. הסטרס — גם הוא."},
+  {emoji:"😏", text:"עשית יותר ממה שציפו? כנראה שכן. שמור את זה."},
+  {emoji:"🌟", text:"כוכב. פשוט כוכב. עם תלוש שכר."},
+  {emoji:"🎁", text:"מתנה לעצמך: שאר היום. מגיע לך."},
+  {emoji:"🦾", text:"כלתה המשמרת. לא כלית אתה. ניצחת."},
+  {emoji:"🏖️", text:"כל משמרת שסיימת מקרבת אותך לחופשה הבאה. חשוב על זה."},
+  {emoji:"🍦", text:"תגמל את עצמך. לא? לפחות תחייך לבנק."},
+];
+function randMsg(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+// ════════════════════════════════════════
+// CLOCK IN/OUT SCREEN (main screen)
+// ════════════════════════════════════════
+function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved}){
+  const[tick,setTick]=useState(0);
+  const[selAls,setSelAls]=useState([]);
+  const[note,setNote]=useState("");
+  const[inMsg,setInMsg]=useState(null);
+  const[outMsg,setOutMsg]=useState(null);
+
+  useEffect(()=>{
+    if(!clockIn) return;
+    const id=setInterval(()=>setTick(t=>t+1),1000);
+    return()=>clearInterval(id);
+  },[clockIn]);
+
+  const shiftAls=als.filter(a=>a.active&&a.type==="per_shift");
+
+  const handleClockIn=()=>{
+    const now=new Date();
+    const msg=randMsg(IN_MSGS);
+    setInMsg(msg);
+    setTimeout(()=>{
+      setInMsg(null);
+      const ci={date:tdy(),time:nowTime(),iso:now.toISOString(),type:detectShiftType(now.getHours())};
+      setClockIn(ci);
+      LS.set(K.clockin,ci);
+      setSelAls(shiftAls.map(a=>a.id));
+    },2200);
+  };
+
+  const handleClockOut=()=>{
+    if(!clockIn) return;
+    const endTime=nowTime();
+    const hours=ch(clockIn.time,endTime);
+    const shift={id:Date.now(),date:clockIn.date,start:clockIn.time,end:endTime,type:clockIn.type,allowanceIds:selAls,note,templateName:""};
+    onShiftSaved(shift);
+    setClockIn(null);
+    LS.set(K.clockin,null);
+    setSelAls([]);setNote("");
+    const msg=randMsg(OUT_MSGS);
+    setOutMsg(msg);
+    setTimeout(()=>setOutMsg(null),3000);
+  };
+
+  const toggleAl=(id)=>setSelAls(s=>s.includes(id)?s.filter(x=>x!==id):[...s,id]);
+
+  const now=new Date();
+  const curType=clockIn?clockIn.type:detectShiftType(now.getHours());
+  const t=ST[curType];
+
+  // Funny message overlay
+  if(inMsg||outMsg){
+    const msg=inMsg||outMsg;
+    const isIn=!!inMsg;
+    return(
+      <div style={{padding:"40px 24px",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"60vh",textAlign:"center"}}>
+        <div style={{fontSize:"72px",marginBottom:"20px",animation:"bounce 0.5s ease"}}>{msg.emoji}</div>
+        <div style={{fontSize:"20px",fontWeight:"900",color:isIn?"#4ade80":"#fbbf24",lineHeight:"1.5",marginBottom:"16px"}}>
+          {msg.text}
+        </div>
+        <div style={{fontSize:"13px",color:"#4b5563"}}>
+          {isIn?"מתחיל לרשום...":"משמרת נשמרה ✓"}
+        </div>
+      </div>
+    );
+  }
+
+  return(
+    <div style={{padding:"20px 16px",paddingBottom:"90px"}}>
+      {/* Current time display */}
+      <div style={{textAlign:"center",marginBottom:"28px"}}>
+        <div style={{fontSize:"13px",color:"#6b7280",marginBottom:"4px"}}>
+          {new Date().toLocaleDateString("he-IL",{weekday:"long",day:"numeric",month:"long"})}
+        </div>
+        <LiveClock/>
+        <div style={{display:"inline-flex",alignItems:"center",gap:"6px",background:t.bg,border:`1px solid ${t.color}`,borderRadius:"20px",padding:"4px 14px",marginTop:"8px"}}>
+          <span style={{fontSize:"14px"}}>{t.icon}</span>
+          <span style={{fontSize:"13px",color:t.color,fontWeight:"700"}}>משמרת {t.label}</span>
+        </div>
+      </div>
+
+      {!clockIn?(
+        // CLOCK IN button
+        <div>
+          <button onClick={handleClockIn} style={{
+            width:"100%",height:"180px",borderRadius:"24px",border:"none",cursor:"pointer",
+            background:`linear-gradient(145deg, #052e16, #14532d)`,
+            border:"2px solid #22c55e",
+            display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"12px",
+            boxShadow:"0 0 40px #22c55e33",
+          }}>
+            <div style={{fontSize:"52px"}}>▶</div>
+            <div style={{fontSize:"22px",fontWeight:"900",color:"#4ade80"}}>כניסה למשמרת</div>
+            <div style={{fontSize:"13px",color:"#86efac"}}>{nowTime()}</div>
+          </button>
+
+          <div style={{marginTop:"20px",...CARD,background:"#0d1117",textAlign:"center"}}>
+            <div style={{fontSize:"12px",color:"#4b5563"}}>לחץ כניסה כשמתחיל המשמרת</div>
+            <div style={{fontSize:"12px",color:"#4b5563",marginTop:"4px"}}>השעה והתאריך יירשמו אוטומטית</div>
+          </div>
+        </div>
+      ):(
+        // CLOCK OUT view
+        <div>
+          {/* Elapsed timer */}
+          <div style={{...CARD,marginBottom:"16px",background:"#0d1f0a",border:"1px solid #166534",textAlign:"center"}}>
+            <div style={{fontSize:"12px",color:"#86efac",marginBottom:"6px",fontWeight:"700"}}>⏱ משמרת פעילה</div>
+            <div style={{fontSize:"13px",color:"#6b7280",marginBottom:"6px"}}>התחלה: {clockIn.time} · {fD(clockIn.date)}</div>
+            <div style={{fontSize:"42px",fontWeight:"900",color:"#4ade80",letterSpacing:"2px",fontVariantNumeric:"tabular-nums"}}>
+              {elapsed(clockIn.iso)}
+            </div>
+            <div style={{fontSize:"12px",color:"#4b5563",marginTop:"6px"}}>
+              {fH(ch(clockIn.time,nowTime()))} שעות עד עכשיו
+            </div>
+          </div>
+
+          {/* Allowances */}
+          {shiftAls.length>0&&(
+            <div style={{marginBottom:"16px"}}>
+              <div style={LBL}>תוספות למשמרת זו</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:"8px"}}>
+                {shiftAls.map(a=>{const on=selAls.includes(a.id);return(
+                  <button key={a.id} onClick={()=>toggleAl(a.id)} style={{padding:"10px 14px",borderRadius:"10px",cursor:"pointer",border:`1.5px solid ${on?"#34d399":"#2a2d3e"}`,background:on?"#022c22":"#0d1117",color:on?"#34d399":"#6b7280",fontWeight:"700",fontSize:"13px"}}>
+                    🧾 {a.name} {fM(a.amount)}
+                  </button>
+                );})}
+              </div>
+            </div>
+          )}
+
+          {/* Note */}
+          <Field label="הערה (אופציונלי)">
+            <input type="text" value={note} onChange={e=>setNote(e.target.value)} placeholder="חג, שעות מיוחדות..." style={SI}/>
+          </Field>
+
+          {/* Clock out button */}
+          <button onClick={handleClockOut} style={{
+            width:"100%",height:"140px",borderRadius:"24px",border:"none",cursor:"pointer",
+            background:"linear-gradient(145deg,#2d0505,#7f1d1d)",
+            border:"2px solid #ef4444",
+            display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"10px",
+            boxShadow:"0 0 30px #ef444433",
+          }}>
+            <div style={{fontSize:"42px"}}>⏹</div>
+            <div style={{fontSize:"20px",fontWeight:"900",color:"#f87171"}}>סיום משמרת</div>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LiveClock(){
+  const[time,setTime]=useState(nowTime());
+  useEffect(()=>{const id=setInterval(()=>setTime(nowTime()),1000);return()=>clearInterval(id);},[]);
+  return <div style={{fontSize:"48px",fontWeight:"900",color:"#f1f5f9",letterSpacing:"2px",fontVariantNumeric:"tabular-nums"}}>{time}</div>;
+}
+
+// ════════════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════════════
+function Dashboard({shifts,cfg,als,selM,setSelM}){
+  const ms=shifts.filter(s=>s.date.startsWith(selM));
+  let tG=0,tA=0,tH=0,regH=0,aftH=0,ngtH=0,ot125=0,ot150=0;
+  ms.forEach(s=>{
+    const h=ch(s.start,s.end),c=cp(h,s.type,cfg),sa=csa(s.allowanceIds||[],als);
+    tG+=c.gross;tA+=sa;tH+=h;
+    if(s.type==="regular")regH+=c.regH;
+    if(s.type==="afternoon")aftH+=c.regH;
+    if(s.type==="night")ngtH+=c.regH;
+    ot125+=c.ot125H;ot150+=c.ot150H;
+  });
+  tA+=cma(als);
+  const dedBase=tG+tA; // ניכויים על ברוטו + תוספות
+  const ded=cfg.enableDeductions?cd(dedBase,cfg):null;
+  const net=ded?dedBase-ded.tot:dedBase;
+  const nav=(dir)=>{const[y,m]=selM.split("-").map(Number);const d=new Date(y,m-2+dir*2);setSelM(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`);};
+
+  return(
+    <div style={{padding:"16px",paddingBottom:"90px"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"18px"}}>
+        <button onClick={()=>nav(1)} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>‹</button>
+        <div style={{textAlign:"center"}}>
+          <div style={{fontSize:"18px",fontWeight:"800",color:"#f1f5f9"}}>{mLbl(selM)}</div>
+          {selM===tdy().substring(0,7)&&<div style={{fontSize:"11px",color:"#22c55e",marginTop:"2px"}}>● חודש נוכחי</div>}
+        </div>
+        <button onClick={()=>nav(-1)} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>›</button>
+      </div>
+
+      <div style={{background:"linear-gradient(145deg,#052e16,#14532d)",border:"1px solid #166534",borderRadius:"18px",padding:"20px",marginBottom:"12px",textAlign:"center",position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:"-20px",right:"-20px",width:"80px",height:"80px",background:"#22c55e22",borderRadius:"50%"}}/>
+        {ded?(
+          <>
+            <div style={{fontSize:"11px",color:"#86efac",letterSpacing:"1.5px",fontWeight:"700",marginBottom:"4px"}}>סה״כ הכנסה חייבת במס</div>
+            <div style={{fontSize:"28px",fontWeight:"900",color:"#4ade80"}}>{fM(dedBase)}</div>
+            <div style={{fontSize:"11px",color:"#86efac88",marginTop:"2px"}}>{fM(tG)} משכורת + {fM(tA)} תוספות</div>
+            <div style={{height:"1px",background:"#166534",margin:"12px 0 10px"}}/>
+            <div style={{display:"flex",justifyContent:"space-around",alignItems:"center"}}>
+              <div>
+                <div style={{fontSize:"10px",color:"#86efac",marginBottom:"3px"}}>ניכויים</div>
+                <div style={{fontSize:"17px",fontWeight:"800",color:"#f87171"}}>-{fM(ded.tot)}</div>
+                <div style={{fontSize:"10px",color:"#f8717188"}}>{(ded.tot/dedBase*100).toFixed(1)}% מהכנסה</div>
+              </div>
+              <div style={{width:"1px",background:"#166534",height:"40px"}}/>
+              <div>
+                <div style={{fontSize:"10px",color:"#86efac",marginBottom:"3px"}}>שכר נטו לקבלה</div>
+                <div style={{fontSize:"20px",fontWeight:"900",color:"#4ade80"}}>{fM(net)}</div>
+              </div>
+            </div>
+          </>
+        ):(
+          <>
+            <div style={{fontSize:"11px",color:"#86efac",letterSpacing:"1.5px",fontWeight:"700",marginBottom:"8px"}}>שכר משוער לחודש</div>
+            <div style={{fontSize:"40px",fontWeight:"900",color:"#4ade80",letterSpacing:"-2px",lineHeight:1}}>{fM(tG+tA)}</div>
+          </>
+        )}
+        <div style={{color:"#4ade8080",fontSize:"12px",marginTop:"10px"}}>{fH(tH)} שעות · {ms.length} משמרות</div>
+      </div>
+
+      {tA>0&&(
+        <div style={{...CARD,marginBottom:"10px",background:"#0d1f1a",border:"1px solid #065f46"}}>
+          <div style={{fontSize:"12px",color:"#6ee7b7",fontWeight:"700",marginBottom:"10px"}}>🧾 תוספות החודש</div>
+          {als.filter(a=>a.active&&a.type==="per_shift").map(a=>{
+            const cnt=ms.filter(s=>(s.allowanceIds||[]).includes(a.id)).length;
+            if(!cnt)return null;
+            return(
+              <div key={a.id} style={{display:"flex",justifyContent:"space-between",padding:"7px 0",borderBottom:"1px solid #065f46"}}>
+                <span style={{fontSize:"13px",color:"#9ca3af"}}>{a.name} <span style={{color:"#4b5563"}}>×{cnt}</span></span>
+                <span style={{fontSize:"14px",fontWeight:"700",color:"#34d399"}}>{fM(a.amount*cnt)}</span>
+              </div>
+            );
+          })}
+          {als.filter(a=>a.active&&a.type==="per_month").map(a=>(
+            <div key={a.id} style={{display:"flex",justifyContent:"space-between",padding:"7px 0",borderBottom:"1px solid #065f46"}}>
+              <span style={{fontSize:"13px",color:"#9ca3af"}}>{a.name} (חודשי)</span>
+              <span style={{fontSize:"14px",fontWeight:"700",color:"#34d399"}}>{fM(a.amount)}</span>
+            </div>
+          ))}
+          <div style={{display:"flex",justifyContent:"space-between",paddingTop:"8px"}}>
+            <span style={{fontSize:"13px",color:"#6b7280",fontWeight:"700"}}>סה״כ תוספות</span>
+            <span style={{fontSize:"15px",fontWeight:"900",color:"#34d399"}}>{fM(tA)}</span>
+          </div>
+        </div>
+      )}
+
+      {ded&&tG>0&&(
+        <>
+          <div style={{...CARD,marginBottom:"10px"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:"10px"}}>
+              <div style={SEC}>ניכויים</div>
+              <div style={{fontSize:"10px",color:"#4b5563"}}>מחושב על {fM(dedBase)}</div>
+            </div>
+            {[
+              {l:"מס הכנסה",v:ded.tx,c:"#f87171",p:cfg.taxRate},
+              {l:"ביטוח לאומי",v:ded.bl,c:"#fb923c",p:cfg.bituachLeumi},
+              {l:"מס בריאות",v:ded.br,c:"#facc15",p:cfg.masBriut},
+              {l:"פנסיה (עובד)",v:ded.pe,c:"#60a5fa",p:cfg.pensionEmployee},
+              {l:"קרן השתלמות",v:ded.ke,c:"#a78bfa",p:cfg.kerenEmployee},
+            ].map((r,i)=>(
+              <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 0",borderBottom:i<4?"1px solid #1f2937":"none"}}>
+                <div style={{display:"flex",alignItems:"center",gap:"7px"}}>
+                  <div style={{width:"3px",height:"14px",borderRadius:"2px",background:r.c}}/>
+                  <span style={{fontSize:"13px",color:"#9ca3af"}}>{r.l}</span>
+                  <span style={{fontSize:"10px",color:"#374151"}}>{r.p}%</span>
+                </div>
+                <span style={{fontSize:"14px",fontWeight:"700",color:r.c}}>-{fM(r.v)}</span>
+              </div>
+            ))}
+            <div style={{display:"flex",justifyContent:"space-between",paddingTop:"8px"}}>
+              <span style={{fontSize:"13px",color:"#6b7280",fontWeight:"700"}}>סה״כ ניכויים</span>
+              <span style={{fontSize:"15px",fontWeight:"900",color:"#f87171"}}>-{fM(ded.tot)}</span>
+            </div>
+          </div>
+          <div style={{...CARD,marginBottom:"12px",background:"#0d1b2a",border:"1px solid #1e3a5f"}}>
+            <div style={{fontSize:"11px",color:"#60a5fa",fontWeight:"700",marginBottom:"8px"}}>הפרשות מעסיק</div>
+            <div style={{display:"flex",gap:"12px"}}>
+              <div style={{flex:1,textAlign:"center"}}><div style={{fontSize:"10px",color:"#4b5563"}}>פנסיה</div><div style={{fontSize:"15px",fontWeight:"800",color:"#60a5fa"}}>{fM(ded.pr)}</div></div>
+              <div style={{width:"1px",background:"#1e3a5f"}}/>
+              <div style={{flex:1,textAlign:"center"}}><div style={{fontSize:"10px",color:"#4b5563"}}>קרן השתלמות</div><div style={{fontSize:"15px",fontWeight:"800",color:"#a78bfa"}}>{fM(ded.kr)}</div></div>
+            </div>
+          </div>
+        </>
+      )}
+
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"18px"}}>
+        {[
+          {label:"שעות רגיל",val:fH(regH),sub:"100%",color:"#34d399"},
+          {label:"שעות צהריים",val:fH(aftH),sub:"117%",color:"#fbbf24"},
+          {label:"שעות לילה",val:fH(ngtH),sub:"140%",color:"#a78bfa"},
+          {label:"שעות נוספות",val:fH(ot125+ot150),sub:`×125%: ${fH(ot125)} | ×150%: ${fH(ot150)}`,color:"#f87171"},
+        ].map(s=>(
+          <div key={s.label} style={CARD}>
+            <div style={{fontSize:"11px",color:"#6b7280",marginBottom:"4px"}}>{s.label}</div>
+            <div style={{fontSize:"24px",fontWeight:"800",color:s.color}}>{s.val}<span style={{fontSize:"13px",marginRight:"3px"}}>ש׳</span></div>
+            <div style={{fontSize:"11px",color:"#374151",marginTop:"2px"}}>{s.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      {ms.length>0?(
+        <>
+          <div style={SEC}>פירוט משמרות</div>
+          {[...ms].sort((a,b)=>a.date.localeCompare(b.date)).map(s=>{
+            const h=ch(s.start,s.end),c=cp(h,s.type,cfg),t=ST[s.type],sa=csa(s.allowanceIds||[],als);
+            return(
+              <div key={s.id} style={{...CARD,marginBottom:"8px",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                <div style={{flex:1}}>
+                  <div style={{display:"flex",alignItems:"center",gap:"6px",flexWrap:"wrap"}}>
+                    <span style={{fontSize:"14px",fontWeight:"700",color:"#e2e8f0"}}>{t.icon} {fD(s.date)}</span>
+                  </div>
+                  <div style={{fontSize:"12px",color:"#6b7280",marginTop:"3px"}}>{s.start}–{s.end} | <span style={{color:t.color}}>{t.label}</span> | {fH(h)}ש׳</div>
+                  {(c.ot125H>0||c.ot150H>0)&&(
+                    <div style={{fontSize:"11px",color:"#f87171",marginTop:"2px"}}>
+                      {c.ot125H>0&&`+${fH(c.ot125H)}ש׳ ×${Math.round(ST[s.type].mult*125)}% `}
+                      {c.ot150H>0&&`+${fH(c.ot150H)}ש׳ ×${Math.round(ST[s.type].mult*150)}%`}
+                    </div>
+                  )}
+                  {sa>0&&<div style={{fontSize:"11px",color:"#34d399",marginTop:"2px"}}>🧾 {fM(sa)}</div>}
+                  {s.note&&<div style={{fontSize:"11px",color:"#4b5563",marginTop:"2px"}}>📝 {s.note}</div>}
+                </div>
+                <div style={{textAlign:"left",marginRight:"8px",flexShrink:0}}>
+                  <div style={{fontWeight:"800",color:"#4ade80",fontSize:"16px"}}>{fM(c.gross+sa)}</div>
+                  <div style={{fontSize:"11px",color:"#374151"}}>{fH(h)}ש׳</div>
+                </div>
+              </div>
+            );
+          })}
+        </>
+      ):(
+        <div style={{textAlign:"center",color:"#374151",padding:"40px 0"}}>
+          <div style={{fontSize:"36px",marginBottom:"12px"}}>📋</div>
+          <div>אין משמרות לחודש זה</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ════════════════════════════════════════
+// CUSTOM SHIFT CALENDAR
+// ════════════════════════════════════════
+function ShiftCalendar({value,onChange,shifts,onEditShift,onDeleteShift}){
+  const[open,setOpen]=useState(false);
+  const[selectedDay,setSelectedDay]=useState(null); // date string for detail panel
+  const[viewDate,setViewDate]=useState(()=>{
+    const d=value?new Date(value+"T12:00:00"):new Date();
+    return{y:d.getFullYear(),m:d.getMonth()};
+  });
+
+  // Build shift map: date -> [shifts]
+  const shiftMap={};
+  shifts.forEach(s=>{
+    if(!shiftMap[s.date]) shiftMap[s.date]=[];
+    shiftMap[s.date].push(s);
+  });
+
+  const daysInMonth=(y,m)=>new Date(y,m+1,0).getDate();
+  const firstDay=(y,m)=>new Date(y,m,1).getDay();
+
+  const{y,m}=viewDate;
+  const days=daysInMonth(y,m);
+  const startDay=firstDay(y,m);
+  const monthNames=["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
+  const dayNames=["א","ב","ג","ד","ה","ו","ש"];
+
+  const prevMonth=()=>{setSelectedDay(null);setViewDate(({y,m})=>{const d=new Date(y,m-1);return{y:d.getFullYear(),m:d.getMonth()};});};
+  const nextMonth=()=>{setSelectedDay(null);setViewDate(({y,m})=>{const d=new Date(y,m+1);return{y:d.getFullYear(),m:d.getMonth()};});};
+
+  const handleDayClick=(d)=>{
+    const ds=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    if(shiftMap[ds]&&shiftMap[ds].length>0){
+      // Has shifts — show detail panel
+      setSelectedDay(ds===selectedDay?null:ds);
+    } else {
+      // No shift — select as date
+      onChange(ds);setOpen(false);setSelectedDay(null);
+    }
+  };
+
+  const selectedShifts=selectedDay?shiftMap[selectedDay]||[]:[];
+
+  const displayDate=value?new Date(value+"T12:00:00").toLocaleDateString("he-IL",{weekday:"short",day:"numeric",month:"long",year:"numeric"}):"בחר תאריך";
+
+  return(
+    <div style={{position:"relative"}}>
+      <button onClick={()=>{setOpen(!open);setSelectedDay(null);}} style={{...SI,textAlign:"right",cursor:"pointer",background:"#0d1117",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <span style={{color:value?"#e2e8f0":"#4b5563"}}>{displayDate}</span>
+        <span style={{color:"#4b5563"}}>📅</span>
+      </button>
+
+      {open&&(
+        <div style={{position:"absolute",top:"100%",right:0,left:0,zIndex:50,background:"#111827",border:"1px solid #1f2937",borderRadius:"14px",padding:"14px",marginTop:"6px",boxShadow:"0 10px 40px #000a"}}>
+          {/* Month nav */}
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}}>
+            <button onClick={prevMonth} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"8px",width:"32px",height:"32px",fontSize:"18px",cursor:"pointer"}}>‹</button>
+            <div style={{fontWeight:"800",color:"#f1f5f9",fontSize:"15px"}}>{monthNames[m]} {y}</div>
+            <button onClick={nextMonth} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"8px",width:"32px",height:"32px",fontSize:"18px",cursor:"pointer"}}>›</button>
+          </div>
+
+          {/* Day headers */}
+          <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:"2px",marginBottom:"6px"}}>
+            {dayNames.map(d=>(
+              <div key={d} style={{textAlign:"center",fontSize:"11px",color:"#4b5563",fontWeight:"700",padding:"4px 0"}}>{d}</div>
+            ))}
+          </div>
+
+          {/* Days grid */}
+          <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:"2px"}}>
+            {Array.from({length:startDay}).map((_,i)=><div key={"e"+i}/>)}
+            {Array.from({length:days}).map((_,i)=>{
+              const d=i+1;
+              const ds=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+              const dayShifts=shiftMap[ds]||[];
+              const hasShift=dayShifts.length>0;
+              const isSelected=value===ds;
+              const isPanelOpen=selectedDay===ds;
+              const isToday=ds===tdy();
+              // Get dominant color from first shift
+              const firstType=hasShift?dayShifts[0].type:null;
+              const tColor=firstType?ST[firstType].color:null;
+              return(
+                <button key={d} onClick={()=>handleDayClick(d)} style={{
+                  padding:"6px 2px",borderRadius:"8px",border:isPanelOpen?`1.5px solid ${tColor||"#22c55e"}`:"1.5px solid transparent",
+                  cursor:"pointer",
+                  background:isSelected?"#22c55e":isPanelOpen?"#1a2a1a":isToday?"#1f2937":"none",
+                  color:isSelected?"#000":isToday?"#4ade80":"#e2e8f0",
+                  fontWeight:isSelected||isToday||isPanelOpen?"800":"400",
+                  fontSize:"13px",
+                  display:"flex",flexDirection:"column",alignItems:"center",gap:"2px",
+                }}>
+                  {d}
+                  {hasShift&&!isSelected?(
+                    <div style={{display:"flex",gap:"2px"}}>
+                      {dayShifts.slice(0,3).map((s,i)=>(
+                        <div key={i} style={{width:"5px",height:"5px",borderRadius:"50%",background:ST[s.type].color}}/>
+                      ))}
+                    </div>
+                  ):(
+                    <div style={{width:"5px",height:"5px"}}/>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Shift detail panel */}
+          {selectedDay&&selectedShifts.length>0&&(
+            <div style={{marginTop:"12px",borderTop:"1px solid #1f2937",paddingTop:"12px"}}>
+              <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"8px"}}>
+                {new Date(selectedDay+"T12:00:00").toLocaleDateString("he-IL",{weekday:"long",day:"numeric",month:"long"})}
+              </div>
+              {selectedShifts.map(s=>{
+                const h=ch(s.start,s.end);
+                const c=ST[s.type];
+                return(
+                  <div key={s.id} style={{background:"#0d1117",border:`1px solid ${c.color}44`,borderRadius:"10px",padding:"10px",marginBottom:"8px"}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}}>
+                      <div>
+                        <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
+                          <span style={{fontSize:"14px"}}>{c.icon}</span>
+                          <span style={{fontSize:"13px",fontWeight:"700",color:c.color}}>{c.label}</span>
+                        </div>
+                        <div style={{fontSize:"12px",color:"#6b7280",marginTop:"3px"}}>
+                          {s.start} – {s.end} · {fH(h)} שעות
+                        </div>
+                        {s.note&&<div style={{fontSize:"11px",color:"#4b5563",marginTop:"2px"}}>📝 {s.note}</div>}
+                      </div>
+                      <div style={{fontSize:"14px",fontWeight:"800",color:"#4ade80"}}>{fM(cp(h,s.type,{baseRate:34.32,overtimeThreshold:8.6,overtime125Hours:2}).gross)}</div>
+                    </div>
+                    <div style={{display:"flex",gap:"6px"}}>
+                      <button onClick={()=>{onEditShift&&onEditShift(s);setOpen(false);setSelectedDay(null);}} style={{flex:1,padding:"7px",background:"#1e3a5f",border:"none",color:"#60a5fa",borderRadius:"8px",cursor:"pointer",fontWeight:"700",fontSize:"12px"}}>✏️ ערוך</button>
+                      <button onClick={()=>{onChange(selectedDay);setOpen(false);setSelectedDay(null);}} style={{flex:1,padding:"7px",background:"#052e16",border:"none",color:"#4ade80",borderRadius:"8px",cursor:"pointer",fontWeight:"700",fontSize:"12px"}}>📋 בחר יום</button>
+                      <button onClick={()=>{onDeleteShift&&onDeleteShift(s.id);if(selectedShifts.length<=1)setSelectedDay(null);}} style={{padding:"7px 10px",background:"#2d0505",border:"none",color:"#f87171",borderRadius:"8px",cursor:"pointer",fontWeight:"700",fontSize:"12px"}}>🗑</button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Legend */}
+          <div style={{display:"flex",gap:"10px",marginTop:"10px",paddingTop:"10px",borderTop:"1px solid #1f2937",justifyContent:"center",flexWrap:"wrap"}}>
+            {Object.entries(ST).map(([k,t])=>(
+              <div key={k} style={{display:"flex",alignItems:"center",gap:"4px"}}>
+                <div style={{width:"8px",height:"8px",borderRadius:"50%",background:t.color}}/>
+                <span style={{fontSize:"10px",color:"#6b7280"}}>{t.label}</span>
+              </div>
+            ))}
+            <div style={{fontSize:"10px",color:"#374151"}}>· לחץ על יום עם משמרת לפרטים</div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ════════════════════════════════════════
+// MANUAL ADD SHIFT
+// ════════════════════════════════════════
+function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete}){
+  const sAls=als.filter(a=>a.active&&a.type==="per_shift");
+  const defIds=sAls.map(a=>a.id);
+  const[form,setForm]=useState({date:tdy(),start:"",end:"",type:"regular",note:"",templateName:"",allowanceIds:defIds,customMult:null});
+  const[saved,setSaved]=useState(false);const[err,setErr]=useState("");const[showT,setShowT]=useState(true);
+  const[editingShift,setEditingShift]=useState(null);
+  const hours=form.start&&form.end?ch(form.start,form.end):0;
+  const prev=hours>0?cp(hours,form.type,cfg,form.customMult):null;
+  const aTotal=csa(form.allowanceIds,als);
+  const togA=(id)=>setForm(f=>({...f,allowanceIds:f.allowanceIds.includes(id)?f.allowanceIds.filter(x=>x!==id):[...f.allowanceIds,id]}));
+  const applyT=(t)=>setForm(f=>({...f,start:t.start,end:t.end,type:t.type,templateName:t.name,customMult:t.customMult||null}));
+  const add=()=>{
+    if(!form.date||!form.start||!form.end){setErr("יש למלא תאריך, שעת התחלה וסיום");return;}
+    if(hours<0.1){setErr("שעות לא תקינות");return;}
+    setErr("");onAdd({...form,id:Date.now()});setSaved(true);
+    setForm({date:tdy(),start:"",end:"",type:"regular",note:"",templateName:"",allowanceIds:defIds,customMult:null});
+    setTimeout(()=>setSaved(false),2000);
+  };
+  return(
+    <div style={{padding:"16px",paddingBottom:"90px"}}>
+      {editingShift&&<EditModal shift={editingShift} cfg={cfg} als={als} onSave={s=>{onEdit(s);setEditingShift(null);}} onClose={()=>setEditingShift(null)}/>}
+      <div style={{fontSize:"18px",fontWeight:"800",marginBottom:"20px",color:"#f1f5f9"}}>➕ הוסף משמרת ידנית</div>
+      {tpls.length>0&&(
+        <div style={{marginBottom:"16px"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}}>
+            <div style={LBL}>בחר מתבנית</div>
+            <button onClick={()=>setShowT(!showT)} style={{background:"none",border:"none",color:"#60a5fa",fontSize:"12px",cursor:"pointer"}}>{showT?"הסתר ▲":"הצג ▼"}</button>
+          </div>
+            {showT&&<div style={{display:"flex",flexWrap:"wrap",gap:"8px",marginBottom:"10px"}}>
+            {tpls.map(t=>{
+              const color=t.color||ST[t.type].color;
+              const emoji=t.emoji||ST[t.type].icon;
+              const pct=t.customMult||Math.round(ST[t.type].mult*100);
+              const active=form.templateName===t.name;
+              return(
+                <button key={t.id} onClick={()=>applyT(t)} style={{background:active?color+"22":"#0d1117",border:`1.5px solid ${active?color:"#2a2d3e"}`,borderRadius:"10px",padding:"10px 12px",cursor:"pointer",color:active?color:"#9ca3af",textAlign:"right"}}>
+                  <div style={{fontWeight:"800",fontSize:"13px"}}>{emoji} {t.name}</div>
+                  <div style={{fontSize:"11px",opacity:0.8,marginTop:"2px"}}>{t.start}–{t.end} · {fH(ch(t.start,t.end))}ש׳ · {pct}%</div>
+                </button>
+              );
+            })}
+          </div>}
+          <div style={{height:"1px",background:"#1f2937",marginBottom:"14px"}}/>
+        </div>
+      )}
+      <Field label="תאריך"><ShiftCalendar value={form.date} onChange={d=>setForm({...form,date:d})} shifts={shifts} onEditShift={s=>setEditingShift(s)} onDeleteShift={id=>onDelete(id)}/></Field>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
+        <Field label="התחלה"><input type="time" value={form.start} onChange={e=>setForm({...form,start:e.target.value,templateName:""})} style={SI}/></Field>
+        <Field label="סיום"><input type="time" value={form.end} onChange={e=>setForm({...form,end:e.target.value,templateName:""})} style={SI}/></Field>
+      </div>
+      <Field label="סוג משמרת">
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"8px"}}>
+          {Object.entries(ST).map(([k,t])=>(
+            <button key={k} onClick={()=>setForm({...form,type:k})} style={{padding:"14px 6px",borderRadius:"11px",cursor:"pointer",border:form.type===k?`2px solid ${t.color}`:"2px solid #1f2937",background:form.type===k?t.bg:"#0d1117",color:form.type===k?t.color:"#6b7280",fontWeight:"700",fontSize:"13px"}}>
+              <div style={{fontSize:"18px",marginBottom:"4px"}}>{t.icon}</div><div>{t.label}</div><div style={{fontSize:"10px",opacity:0.8,marginTop:"2px"}}>{Math.round(t.mult*100)}%</div>
+            </button>
+          ))}
+        </div>
+      </Field>
+      {sAls.length>0&&(
+        <Field label="תוספות">
+          <div style={{display:"flex",flexWrap:"wrap",gap:"8px"}}>
+            {sAls.map(a=>{const on=form.allowanceIds.includes(a.id);return(
+              <button key={a.id} onClick={()=>togA(a.id)} style={{padding:"10px 14px",borderRadius:"10px",cursor:"pointer",border:`1.5px solid ${on?"#34d399":"#2a2d3e"}`,background:on?"#022c22":"#0d1117",color:on?"#34d399":"#6b7280",fontWeight:"700",fontSize:"13px"}}>
+                🧾 {a.name} {fM(a.amount)}
+              </button>
+            );})}
+          </div>
+        </Field>
+      )}
+      {prev&&(
+        <div style={{background:"#052e16",border:"1px solid #166534",borderRadius:"12px",padding:"14px",marginBottom:"14px"}}>
+          <div style={{fontSize:"11px",color:"#86efac",marginBottom:"8px",fontWeight:"700"}}>תצוגה מקדימה</div>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div>
+              <div style={{fontSize:"13px",color:"#6b7280"}}>{fH(hours)} שעות</div>
+              {prev.ot125H>0&&<div style={{fontSize:"12px",color:"#f87171"}}>{fH(prev.ot125H)}ש׳ נוספות ב-125%{prev.ot150H>0?` + ${fH(prev.ot150H)}ש׳ ב-150%`:""}</div>}
+              {aTotal>0&&<div style={{fontSize:"12px",color:"#34d399"}}>תוספות {fM(aTotal)}</div>}
+            </div>
+            <div style={{fontSize:"24px",fontWeight:"900",color:"#4ade80"}}>{fM(prev.gross+aTotal)}</div>
+          </div>
+        </div>
+      )}
+      <Field label="הערה"><input type="text" value={form.note} onChange={e=>setForm({...form,note:e.target.value})} placeholder="חג, שעות מיוחדות..." style={SI}/></Field>
+      {err&&<div style={{color:"#f87171",fontSize:"13px",marginBottom:"10px"}}>⚠ {err}</div>}
+      <Btn onClick={add} color={saved?"#16a34a":"#22c55e"} textColor={saved?"#dcfce7":"#000"}>{saved?"✓ המשמרת נשמרה!":"שמור משמרת"}</Btn>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════
+// EDIT SHIFT MODAL
+// ════════════════════════════════════════
+function EditModal({shift,cfg,als,onSave,onClose}){
+  const[form,setForm]=useState({...shift});
+  const[err,setErr]=useState("");
+  const hours=form.start&&form.end?ch(form.start,form.end):0;
+  const prev=hours>0?cp(hours,form.type,cfg):null;
+  const sAls=als.filter(a=>a.active&&a.type==="per_shift");
+  const aTotal=csa(form.allowanceIds||[],als);
+  const togA=(id)=>setForm(f=>({...f,allowanceIds:(f.allowanceIds||[]).includes(id)?(f.allowanceIds||[]).filter(x=>x!==id):[...(f.allowanceIds||[]),id]}));
+  const save=()=>{
+    if(!form.date||!form.start||!form.end){setErr("יש למלא תאריך, שעת התחלה וסיום");return;}
+    if(hours<0.1){setErr("שעות לא תקינות");return;}
+    setErr("");onSave(form);
+  };
+  return(
+    <div style={{position:"fixed",inset:0,background:"#000000cc",zIndex:100,display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+      <div style={{background:"#111827",border:"1px solid #1f2937",borderRadius:"20px 20px 0 0",padding:"20px 16px",paddingBottom:"40px",width:"100%",maxWidth:"430px",maxHeight:"90vh",overflowY:"auto"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"20px"}}>
+          <div style={{fontSize:"18px",fontWeight:"800",color:"#f1f5f9"}}>✏️ עריכת משמרת</div>
+          <button onClick={onClose} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"8px",width:"32px",height:"32px",fontSize:"18px",cursor:"pointer"}}>✕</button>
+        </div>
+        <Field label="תאריך"><input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})} style={SI}/></Field>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
+          <Field label="התחלה"><input type="time" value={form.start} onChange={e=>setForm({...form,start:e.target.value})} style={SI}/></Field>
+          <Field label="סיום"><input type="time" value={form.end} onChange={e=>setForm({...form,end:e.target.value})} style={SI}/></Field>
+        </div>
+        <Field label="סוג משמרת">
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"8px"}}>
+            {Object.entries(ST).map(([k,t])=>(
+              <button key={k} onClick={()=>setForm({...form,type:k})} style={{padding:"12px 4px",borderRadius:"11px",cursor:"pointer",border:form.type===k?`2px solid ${t.color}`:"2px solid #1f2937",background:form.type===k?t.bg:"#0d1117",color:form.type===k?t.color:"#6b7280",fontWeight:"700",fontSize:"13px"}}>
+                <div style={{fontSize:"16px",marginBottom:"3px"}}>{t.icon}</div><div>{t.label}</div>
+              </button>
+            ))}
+          </div>
+        </Field>
+        {sAls.length>0&&(
+          <Field label="תוספות">
+            <div style={{display:"flex",flexWrap:"wrap",gap:"8px"}}>
+              {sAls.map(a=>{const on=(form.allowanceIds||[]).includes(a.id);return(
+                <button key={a.id} onClick={()=>togA(a.id)} style={{padding:"9px 12px",borderRadius:"10px",cursor:"pointer",border:`1.5px solid ${on?"#34d399":"#2a2d3e"}`,background:on?"#022c22":"#0d1117",color:on?"#34d399":"#6b7280",fontWeight:"700",fontSize:"13px"}}>
+                  🧾 {a.name} {fM(a.amount)}
+                </button>
+              );})}
+            </div>
+          </Field>
+        )}
+        {prev&&(
+          <div style={{background:"#052e16",border:"1px solid #166534",borderRadius:"12px",padding:"12px",marginBottom:"14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div>
+              <div style={{fontSize:"13px",color:"#6b7280"}}>{fH(hours)} שעות</div>
+              {prev.ot125H>0&&<div style={{fontSize:"12px",color:"#f87171"}}>{fH(prev.ot125H)}ש׳ ב-125%{prev.ot150H>0?` + ${fH(prev.ot150H)}ש׳ ב-150%`:""}</div>}
+              {aTotal>0&&<div style={{fontSize:"12px",color:"#34d399"}}>תוספות {fM(aTotal)}</div>}
+            </div>
+            <div style={{fontSize:"22px",fontWeight:"900",color:"#4ade80"}}>{fM(prev.gross+aTotal)}</div>
+          </div>
+        )}
+        <Field label="הערה"><input type="text" value={form.note||""} onChange={e=>setForm({...form,note:e.target.value})} placeholder="חג, שעות מיוחדות..." style={SI}/></Field>
+        {err&&<div style={{color:"#f87171",fontSize:"13px",marginBottom:"10px"}}>⚠ {err}</div>}
+        <button onClick={save} style={{width:"100%",padding:"14px",background:"#22c55e",border:"none",borderRadius:"12px",color:"#000",fontSize:"15px",fontWeight:"800",cursor:"pointer"}}>שמור שינויים</button>
+      </div>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════
+// SHIFTS LIST
+// ════════════════════════════════════════
+function ShiftsList({shifts,cfg,als,onDelete,onEdit}){
+  const[cid,setCid]=useState(null);
+  const[editShift,setEditShift]=useState(null);
+  const grp={};shifts.forEach(s=>{const ym=s.date.substring(0,7);if(!grp[ym])grp[ym]=[];grp[ym].push(s);});
+  const months=Object.keys(grp).sort().reverse();
+  return(
+    <div style={{padding:"16px",paddingBottom:"90px"}}>
+      {editShift&&<EditModal shift={editShift} cfg={cfg} als={als} onSave={s=>{onEdit(s);setEditShift(null);}} onClose={()=>setEditShift(null)}/>}
+      <div style={{fontSize:"18px",fontWeight:"800",marginBottom:"20px",color:"#f1f5f9"}}>📋 כל המשמרות</div>
+      {months.length===0&&<div style={{textAlign:"center",color:"#374151",padding:"60px 0"}}><div style={{fontSize:"36px"}}>📭</div><div style={{marginTop:"12px"}}>אין משמרות עדיין</div></div>}
+      {months.map(ym=>(
+        <div key={ym} style={{marginBottom:"24px"}}>
+          <div style={{fontSize:"13px",color:"#9ca3af",fontWeight:"700",marginBottom:"10px",display:"flex",justifyContent:"space-between"}}>
+            <span>{mLbl(ym)}</span>
+            <span style={{color:"#4ade80"}}>{fM(grp[ym].reduce((acc,s)=>acc+cp(ch(s.start,s.end),s.type,cfg).gross+csa(s.allowanceIds||[],als),0)+cma(als))}</span>
+          </div>
+          {[...grp[ym]].sort((a,b)=>b.date.localeCompare(a.date)).map(s=>{
+            const h=ch(s.start,s.end),c=cp(h,s.type,cfg),t=ST[s.type],sa=csa(s.allowanceIds||[],als);
+            return(
+              <div key={s.id} style={{...CARD,marginBottom:"8px"}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:"14px",fontWeight:"700",color:"#e2e8f0"}}>{t.icon} {fD(s.date)}</div>
+                    <div style={{fontSize:"12px",color:"#6b7280",marginTop:"3px"}}>{s.start}–{s.end} · {fH(h)}ש׳</div>
+                    <div style={{marginTop:"6px",display:"flex",gap:"6px",flexWrap:"wrap"}}>
+                      <span style={{background:t.bg,color:t.color,fontSize:"11px",padding:"2px 8px",borderRadius:"6px",fontWeight:"700"}}>{t.label} {Math.round(t.mult*100)}%</span>
+                      {c.ot125H>0&&<span style={{background:"#2d0505",color:"#f87171",fontSize:"11px",padding:"2px 8px",borderRadius:"6px",fontWeight:"700"}}>+{fH(c.ot125H)}ש׳ ×{Math.round(ST[s.type].mult*125)}%</span>}
+                      {c.ot150H>0&&<span style={{background:"#2d0505",color:"#ef4444",fontSize:"11px",padding:"2px 8px",borderRadius:"6px",fontWeight:"700"}}>+{fH(c.ot150H)}ש׳ ×{Math.round(ST[s.type].mult*150)}%</span>}
+                      {sa>0&&<span style={{background:"#022c22",color:"#34d399",fontSize:"11px",padding:"2px 8px",borderRadius:"6px",fontWeight:"700"}}>🧾 {fM(sa)}</span>}
+                    </div>
+                    {s.note&&<div style={{fontSize:"11px",color:"#4b5563",marginTop:"4px"}}>📝 {s.note}</div>}
+                  </div>
+                  <div style={{textAlign:"left",marginRight:"6px",flexShrink:0}}>
+                    <div style={{fontWeight:"800",color:"#4ade80",fontSize:"16px"}}>{fM(c.gross+sa)}</div>
+                    <div style={{display:"flex",gap:"4px",marginTop:"6px",justifyContent:"flex-end"}}>
+                      <button onClick={()=>setEditShift(s)} style={{background:"#1e3a5f",border:"none",color:"#60a5fa",borderRadius:"6px",padding:"3px 8px",cursor:"pointer",fontSize:"12px",fontWeight:"700"}}>✏️</button>
+                      {cid===s.id?(
+                        <>
+                          <button onClick={()=>{onDelete(s.id);setCid(null);}} style={{background:"#7f1d1d",border:"none",color:"#f87171",borderRadius:"6px",padding:"3px 8px",cursor:"pointer",fontSize:"12px"}}>מחק</button>
+                          <button onClick={()=>setCid(null)} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"6px",padding:"3px 8px",cursor:"pointer",fontSize:"12px"}}>בטל</button>
+                        </>
+                      ):(
+                        <button onClick={()=>setCid(s.id)} style={{background:"#2d0505",border:"none",color:"#f87171",borderRadius:"6px",padding:"3px 8px",cursor:"pointer",fontSize:"12px",fontWeight:"700"}}>🗑</button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ════════════════════════════════════════
+// SAVINGS
+// ════════════════════════════════════════
+function Savings({shifts,cfg}){
+  const mon={};shifts.forEach(s=>{const ym=s.date.substring(0,7);if(!mon[ym])mon[ym]=0;mon[ym]+=cp(ch(s.start,s.end),s.type,cfg).gross;});
+  const months=Object.keys(mon).sort();let cP=0,cK=0;
+  const rows=months.map(ym=>{const g=mon[ym],pe=g*cfg.pensionEmployee/100,pr=g*cfg.pensionEmployer/100,ke=g*cfg.kerenEmployee/100,kr=g*cfg.kerenEmployer/100;cP+=pe+pr;cK+=ke+kr;return{ym,g,pe,pr,ke,kr,cP,cK};});
+  return(
+    <div style={{padding:"16px",paddingBottom:"90px"}}>
+      <div style={{fontSize:"18px",fontWeight:"800",marginBottom:"20px",color:"#f1f5f9"}}>💰 מעקב חסכונות</div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"12px"}}>
+        <div style={{background:"linear-gradient(145deg,#0c1a3e,#1e3a8a)",border:"1px solid #1e40af",borderRadius:"14px",padding:"16px",textAlign:"center"}}>
+          <div style={{fontSize:"11px",color:"#93c5fd",marginBottom:"6px",fontWeight:"700"}}>🏦 פנסיה</div>
+          <div style={{fontSize:"22px",fontWeight:"900",color:"#60a5fa"}}>{fM(cP)}</div>
+          <div style={{fontSize:"10px",color:"#3b82f6",marginTop:"4px"}}>{cfg.pensionEmployee}%+{cfg.pensionEmployer}%</div>
+        </div>
+        <div style={{background:"linear-gradient(145deg,#1a0c3e,#3b1d8a)",border:"1px solid #5b21b6",borderRadius:"14px",padding:"16px",textAlign:"center"}}>
+          <div style={{fontSize:"11px",color:"#c4b5fd",marginBottom:"6px",fontWeight:"700"}}>📈 קרן השתלמות</div>
+          <div style={{fontSize:"22px",fontWeight:"900",color:"#a78bfa"}}>{fM(cK)}</div>
+          <div style={{fontSize:"10px",color:"#7c3aed",marginTop:"4px"}}>{cfg.kerenEmployee}%+{cfg.kerenEmployer}%</div>
+        </div>
+      </div>
+      <div style={{background:"linear-gradient(145deg,#0a1628,#1e2d4a)",border:"1px solid #1e3a5f",borderRadius:"14px",padding:"16px",textAlign:"center",marginBottom:"20px"}}>
+        <div style={{fontSize:"11px",color:"#7dd3fc",fontWeight:"700",marginBottom:"6px"}}>סה״כ מצטבר</div>
+        <div style={{fontSize:"36px",fontWeight:"900",color:"#38bdf8"}}>{fM(cP+cK)}</div>
+        <div style={{fontSize:"11px",color:"#334155",marginTop:"6px"}}>* ללא תשואה</div>
+      </div>
+      {rows.length>0?[...rows].reverse().map(r=>(
+        <div key={r.ym} style={{...CARD,marginBottom:"8px"}}>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:"8px"}}><span style={{fontWeight:"700",color:"#e2e8f0"}}>{mLbl(r.ym)}</span><span style={{fontSize:"12px",color:"#6b7280"}}>{fM(r.g)}</span></div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
+            <div style={{background:"#0c1a3e55",borderRadius:"8px",padding:"8px"}}><div style={{fontSize:"10px",color:"#93c5fd",marginBottom:"3px"}}>פנסיה</div><div style={{fontSize:"14px",fontWeight:"700",color:"#60a5fa"}}>{fM(r.pe+r.pr)}</div></div>
+            <div style={{background:"#1a0c3e55",borderRadius:"8px",padding:"8px"}}><div style={{fontSize:"10px",color:"#c4b5fd",marginBottom:"3px"}}>קרן השתלמות</div><div style={{fontSize:"14px",fontWeight:"700",color:"#a78bfa"}}>{fM(r.ke+r.kr)}</div></div>
+          </div>
+          <div style={{display:"flex",justifyContent:"space-between",marginTop:"8px"}}><span style={{fontSize:"11px",color:"#4b5563"}}>מצטבר</span><span style={{fontSize:"12px",fontWeight:"700",color:"#38bdf8"}}>{fM(r.cP+r.cK)}</span></div>
+        </div>
+      )):(
+        <div style={{textAlign:"center",color:"#374151",padding:"40px 0"}}><div style={{fontSize:"36px"}}>📊</div><div style={{marginTop:"12px"}}>הוסף משמרות לראות חסכונות</div></div>
+      )}
+    </div>
+  );
+}
+
+// ════════════════════════════════════════
+// AI INSIGHTS
+// ════════════════════════════════════════
+function AIInsights({shifts,cfg,als}){
+  const[loading,setLoading]=useState(false);
+  const[result,setResult]=useState(null);
+  const[error,setError]=useState("");
+
+  const curM=tdy().substring(0,7);
+  const prevM=(()=>{const[y,m]=curM.split("-").map(Number);const d=new Date(y,m-2);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;})();
+
+  const getMonthData=(ym)=>{
+    const ms=shifts.filter(s=>s.date.startsWith(ym));
+    if(!ms.length)return null;
+    let gross=0,hours=0,allow=0;
+    ms.forEach(s=>{const h=ch(s.start,s.end),c=cp(h,s.type,cfg);gross+=c.gross;hours+=h;allow+=csa(s.allowanceIds||[],als);});
+    return{shifts:ms.length,hours:Math.round(hours*10)/10,gross:Math.round(gross),allow:Math.round(allow),net:Math.round(gross+allow)};
+  };
+
+  const cur=getMonthData(curM);
+  const prev=getMonthData(prevM);
+
+  const analyze=async()=>{
+    if(!cur){setError("אין נתונים לחודש הנוכחי");return;}
+    setLoading(true);setError("");setResult(null);
+
+    const prompt=`אתה אנליסט שכר ישראלי עם חוש הומור יבש ושנון.
+נתוני עובד:
+- חודש נוכחי (${mLbl(curM)}): ${cur.shifts} משמרות, ${cur.hours} שעות, ברוטו ₪${cur.gross}, סה"כ עם תוספות ₪${cur.net}
+${prev?`- חודש קודם (${mLbl(prevM)}): ${prev.shifts} משמרות, ${prev.hours} שעות, ₪${prev.net}`:"- אין נתוני חודש קודם"}
+- שכר בסיס: ₪${cfg.baseRate}/שעה
+
+כתוב תובנות בעברית קצרות ומצחיקות במבנה הבא (JSON בלבד, ללא שום טקסט נוסף):
+{
+  "emoji": "אמוג'י אחד שמייצג את החודש",
+  "title": "כותרת מצחיקה לחודש (5-8 מילים)",
+  "joke": "בדיחה או משפט מצחיק על מצב השכר (אם חודש חלש - משהו כמו 'תכבה את המזגן', אם חזק - משהו על לחגוג), 1-2 משפטים",
+  "comparison": "השוואה לחודש קודם בטון קצר ומצחיק, 1-2 משפטים",
+  "forecast": "תחזית שכר לחודש הבא בטון אופטימי/ריאליסטי, 1 משפט",
+  "tip": "טיפ מעשי אחד קצר",
+  "cheer": "משפט חיזוק מוטיבציוני מצחיק, 1 משפט"
+}`;
+
+    try{
+      const res=await fetch("https://api.anthropic.com/v1/messages",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          model:"claude-sonnet-4-20250514",
+          max_tokens:1000,
+          messages:[{role:"user",content:prompt}]
+        })
+      });
+      const data=await res.json();
+      const text=data.content?.[0]?.text||"";
+      const clean=text.replace(/```json|```/g,"").trim();
+      const parsed=JSON.parse(clean);
+      setResult(parsed);
+    }catch(e){
+      setError("שגיאה בטעינת התובנות. נסה שוב.");
+    }
+    setLoading(false);
+  };
+
+  const diff=cur&&prev?Math.round(((cur.net-prev.net)/prev.net)*100):null;
+  const isGood=diff===null?null:diff>=0;
+
+  return(
+    <div style={{padding:"16px",paddingBottom:"90px"}}>
+      <div style={{fontSize:"18px",fontWeight:"800",marginBottom:"6px",color:"#f1f5f9"}}>🤖 תובנות AI</div>
+      <div style={{fontSize:"12px",color:"#4b5563",marginBottom:"20px"}}>ניתוח חכם ומצחיק של השכר שלך</div>
+
+      {/* Quick stats */}
+      {cur&&(
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"16px"}}>
+          <div style={{...CARD,textAlign:"center"}}>
+            <div style={{fontSize:"11px",color:"#6b7280",marginBottom:"4px"}}>החודש</div>
+            <div style={{fontSize:"20px",fontWeight:"900",color:"#4ade80"}}>₪{cur.net.toLocaleString()}</div>
+            <div style={{fontSize:"11px",color:"#374151"}}>{cur.shifts} משמרות · {cur.hours}ש׳</div>
+          </div>
+          <div style={{...CARD,textAlign:"center"}}>
+            <div style={{fontSize:"11px",color:"#6b7280",marginBottom:"4px"}}>לעומת חודש קודם</div>
+            {prev?(
+              <>
+                <div style={{fontSize:"20px",fontWeight:"900",color:diff>=0?"#4ade80":"#f87171"}}>
+                  {diff>=0?"+":""}{diff}%
+                </div>
+                <div style={{fontSize:"11px",color:"#374151"}}>{diff>=0?"📈 עלייה":"📉 ירידה"}</div>
+              </>
+            ):(
+              <div style={{fontSize:"13px",color:"#4b5563",paddingTop:"8px"}}>אין נתונים</div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Generate button */}
+      {!result&&!loading&&(
+        <button onClick={analyze} style={{width:"100%",padding:"18px",background:"linear-gradient(135deg,#1e3a8a,#5b21b6)",border:"1px solid #3b82f6",borderRadius:"16px",color:"#fff",fontSize:"16px",fontWeight:"800",cursor:"pointer",marginBottom:"16px"}}>
+          ✨ צור תובנות AI
+        </button>
+      )}
+
+      {loading&&(
+        <div style={{...CARD,textAlign:"center",padding:"32px",marginBottom:"16px"}}>
+          <div style={{fontSize:"32px",marginBottom:"12px",animation:"spin 1s linear infinite"}}>⚙️</div>
+          <div style={{fontSize:"14px",color:"#6b7280"}}>Claude מנתח את המשמרות שלך...</div>
+          <div style={{fontSize:"12px",color:"#374151",marginTop:"6px"}}>זה לוקח שנייה</div>
+        </div>
+      )}
+
+      {error&&(
+        <div style={{background:"#2d0505",border:"1px solid #7f1d1d",borderRadius:"12px",padding:"14px",marginBottom:"16px",color:"#f87171",fontSize:"13px"}}>
+          ⚠️ {error}
+        </div>
+      )}
+
+      {result&&(
+        <div style={{display:"flex",flexDirection:"column",gap:"12px"}}>
+          {/* Main card */}
+          <div style={{background:"linear-gradient(145deg,#1e1040,#0f0a2e)",border:"1px solid #5b21b6",borderRadius:"18px",padding:"20px",textAlign:"center"}}>
+            <div style={{fontSize:"48px",marginBottom:"8px"}}>{result.emoji}</div>
+            <div style={{fontSize:"18px",fontWeight:"900",color:"#c4b5fd",marginBottom:"12px"}}>{result.title}</div>
+            <div style={{fontSize:"14px",color:"#a78bfa",lineHeight:"1.6",fontStyle:"italic"}}>"{result.joke}"</div>
+          </div>
+
+          {/* Comparison */}
+          {result.comparison&&(
+            <div style={{...CARD,background:"#0d1b2a",border:"1px solid #1e3a5f"}}>
+              <div style={{fontSize:"11px",color:"#60a5fa",fontWeight:"700",marginBottom:"8px"}}>📊 השוואה לחודש קודם</div>
+              <div style={{fontSize:"14px",color:"#e2e8f0",lineHeight:"1.5"}}>{result.comparison}</div>
+            </div>
+          )}
+
+          {/* Forecast */}
+          {result.forecast&&(
+            <div style={{...CARD,background:"#052e16",border:"1px solid #166534"}}>
+              <div style={{fontSize:"11px",color:"#86efac",fontWeight:"700",marginBottom:"8px"}}>🔮 תחזית לחודש הבא</div>
+              <div style={{fontSize:"14px",color:"#e2e8f0",lineHeight:"1.5"}}>{result.forecast}</div>
+            </div>
+          )}
+
+          {/* Tip */}
+          {result.tip&&(
+            <div style={{...CARD,background:"#2a1800",border:"1px solid #92400e"}}>
+              <div style={{fontSize:"11px",color:"#fbbf24",fontWeight:"700",marginBottom:"8px"}}>💡 טיפ</div>
+              <div style={{fontSize:"14px",color:"#e2e8f0",lineHeight:"1.5"}}>{result.tip}</div>
+            </div>
+          )}
+
+          {/* Cheer */}
+          {result.cheer&&(
+            <div style={{background:"linear-gradient(135deg,#052e16,#0c1a3e)",border:"1px solid #22c55e",borderRadius:"14px",padding:"16px",textAlign:"center"}}>
+              <div style={{fontSize:"14px",color:"#4ade80",fontWeight:"700",lineHeight:"1.6"}}>💪 {result.cheer}</div>
+            </div>
+          )}
+
+          {/* Refresh */}
+          <button onClick={()=>{setResult(null);}} style={{background:"none",border:"1px solid #1f2937",borderRadius:"10px",color:"#6b7280",padding:"10px",fontSize:"13px",cursor:"pointer",width:"100%"}}>
+            🔄 צור תובנות חדשות
+          </button>
+        </div>
+      )}
+
+      {!cur&&(
+        <div style={{textAlign:"center",color:"#374151",padding:"50px 0"}}>
+          <div style={{fontSize:"40px",marginBottom:"12px"}}>📭</div>
+          <div>הוסף משמרות כדי לקבל תובנות</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ════════════════════════════════════════
+// SETTINGS
+// ════════════════════════════════════════
+function Settings({cfg,tpls,als,onSaveCfg,onSaveTpls,onSaveAls}){
+  const[form,setForm]=useState({...cfg});
+  const[tList,setTList]=useState([...tpls]);
+  const[aList,setAList]=useState(als.map(a=>({...a})));
+  const[saved,setSaved]=useState(false);
+  const[newT,setNewT]=useState({name:"",start:"",end:"",type:"regular",color:"#22c55e",emoji:"⭐",customMult:null});
+  const[tErr,setTErr]=useState("");
+  const[newA,setNewA]=useState({name:"",type:"per_shift",amount:""});
+  const[aErr,setAErr]=useState("");
+  const[sub,setSub]=useState("pay");
+
+  const save=()=>{onSaveCfg(form);setSaved(true);setTimeout(()=>setSaved(false),2000);};
+  const addT=()=>{if(!newT.name.trim()){setTErr("יש להזין שם");return;}if(!newT.start||!newT.end||ch(newT.start,newT.end)<0.1){setTErr("שעות לא תקינות");return;}setTErr("");const u=[...tList,{...newT,id:Date.now()}];setTList(u);onSaveTpls(u);setNewT({name:"",start:"",end:"",type:"regular",color:"#22c55e",emoji:"⭐",customMult:null});};
+  const delT=(id)=>{const u=tList.filter(t=>t.id!==id);setTList(u);onSaveTpls(u);};
+  const updA=(id,f,v)=>{const u=aList.map(a=>a.id===id?{...a,[f]:v}:a);setAList(u);onSaveAls(u);};
+  const delA=(id)=>{const u=aList.filter(a=>a.id!==id);setAList(u);onSaveAls(u);};
+  const addA=()=>{if(!newA.name.trim()){setAErr("יש להזין שם");return;}const amt=parseFloat(newA.amount);if(!amt||amt<=0){setAErr("יש להזין סכום");return;}setAErr("");const u=[...aList,{...newA,amount:amt,id:Date.now(),active:true}];setAList(u);onSaveAls(u);setNewA({name:"",type:"per_shift",amount:""});};
+  const subs=[{id:"pay",l:"שכר"},{id:"ded",l:"ניכויים"},{id:"allow",l:"תוספות"},{id:"tpl",l:"תבניות"}];
+
+  return(
+    <div style={{padding:"16px",paddingBottom:"90px"}}>
+      <div style={{fontSize:"18px",fontWeight:"800",marginBottom:"16px",color:"#f1f5f9"}}>⚙️ הגדרות</div>
+      <div style={{display:"flex",gap:"6px",marginBottom:"20px"}}>{subs.map(t=><button key={t.id} onClick={()=>setSub(t.id)} style={{flex:1,padding:"9px 2px",borderRadius:"10px",border:"none",cursor:"pointer",fontWeight:"700",fontSize:"12px",background:sub===t.id?"#22c55e":"#1f2937",color:sub===t.id?"#000":"#6b7280"}}>{t.l}</button>)}</div>
+
+      {sub==="pay"&&(
+        <div style={{...CARD,marginBottom:"14px"}}>
+          <div style={SEC}>שכר ושעות</div>
+          <Field label="שכר בסיס לשעה (₪)"><NumInput value={form.baseRate} onChange={v=>setForm({...form,baseRate:v})} step={0.5}/></Field>
+          <Field label="שעות רגילות לפני 125%"><NumInput value={form.overtimeThreshold} onChange={v=>setForm({...form,overtimeThreshold:v})} step={0.1}/></Field>
+          <Field label="שעות ב-125% לפני 150%"><NumInput value={form.overtime125Hours} onChange={v=>setForm({...form,overtime125Hours:v})} step={1}/></Field>
+          <div style={{...CARD,background:"#0d1117",marginTop:"4px"}}>
+            <div style={{fontSize:"11px",color:"#6b7280",marginBottom:"4px"}}>שכר בסיס נוכחי</div>
+            <div style={{fontSize:"26px",fontWeight:"900",color:"#4ade80"}}>₪{form.baseRate}<span style={{fontSize:"13px",color:"#6b7280"}}>/שעה</span></div>
+          </div>
+        </div>
+      )}
+
+      {sub==="ded"&&(
+        <>
+          <div style={{...CARD,marginBottom:"12px"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"4px"}}>
+              <div style={SEC}>הצגת ניכויים</div>
+              <Toggle on={form.enableDeductions} onToggle={()=>setForm({...form,enableDeductions:!form.enableDeductions})}/>
+            </div>
+          </div>
+          <div style={{...CARD,marginBottom:"12px"}}>
+            <div style={SEC}>ניכויי עובד (%)</div>
+            {[
+              {l:"מס הכנסה %",k:"taxRate",h:"לפי נקודות זיכוי"},
+              {l:"ביטוח לאומי %",k:"bituachLeumi",h:"שיעור משוקלל"},
+              {l:"מס בריאות %",k:"masBriut",h:"3.1%–5%"},
+              {l:"פנסיה עובד %",k:"pensionEmployee",h:"6.5%"},
+              {l:"קרן השתלמות עובד %",k:"kerenEmployee",h:"2.5%"},
+            ].map(f=>(
+              <Field key={f.k} label={f.l} hint={f.h}>
+                <NumInput value={form[f.k]} onChange={v=>setForm({...form,[f.k]:v})} step={0.1} max={100}/>
+              </Field>
+            ))}
+          </div>
+          <div style={{...CARD,marginBottom:"12px"}}>
+            <div style={SEC}>הפרשות מעסיק (%)</div>
+            {[
+              {l:"פנסיה מעסיק %",k:"pensionEmployer",h:"6.5%"},
+              {l:"קרן השתלמות מעסיק %",k:"kerenEmployer",h:"7.5%"},
+            ].map(f=>(
+              <Field key={f.k} label={f.l} hint={f.h}>
+                <NumInput value={form[f.k]} onChange={v=>setForm({...form,[f.k]:v})} step={0.1} max={100}/>
+              </Field>
+            ))}
+          </div>
+        </>
+      )}
+
+      {sub==="allow"&&(
+        <>
+          {aList.length>0&&(
+            <div style={{marginBottom:"16px"}}>
+              <div style={SEC}>תוספות קיימות</div>
+              {aList.map(a=>(
+                <div key={a.id} style={{...CARD,marginBottom:"10px"}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                      <Toggle on={a.active} onToggle={()=>updA(a.id,"active",!a.active)}/>
+                      <span style={{fontWeight:"700",color:a.active?"#e2e8f0":"#4b5563",fontSize:"14px"}}>🧾 {a.name}</span>
+                    </div>
+                    <button onClick={()=>delA(a.id)} style={{background:"none",border:"none",color:"#374151",cursor:"pointer",fontSize:"16px"}}>🗑</button>
+                  </div>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
+                    <div>
+                      <div style={LBL}>סכום (₪)</div>
+                      <NumInput value={a.amount} onChange={v=>updA(a.id,"amount",v)} step={1} style={{opacity:a.active?1:0.4}}/>
+                    </div>
+                    <div>
+                      <div style={LBL}>סוג</div>
+                      <select value={a.type} onChange={e=>updA(a.id,"type",e.target.value)} style={{...SI,opacity:a.active?1:0.4}}>
+                        <option value="per_shift">לכל משמרת</option>
+                        <option value="per_month">חודשי קבוע</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          <div style={CARD}>
+            <div style={SEC}>➕ תוספת חדשה</div>
+            <Field label="שם"><input type="text" value={newA.name} onChange={e=>setNewA({...newA,name:e.target.value})} placeholder="דמי אוכל, נסיעות..." style={SI}/></Field>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
+              <Field label="סכום (₪)"><NumInput value={parseFloat(newA.amount)||0} onChange={v=>setNewA({...newA,amount:String(v)})} step={1}/></Field>
+              <Field label="סוג"><select value={newA.type} onChange={e=>setNewA({...newA,type:e.target.value})} style={SI}><option value="per_shift">לכל משמרת</option><option value="per_month">חודשי קבוע</option></select></Field>
+            </div>
+            {aErr&&<div style={{color:"#f87171",fontSize:"12px",marginBottom:"8px"}}>⚠ {aErr}</div>}
+            <Btn onClick={addA} color="#065f46" textColor="#6ee7b7" style={{fontSize:"14px"}}>+ הוסף תוספת</Btn>
+          </div>
+        </>
+      )}
+
+      {sub==="tpl"&&(
+        <>
+          {tList.length>0&&(
+            <div style={{marginBottom:"16px"}}>
+              <div style={SEC}>תבניות קיימות</div>
+              {tList.map(t=>{
+                const color=t.color||ST[t.type].color;
+                const emoji=t.emoji||ST[t.type].icon;
+                const pct=t.customMult||Math.round(ST[t.type].mult*100);
+                return(
+                  <div key={t.id} style={{...CARD,marginBottom:"8px",display:"flex",justifyContent:"space-between",alignItems:"center",borderRight:`3px solid ${color}`}}>
+                    <div>
+                      <div style={{fontWeight:"700",color:color,fontSize:"14px"}}>{emoji} {t.name}</div>
+                      <div style={{fontSize:"12px",color:"#6b7280",marginTop:"2px"}}>
+                        {t.start}–{t.end} · {fH(ch(t.start,t.end))}ש׳ · <span style={{color:color}}>{pct}%</span>
+                        {t.customMult&&<span style={{fontSize:"10px",color:"#60a5fa",marginRight:"4px"}}> · מותאם</span>}
+                      </div>
+                    </div>
+                    <button onClick={()=>delT(t.id)} style={{background:"none",border:"none",color:"#374151",cursor:"pointer",fontSize:"18px"}}>🗑</button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          <div style={CARD}>
+            <div style={SEC}>➕ תבנית חדשה</div>
+            <Field label="שם"><input type="text" value={newT.name} onChange={e=>setNewT({...newT,name:e.target.value})} placeholder='למשל: "משמרת 12 שעות"' style={SI}/></Field>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
+              <Field label="התחלה"><input type="time" value={newT.start} onChange={e=>setNewT({...newT,start:e.target.value})} style={SI}/></Field>
+              <Field label="סיום"><input type="time" value={newT.end} onChange={e=>setNewT({...newT,end:e.target.value})} style={SI}/></Field>
+            </div>
+            {newT.start&&newT.end&&ch(newT.start,newT.end)>0&&(
+              <div style={{fontSize:"12px",color:"#6b7280",marginBottom:"12px",textAlign:"center"}}>⏱ {fH(ch(newT.start,newT.end))} שעות</div>
+            )}
+            <Field label="סוג משמרת">
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"8px"}}>
+                {Object.entries(ST).map(([k,t])=>(
+                  <button key={k} onClick={()=>setNewT({...newT,type:k,customMult:null})} style={{padding:"10px 4px",borderRadius:"10px",cursor:"pointer",border:newT.type===k?`2px solid ${t.color}`:"2px solid #1f2937",background:newT.type===k?t.bg:"#0d1117",color:newT.type===k?t.color:"#6b7280",fontWeight:"700",fontSize:"12px"}}>{t.icon} {t.label}</button>
+                ))}
+              </div>
+            </Field>
+
+            {/* Custom percentage override */}
+            <div style={{...CARD,marginBottom:"14px",background:"#0d1117"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}}>
+                <div style={LBL}>אחוז שכר מותאם אישית</div>
+                <button onClick={()=>setNewT({...newT,customMult:newT.customMult===null?ST[newT.type].mult*100:null})}
+                  style={{background:newT.customMult!==null?"#052e16":"#1f2937",border:`1.5px solid ${newT.customMult!==null?"#22c55e":"#374151"}`,color:newT.customMult!==null?"#22c55e":"#6b7280",borderRadius:"20px",padding:"3px 12px",cursor:"pointer",fontWeight:"700",fontSize:"12px"}}>
+                  {newT.customMult!==null?"✓ מותאם":"ברירת מחדל"}
+                </button>
+              </div>
+              {newT.customMult===null?(
+                <div style={{fontSize:"12px",color:"#4b5563"}}>
+                  משתמש באחוז של סוג המשמרת הנבחר:&nbsp;
+                  <span style={{color:ST[newT.type].color,fontWeight:"700"}}>{Math.round(ST[newT.type].mult*100)}%</span>
+                </div>
+              ):(
+                <>
+                  <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
+                    <input type="number" step="1" min="100" max="300" value={newT.customMult}
+                      onChange={e=>setNewT({...newT,customMult:parseFloat(e.target.value)||100})}
+                      style={{...SI,flex:1}}
+                    />
+                    <span style={{color:"#e2e8f0",fontWeight:"800",fontSize:"18px"}}>%</span>
+                  </div>
+                  <div style={{fontSize:"11px",color:"#4b5563",marginTop:"6px"}}>
+                    לדוגמה: 100% = רגיל, 117% = צהריים, 125% = שבת, 140% = לילה, 150% = שבת+לילה
+                  </div>
+                  <div style={{marginTop:"8px",display:"flex",gap:"6px",flexWrap:"wrap"}}>
+                    {[{l:"100%",v:100},{l:"117%",v:117},{l:"125%",v:125},{l:"133%",v:133},{l:"140%",v:140},{l:"150%",v:150},{l:"175%",v:175}].map(p=>(
+                      <button key={p.v} onClick={()=>setNewT({...newT,customMult:p.v})}
+                        style={{padding:"5px 10px",borderRadius:"8px",cursor:"pointer",fontWeight:"700",fontSize:"12px",
+                          background:newT.customMult===p.v?"#1e3a5f":"#0d1117",
+                          color:newT.customMult===p.v?"#60a5fa":"#6b7280",
+                          border:`1px solid ${newT.customMult===p.v?"#60a5fa":"#1f2937"}`}}>
+                        {p.l}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+            <Field label="אמוג׳י לתבנית">
+              <div style={{display:"flex",flexWrap:"wrap",gap:"8px"}}>
+                {["⭐","🔵","🟡","🔴","🟢","💜","🏃","🌟","⚡","🎯","💼","🔥","🌙","☀️","🌤️"].map(e=>(
+                  <button key={e} onClick={()=>setNewT({...newT,emoji:e})} style={{padding:"8px",borderRadius:"8px",cursor:"pointer",border:newT.emoji===e?"2px solid #22c55e":"2px solid #1f2937",background:newT.emoji===e?"#052e16":"#0d1117",fontSize:"18px"}}>
+                    {e}
+                  </button>
+                ))}
+              </div>
+            </Field>
+            <Field label="צבע לתבנית">
+              <div style={{display:"flex",flexWrap:"wrap",gap:"8px"}}>
+                {["#22c55e","#60a5fa","#f87171","#fbbf24","#a78bfa","#34d399","#fb923c","#e879f9","#38bdf8","#4ade80"].map(c=>(
+                  <button key={c} onClick={()=>setNewT({...newT,color:c})} style={{width:"32px",height:"32px",borderRadius:"50%",cursor:"pointer",background:c,border:newT.color===c?"3px solid #fff":"3px solid transparent",outline:newT.color===c?"2px solid "+c:"none",outlineOffset:"2px"}}>
+                  </button>
+                ))}
+              </div>
+            </Field>
+            {/* Preview */}
+            {newT.name&&(
+              <div style={{background:newT.color+"15",border:`1px solid ${newT.color}44`,borderRadius:"10px",padding:"10px 12px",marginBottom:"12px",display:"flex",alignItems:"center",gap:"8px"}}>
+                <span style={{fontSize:"18px"}}>{newT.emoji}</span>
+                <div>
+                  <div style={{fontWeight:"800",color:newT.color,fontSize:"13px"}}>{newT.name}</div>
+                  {newT.start&&newT.end&&<div style={{fontSize:"11px",color:"#6b7280"}}>{newT.start}–{newT.end}</div>}
+                </div>
+              </div>
+            )}
+            {tErr&&<div style={{color:"#f87171",fontSize:"12px",marginBottom:"8px"}}>⚠ {tErr}</div>}
+            <Btn onClick={addT} color="#1e3a8a" textColor="#93c5fd" style={{fontSize:"14px"}}>+ הוסף תבנית</Btn>
+          </div>
+        </>
+      )}
+
+      {(sub==="pay"||sub==="ded")&&<Btn onClick={save} color={saved?"#15803d":"#22c55e"} textColor={saved?"#dcfce7":"#000"} style={{marginTop:"16px"}}>{saved?"✓ ההגדרות נשמרו!":"שמור הגדרות"}</Btn>}
+    </div>
+  );
+}
+
+// ════════════════════════════════════════
+// MAIN APP
+// ════════════════════════════════════════
+function App(){
+  const[tab,setTab]=useState("clock");
+  const[shifts,setShifts]=useState([]);
+  const[cfg,setCfg]=useState(DEF_CFG);
+  const[tpls,setTpls]=useState([]);
+  const[als,setAls]=useState(DEF_ALS);
+  const[clockIn,setClockInState]=useState(null);
+  const[loaded,setLoaded]=useState(false);
+  const[selM,setSelM]=useState(()=>tdy().substring(0,7));
+
+  useEffect(()=>{
+    const s=LS.get(K.shifts);if(s)setShifts(s);
+    const c=LS.get(K.cfg);if(c)setCfg({...DEF_CFG,...c});
+    const t=LS.get(K.tpls);if(t)setTpls(t);
+    const a=LS.get(K.als);if(a)setAls(a);
+    const ci=LS.get(K.clockin);if(ci)setClockInState(ci);
+    setLoaded(true);
+  },[]);
+
+  const setClockIn=(v)=>{setClockInState(v);LS.set(K.clockin,v);};
+  const saveSh=useCallback(ns=>{setShifts(ns);LS.set(K.shifts,ns);},[]);
+  const saveCfg=useCallback(ns=>{setCfg(ns);LS.set(K.cfg,ns);},[]);
+  const saveTpls=useCallback(ns=>{setTpls(ns);LS.set(K.tpls,ns);},[]);
+  const saveAls=useCallback(ns=>{setAls(ns);LS.set(K.als,ns);},[]);
+  const addSh=useCallback(s=>saveSh([...shifts,s]),[shifts,saveSh]);
+  const delSh=useCallback(id=>saveSh(shifts.filter(s=>s.id!==id)),[shifts,saveSh]);
+  const editSh=useCallback(s=>saveSh(shifts.map(x=>x.id===s.id?s:x)),[shifts,saveSh]);
+
+  const tabs=[
+    {id:"clock", icon:clockIn?"🔴":"🟢", label:clockIn?"במשמרת":"כניסה"},
+    {id:"dashboard",icon:"📊",label:"סיכום"},
+    {id:"add",icon:"➕",label:"ידני"},
+    {id:"shifts",icon:"📋",label:"משמרות"},
+    {id:"savings",icon:"💰",label:"חסכונות"},
+    {id:"settings",icon:"⚙️",label:"הגדרות"},
+  ];
+
+  if(!loaded)return<div style={{minHeight:"100vh",background:"#090c14",display:"flex",alignItems:"center",justifyContent:"center",color:"#4ade80",fontSize:"18px"}}>טוען...</div>;
+
+  return(
+    <div dir="rtl" style={{fontFamily:"'Heebo','Arial Hebrew',sans-serif",maxWidth:"430px",margin:"0 auto",minHeight:"100vh",background:"#090c14",color:"#e2e8f0"}}>
+      {/* Header */}
+      <div style={{paddingTop:"env(safe-area-inset-top, 28px)",background:"#090c14",borderBottom:"1px solid #1f2937",position:"sticky",top:0,zIndex:10}}>
+        <div style={{padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+        <div style={{fontSize:"17px",fontWeight:"900",color:"#f1f5f9"}}>שעתי ⏱</div>
+        <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+          {clockIn&&<div style={{background:"#2d0505",border:"1px solid #ef4444",borderRadius:"8px",padding:"3px 10px",fontSize:"11px",color:"#f87171",fontWeight:"700"}}>● משמרת פעילה</div>}
+          <div style={{background:"#052e16",border:"1px solid #166534",borderRadius:"8px",padding:"3px 10px",fontSize:"11px",color:"#4ade80",fontWeight:"700"}}>
+            {shifts.filter(s=>s.date.startsWith(tdy().substring(0,7))).length} משמרות החודש
+          </div>
+        </div>
+        </div>
+      </div>
+
+      <div>
+        {tab==="clock"    &&<ClockScreen clockIn={clockIn} setClockIn={setClockIn} als={als} cfg={cfg} onShiftSaved={s=>{addSh(s);}}/>}
+        {tab==="dashboard"&&<Dashboard shifts={shifts} cfg={cfg} als={als} selM={selM} setSelM={setSelM}/>}
+        {tab==="add"      &&<AddShift cfg={cfg} tpls={tpls} als={als} shifts={shifts} onAdd={s=>{addSh(s);setTab("dashboard");}} onEdit={editSh} onDelete={delSh}/>}
+        {tab==="shifts"   &&<ShiftsList shifts={shifts} cfg={cfg} als={als} onDelete={delSh} onEdit={editSh}/>}
+        {tab==="savings"  &&<Savings shifts={shifts} cfg={cfg}/>}
+        {tab==="settings" &&<Settings cfg={cfg} tpls={tpls} als={als} onSaveCfg={saveCfg} onSaveTpls={saveTpls} onSaveAls={saveAls}/>}
+      </div>
+
+      {/* Watermark */}
+      <div style={{textAlign:"center",padding:"8px",paddingBottom:"70px",fontSize:"10px",color:"#1f2937",letterSpacing:"0.5px"}}>
+        made by illouzman
+      </div>
+
+      {/* Bottom nav */}
+      <div style={{position:"fixed",bottom:0,right:0,left:0,maxWidth:"430px",margin:"0 auto",background:"#0d1117",borderTop:"1px solid #1f2937",display:"flex",zIndex:20,paddingBottom:"env(safe-area-inset-bottom)"}}>
+        {tabs.map(t=>(
+          <button key={t.id} onClick={()=>setTab(t.id)} style={{flex:1,padding:"7px 0 9px",background:"none",border:"none",cursor:"pointer",color:tab===t.id?"#4ade80":"#4b5563"}}>
+            <div style={{fontSize:"16px"}}>{t.icon}</div>
+            <div style={{fontSize:"8px",fontWeight:tab===t.id?"800":"400",marginTop:"2px"}}>{t.label}</div>
+            {tab===t.id&&<div style={{width:"14px",height:"2px",background:"#4ade80",borderRadius:"2px",margin:"2px auto 0"}}/>}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
