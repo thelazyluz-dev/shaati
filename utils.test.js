@@ -129,6 +129,13 @@ describe("cp (calculate pay)", () => {
     });
   });
 
+  describe("unknown shift type", () => {
+    test("falls back to ×1.00 when type is unrecognised", () => {
+      const r = cp(8, "unknown", DEF_CFG);
+      expect(r.gross).toBeCloseTo(8 * 34.32 * 1.00, 5);
+    });
+  });
+
   test("0h → all zeros", () => {
     const r = cp(0, "regular", DEF_CFG);
     expect(r.gross).toBe(0);
@@ -175,6 +182,10 @@ describe("csa (shift allowances)", () => {
 
   test("empty allowances list → 0", () => {
     expect(csa([1, 2], [])).toBe(0);
+  });
+
+  test("undefined ids (default param) → 0", () => {
+    expect(csa(undefined, als)).toBe(0);
   });
 });
 
