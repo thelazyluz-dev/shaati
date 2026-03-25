@@ -1638,7 +1638,7 @@ function Savings({shifts,cfg,privacyMode}){
           {savCfg.externals.filter(e=>e.returnPct>0).map(e=>(
             <SavingsForecastCard key={e.id}
               title={e.name} icon={e.icon} color="#34d399" bg="#0d1f12" border="#14532d"
-              historic={e.balance} monthlyContrib={0} returnPct={e.returnPct} years={years}
+              historic={e.balance} monthlyContrib={e.monthlyDeposit||0} returnPct={e.returnPct} years={years}
             />
           ))}
 
@@ -1649,7 +1649,7 @@ function Savings({shifts,cfg,privacyMode}){
               {fM(Math.round(
                 compoundGrowth(totalPensionNow,monthlyPension,returnPct,years)+
                 compoundGrowth(totalKerenNow,monthlyKeren,returnPct,years)+
-                savCfg.externals.reduce((s,e)=>s+compoundGrowth(e.balance||0,0,e.returnPct||0,years),0)
+                savCfg.externals.reduce((s,e)=>s+compoundGrowth(e.balance||0,e.monthlyDeposit||0,e.returnPct||0,years),0)
               ))}
             </div>
           </div>
@@ -1684,7 +1684,7 @@ function Savings({shifts,cfg,privacyMode}){
                     <span style={{fontSize:"20px"}}>{e.icon}</span>
                     <div>
                       <div style={{fontSize:"13px",fontWeight:"700",color:"#e2e8f0"}}>{e.name}</div>
-                      <div style={{fontSize:"11px",color:"#6b7280"}}>{EXT_TYPES.find(t=>t.id===e.type)?.label||e.type} · תשואה {e.returnPct}%</div>
+                      <div style={{fontSize:"11px",color:"#6b7280"}}>{EXT_TYPES.find(t=>t.id===e.type)?.label||e.type} · תשואה {e.returnPct}%{e.monthlyDeposit>0?` · הפקדה ${fM(e.monthlyDeposit)}/חודש`:""}</div>
                     </div>
                   </div>
                   <div style={{textAlign:"left"}}>
@@ -1722,12 +1722,15 @@ function Savings({shifts,cfg,privacyMode}){
                 <Field label="ריבית/תשואה שנתית (%)" hint="0 אם לא ידוע">
                   <NumInput value={newExt.returnPct||0} onChange={v=>setNewExt(x=>({...x,returnPct:v}))} step={0.1} min={0}/>
                 </Field>
+                <Field label="סכום הפקדה חודשי (₪)" hint="0 אם אין הפקדה קבועה">
+                  <NumInput value={newExt.monthlyDeposit||0} onChange={v=>setNewExt(x=>({...x,monthlyDeposit:v}))} step={50} min={0}/>
+                </Field>
                 <div style={{display:"flex",gap:"8px"}}>
                   <Btn onClick={()=>{
                     if(!newExt.name.trim())return;
-                    const u=[...savCfg.externals,{...newExt,id:Date.now(),balance:Number(newExt.balance)||0,returnPct:Number(newExt.returnPct)||0}];
+                    const u=[...savCfg.externals,{...newExt,id:Date.now(),balance:Number(newExt.balance)||0,returnPct:Number(newExt.returnPct)||0,monthlyDeposit:Number(newExt.monthlyDeposit)||0}];
                     save({...savCfg,externals:u});
-                    setNewExt({name:"",balance:"",returnPct:"",type:"deposit",icon:"🏦"});
+                    setNewExt({name:"",balance:"",returnPct:"",monthlyDeposit:"",type:"deposit",icon:"🏦"});
                     setShowExtForm(false);
                   }} color="#22c55e" textColor="#000" style={{fontSize:"13px"}}>הוסף</Btn>
                   <button onClick={()=>setShowExtForm(false)} style={{flex:1,padding:"13px",background:"#1f2937",border:"none",borderRadius:"12px",color:"#9ca3af",fontWeight:"700",cursor:"pointer"}}>ביטול</button>
