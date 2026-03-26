@@ -1482,8 +1482,8 @@ const K_SAV="wt-savings-ext-v1";
 const DEF_SAV_CFG={
   pensionHistoric:0, kerenHistoric:0,
   externals:[],
-  forecastYears:10,
-  returnPct:6.5,
+  pensionReturnPreset:"general", pensionReturnCustom:6.5,
+  kerenReturnPreset:"general",   kerenReturnCustom:6.5,
   lastReturnApplied:null,
   pensionReturn:0,
   kerenReturn:0,
@@ -1498,40 +1498,33 @@ const RETURN_PRESETS=[
   {id:"custom",  label:"ידני",       pct:null, color:"#f87171", icon:"✏️"},
 ];
 
-function compoundGrowth(initialBalance, monthlyContrib, annualReturnPct, years){
-  const r=annualReturnPct/100/12;
-  const n=years*12;
-  if(r===0) return initialBalance + monthlyContrib*n;
-  // FV = P*(1+r)^n + PMT * [((1+r)^n - 1)/r]
-  const fv=initialBalance*Math.pow(1+r,n) + monthlyContrib*(Math.pow(1+r,n)-1)/r;
-  return Math.max(0,fv);
-}
-
-function SavingsForecastCard({title,color,bg,border,icon,historic,monthlyContrib,returnPct,years}){
-  const noReturn=historic+monthlyContrib*12*years;
-  const withReturn=compoundGrowth(historic,monthlyContrib,returnPct,years);
-  const gain=withReturn-noReturn;
+function ReturnPresetRow({selectedId,customPct,onSelect,onCustomChange}){
   return(
-    <div style={{background:bg,border:`1px solid ${border}`,borderRadius:"14px",padding:"14px",marginBottom:"10px"}}>
-      <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"12px"}}>
-        <span style={{fontSize:"18px"}}>{icon}</span>
-        <div style={{fontSize:"13px",fontWeight:"800",color}}>{title}</div>
-        <div style={{fontSize:"11px",color:"#4b5563",marginRight:"auto"}}>תשואה {returnPct}%/שנה</div>
+    <div>
+      <div style={{display:"flex",gap:"4px",flexWrap:"wrap",marginBottom:"4px"}}>
+        {RETURN_PRESETS.map(p=>(
+          <button key={p.id} onClick={()=>onSelect(p.id)} style={{
+            display:"flex",alignItems:"center",gap:"3px",
+            padding:"5px 9px",borderRadius:"8px",cursor:"pointer",
+            background:selectedId===p.id?"#111827":"#0d1117",
+            border:`1.5px solid ${selectedId===p.id?p.color:"#1f2937"}`,
+            color:selectedId===p.id?p.color:"#6b7280",
+            fontSize:"11px",fontWeight:"700",
+          }}>
+            <span style={{fontSize:"12px"}}>{p.icon}</span>
+            <span>{p.label}</span>
+            {p.pct!==null&&<span style={{opacity:0.8}}>{p.pct}%</span>}
+          </button>
+        ))}
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"8px"}}>
-        <div style={{textAlign:"center"}}>
-          <div style={{fontSize:"10px",color:"#6b7280",marginBottom:"3px"}}>כיום</div>
-          <div style={{fontSize:"14px",fontWeight:"800",color}}>{fM(historic)}</div>
+      {selectedId==="custom"&&(
+        <div style={{display:"flex",alignItems:"center",gap:"6px",marginTop:"6px"}}>
+          <input type="number" step="0.1" min="0" max="50" value={customPct}
+            onChange={e=>onCustomChange(parseFloat(e.target.value)||0)}
+            style={{...SI,width:"80px",padding:"4px 8px",fontSize:"12px"}}/>
+          <span style={{fontSize:"11px",color:"#6b7280"}}>% שנתי</span>
         </div>
-        <div style={{textAlign:"center"}}>
-          <div style={{fontSize:"10px",color:"#6b7280",marginBottom:"3px"}}>בעוד {years} שנה</div>
-          <div style={{fontSize:"14px",fontWeight:"800",color:"#f1f5f9"}}>{fM(Math.round(withReturn))}</div>
-        </div>
-        <div style={{textAlign:"center"}}>
-          <div style={{fontSize:"10px",color:"#6b7280",marginBottom:"3px"}}>רווח תשואה</div>
-          <div style={{fontSize:"14px",fontWeight:"800",color:"#4ade80"}}>+{fM(Math.round(gain))}</div>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -1541,8 +1534,6 @@ function Savings({shifts,cfg,privacyMode}){
     const s=LS.get(K_SAV); return s?{...DEF_SAV_CFG,...s}:DEF_SAV_CFG;
   });
   const[tab,setTab]=useState("overview"); // overview | forecast | external | history
-  const[selectedPreset,setSelectedPreset]=useState("general");
-  const[customReturn,setCustomReturn]=useState(6.0);
   const[editExt,setEditExt]=useState(null); // null | {id,name,balance,returnPct,type}
   const[showExtForm,setShowExtForm]=useState(false);
   const[newExt,setNewExt]=useState({name:"",balance:"",returnPct:"",type:"deposit",icon:"🏦"});
@@ -1551,22 +1542,11 @@ function Savings({shifts,cfg,privacyMode}){
   const save=(cfg)=>{setSavCfg(cfg);LS.set(K_SAV,cfg);setSavedMsg(true);setTimeout(()=>setSavedMsg(false),2000);};
   const silentSave=(cfg)=>{setSavCfg(cfg);LS.set(K_SAV,cfg);};
 
-  // עדכון תשואה חודשי אוטומטי ב-1 לכל חודש
-  useEffect(()=>{
-    const now=new Date();
-    const thisM1D=new Date(now.getFullYear(),now.getMonth(),1);
-    const y=thisM1D.getFullYear(),m=String(thisM1D.getMonth()+1).padStart(2,'0');
-    const thisM1=`${y}-${m}-01`;
-    if(!savCfg.lastReturnApplied){
-      silentSave({...savCfg,lastReturnApplied:thisM1});
-      return;
-    }
-    const lastD=new Date(savCfg.lastReturnApplied+"T12:00:00");
-    const diff=(thisM1D.getFullYear()-lastD.getFullYear())*12+(thisM1D.getMonth()-lastD.getMonth());
-    if(diff<=0)return;
-    const rPct=savCfg.returnPct||6.5;
-    const factor=Math.pow(1+rPct/100/12,diff);
-    // pension — cP ו-cK יחושבו בעת קריאת ה-closure לאחר הרינדר
+  // עזר: שיעור תשואה מפרסט
+  const getPct=(preset,custom)=>preset==="custom"?Number(custom||0):(RETURN_PRESETS.find(p=>p.id===preset)?.pct||6.5);
+
+  // לוגיקת עדכון תשואה — מחזירה אובייקט cfg מעודכן
+  const buildReturnUpdate=(sc,monthsDiff)=>{
     const wM=buildWeeklyThresholdMap(shifts,cfg);
     const tmpMon={};
     shifts.forEach(s=>{
@@ -1580,17 +1560,51 @@ function Savings({shifts,cfg,privacyMode}){
       tmpCP+=base*(cfg.pensionEmployee+cfg.pensionEmployer)/100;
       tmpCK+=base*(cfg.kerenEmployee+cfg.kerenEmployer)/100;
     });
-    const pBase=savCfg.pensionHistoric+tmpCP;
-    const kBase=savCfg.kerenHistoric+tmpCK;
-    const newPR=(pBase+(savCfg.pensionReturn||0))*factor-pBase;
-    const newKR=(kBase+(savCfg.kerenReturn||0))*factor-kBase;
-    const updExt=savCfg.externals.map(e=>{
-      const ePct=e.returnPct||rPct;
-      const eFactor=Math.pow(1+ePct/100/12,diff);
+    const pPct=getPct(sc.pensionReturnPreset||"general",sc.pensionReturnCustom||6.5);
+    const kPct=getPct(sc.kerenReturnPreset||"general",sc.kerenReturnCustom||6.5);
+    const pFactor=Math.pow(1+pPct/100/12,monthsDiff);
+    const kFactor=Math.pow(1+kPct/100/12,monthsDiff);
+    const pBase=sc.pensionHistoric+tmpCP;
+    const kBase=sc.kerenHistoric+tmpCK;
+    const newPR=(pBase+(sc.pensionReturn||0))*pFactor-pBase;
+    const newKR=(kBase+(sc.kerenReturn||0))*kFactor-kBase;
+    const now2=new Date();
+    const thisM1=`${now2.getFullYear()}-${String(now2.getMonth()+1).padStart(2,'0')}-01`;
+    const updExt=sc.externals.map(e=>{
+      const ePct=getPct(e.returnPreset||"custom",e.returnPct||0);
+      if(!ePct)return e;
+      const eFactor=Math.pow(1+ePct/100/12,monthsDiff);
       return{...e,balance:Math.round(e.balance*eFactor*100)/100};
     });
-    silentSave({...savCfg,pensionReturn:newPR,kerenReturn:newKR,externals:updExt,lastReturnApplied:thisM1});
+    return{...sc,pensionReturn:newPR,kerenReturn:newKR,externals:updExt,lastReturnApplied:thisM1};
+  };
+
+  // עדכון אוטומטי ב-1 לחודש
+  useEffect(()=>{
+    const now=new Date();
+    const thisM1D=new Date(now.getFullYear(),now.getMonth(),1);
+    const y=thisM1D.getFullYear(),m=String(thisM1D.getMonth()+1).padStart(2,'0');
+    const thisM1=`${y}-${m}-01`;
+    if(!savCfg.lastReturnApplied){
+      silentSave({...savCfg,lastReturnApplied:thisM1});
+      return;
+    }
+    const lastD=new Date(savCfg.lastReturnApplied+"T12:00:00");
+    const diff=(thisM1D.getFullYear()-lastD.getFullYear())*12+(thisM1D.getMonth()-lastD.getMonth());
+    if(diff<=0)return;
+    silentSave(buildReturnUpdate(savCfg,diff));
   },[]);// eslint-disable-line
+
+  // עדכון ידני מהכפתור
+  const handleApplyReturns=()=>{
+    const now=new Date();
+    const thisM1D=new Date(now.getFullYear(),now.getMonth(),1);
+    if(!savCfg.lastReturnApplied){save(buildReturnUpdate(savCfg,1));return;}
+    const lastD=new Date(savCfg.lastReturnApplied+"T12:00:00");
+    const diff=(thisM1D.getFullYear()-lastD.getFullYear())*12+(thisM1D.getMonth()-lastD.getMonth());
+    if(diff<=0){setSavedMsg(true);setTimeout(()=>setSavedMsg(false),2000);return;}
+    save(buildReturnUpdate(savCfg,diff));
+  };
 
   // חישוב הפרשות חודשיות ממוצעות מהמשמרות
   // משתמש ב-getShiftPay (כולל cpAuto + מפת סף שבועי) לדיוק מלא
@@ -1620,9 +1634,6 @@ function Savings({shifts,cfg,privacyMode}){
   const extTotal=savCfg.externals.reduce((s,e)=>s+(e.balance||0),0);
   const grandTotal=totalPensionNow+totalKerenNow+extTotal;
 
-  const returnPct=selectedPreset==="custom"?customReturn:(RETURN_PRESETS.find(p=>p.id===selectedPreset)?.pct||6.5);
-  const years=savCfg.forecastYears||10;
-
   const EXT_ICONS=["🏦","🏠","💎","📊","🪙","💵","🏛️","🌍"];
   const EXT_TYPES=[
     {id:"deposit",label:"פיקדון בנקאי"},
@@ -1634,7 +1645,7 @@ function Savings({shifts,cfg,privacyMode}){
 
   const TABS=[
     {id:"overview",label:"סיכום",icon:"📊"},
-    {id:"forecast",label:"תחזית",icon:"🔮"},
+    {id:"returns",label:"תשואות",icon:"💹"},
     {id:"external",label:"חיצוני",icon:"➕"},
     {id:"history", label:"היסטוריה",icon:"📋"},
   ];
@@ -1677,6 +1688,7 @@ function Savings({shifts,cfg,privacyMode}){
               <div style={{fontSize:"11px",color:"#93c5fd",marginBottom:"4px",fontWeight:"700"}}>🏦 פנסיה</div>
               <div style={{fontSize:"20px",fontWeight:"900",color:"#60a5fa"}}>{fM(Math.round(totalPensionNow))}</div>
               {savCfg.pensionHistoric>0&&<div style={{fontSize:"10px",color:"#3b82f688",marginTop:"3px"}}>כולל {fM(savCfg.pensionHistoric)} היסטורי</div>}
+              {(savCfg.pensionReturn||0)>0&&<div style={{fontSize:"10px",color:"#4ade80",marginTop:"2px"}}>תשואה +{fM(Math.round(savCfg.pensionReturn))}</div>}
               <div style={{fontSize:"10px",color:"#3b82f6",marginTop:"3px"}}>{fM(Math.round(monthlyPension))}/חודש (עובד+מעסיק)</div>
               <div style={{fontSize:"9px",color:"#1e40af",marginTop:"1px"}}>{cfg.pensionEmployee}% עובד + {cfg.pensionEmployer}% מעסיק</div>
             </div>
@@ -1684,6 +1696,7 @@ function Savings({shifts,cfg,privacyMode}){
               <div style={{fontSize:"11px",color:"#c4b5fd",marginBottom:"4px",fontWeight:"700"}}>📈 קרן השתלמות</div>
               <div style={{fontSize:"20px",fontWeight:"900",color:"#a78bfa"}}>{fM(Math.round(totalKerenNow))}</div>
               {savCfg.kerenHistoric>0&&<div style={{fontSize:"10px",color:"#7c3aed88",marginTop:"3px"}}>כולל {fM(savCfg.kerenHistoric)} היסטורי</div>}
+              {(savCfg.kerenReturn||0)>0&&<div style={{fontSize:"10px",color:"#4ade80",marginTop:"2px"}}>תשואה +{fM(Math.round(savCfg.kerenReturn))}</div>}
               <div style={{fontSize:"10px",color:"#7c3aed",marginTop:"3px"}}>{fM(Math.round(monthlyKeren))}/חודש (עובד+מעסיק)</div>
               <div style={{fontSize:"9px",color:"#4c1d95",marginTop:"1px"}}>{cfg.kerenEmployee}% עובד + {cfg.kerenEmployer}% מעסיק</div>
             </div>
@@ -1720,113 +1733,91 @@ function Savings({shifts,cfg,privacyMode}){
             </Btn>
           </div>
 
-          {/* תשואה חודשית אוטומטית */}
-          <div style={{...CARD,marginBottom:"10px",background:"#0d1f12",border:"1px solid #14532d"}}>
-            <div style={{fontSize:"12px",color:"#4ade80",fontWeight:"700",marginBottom:"12px"}}>📈 תשואה חודשית אוטומטית</div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"12px"}}>
-              <Field label="תשואה שנתית (%)">
-                <NumInput value={savCfg.returnPct||6.5} onChange={v=>setSavCfg(c=>({...c,returnPct:v}))} step={0.5}/>
-              </Field>
-              <div>
-                <div style={{fontSize:"10px",color:"#6b7280",marginBottom:"4px"}}>עדכון אחרון</div>
-                <div style={{fontSize:"13px",fontWeight:"700",color:"#4ade80"}}>{savCfg.lastReturnApplied||"טרם עודכן"}</div>
-              </div>
-            </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"12px"}}>
-              <div style={{background:"#0a2e18",borderRadius:"10px",padding:"10px",textAlign:"center"}}>
-                <div style={{fontSize:"10px",color:"#6b7280",marginBottom:"3px"}}>תשואה פנסיה</div>
-                <div style={{fontSize:"15px",fontWeight:"800",color:"#4ade80"}}>+{fM(Math.round(savCfg.pensionReturn||0))}</div>
-              </div>
-              <div style={{background:"#1a0a2e",borderRadius:"10px",padding:"10px",textAlign:"center"}}>
-                <div style={{fontSize:"10px",color:"#6b7280",marginBottom:"3px"}}>תשואה קרן השתלמות</div>
-                <div style={{fontSize:"15px",fontWeight:"800",color:"#a78bfa"}}>+{fM(Math.round(savCfg.kerenReturn||0))}</div>
-              </div>
-            </div>
-            <Btn onClick={()=>save(savCfg)} color={savedMsg?"#15803d":"#22c55e"} textColor={savedMsg?"#dcfce7":"#000"} style={{fontSize:"13px"}}>
-              {savedMsg?"✓ נשמר!":"שמור הגדרת תשואה"}
-            </Btn>
-          </div>
         </>
       )}
 
-      {/* ── TAB: FORECAST ── */}
-      {tab==="forecast"&&(
+      {/* ── TAB: RETURNS ── */}
+      {tab==="returns"&&(
         <>
-          {/* Preset selector */}
-          <div style={{...CARD,marginBottom:"14px"}}>
-            <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"10px"}}>📐 בחר מסלול תשואה</div>
-            <div style={{display:"flex",flexDirection:"column",gap:"8px",marginBottom:"12px"}}>
-              {RETURN_PRESETS.map(p=>(
-                <button key={p.id} onClick={()=>setSelectedPreset(p.id)} style={{
-                  display:"flex",alignItems:"center",justifyContent:"space-between",
-                  padding:"10px 14px",borderRadius:"10px",cursor:"pointer",
-                  background:selectedPreset===p.id?"#111827":"#0d1117",
-                  border:`1.5px solid ${selectedPreset===p.id?p.color:"#1f2937"}`,
-                }}>
-                  <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
-                    <span style={{fontSize:"16px"}}>{p.icon}</span>
-                    <span style={{fontSize:"13px",fontWeight:"700",color:selectedPreset===p.id?p.color:"#9ca3af"}}>{p.label}</span>
-                  </div>
-                  {p.pct!==null
-                    ?<span style={{fontSize:"13px",fontWeight:"900",color:selectedPreset===p.id?p.color:"#4b5563"}}>{p.pct}%</span>
-                    :<div style={{display:"flex",alignItems:"center",gap:"6px"}}>
-                      <input type="number" step="0.1" min="0" max="30" value={customReturn}
-                        onClick={e=>e.stopPropagation()}
-                        onChange={e=>setCustomReturn(parseFloat(e.target.value)||0)}
-                        style={{...SI,width:"70px",padding:"4px 8px",fontSize:"13px"}}/>
-                      <span style={{fontSize:"11px",color:"#6b7280"}}>%</span>
-                    </div>
-                  }
-                </button>
-              ))}
+          {/* כרטיס סטטוס עדכון */}
+          <div style={{...CARD,marginBottom:"12px"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}}>
+              <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700"}}>🔄 עדכון תשואה חודשי</div>
+              <Btn onClick={handleApplyReturns} color={savedMsg?"#15803d":"#22c55e"} textColor={savedMsg?"#dcfce7":"#000"} style={{fontSize:"11px",padding:"6px 14px"}}>
+                {savedMsg?"✓ עודכן!":"עדכן עכשיו"}
+              </Btn>
             </div>
-
-            <Field label="אופק זמן (שנים)">
-              <div style={{display:"flex",gap:"8px"}}>
-                {[5,10,15,20,30].map(y=>(
-                  <button key={y} onClick={()=>save({...savCfg,forecastYears:y})}
-                    style={{flex:1,padding:"9px 0",background:years===y?"#052e16":"#0d1117",border:`1.5px solid ${years===y?"#22c55e":"#1f2937"}`,borderRadius:"8px",color:years===y?"#4ade80":"#6b7280",fontWeight:"800",fontSize:"12px",cursor:"pointer"}}>
-                    {y}
-                  </button>
-                ))}
-              </div>
-            </Field>
+            <div style={{fontSize:"11px",color:"#4b5563"}}>
+              מחושב אוטומטית ב-1 לכל חודש ·{" "}
+              <span style={{color:"#4ade80",fontWeight:"700"}}>{savCfg.lastReturnApplied||"טרם עודכן"}</span>
+            </div>
           </div>
 
-          {/* Forecast cards */}
-          <SavingsForecastCard
-            title="פנסיה" icon="🏦" color="#60a5fa" bg="linear-gradient(145deg,#0c1a3e,#1e3a8a)" border="#1e40af"
-            historic={totalPensionNow} monthlyContrib={monthlyPension} returnPct={returnPct} years={years}
-          />
-          <SavingsForecastCard
-            title="קרן השתלמות" icon="📈" color="#a78bfa" bg="linear-gradient(145deg,#1a0c3e,#3b1d8a)" border="#5b21b6"
-            historic={totalKerenNow} monthlyContrib={monthlyKeren} returnPct={returnPct} years={years}
-          />
-          {savCfg.externals.filter(e=>e.returnPct>0).map(e=>(
-            <SavingsForecastCard key={e.id}
-              title={e.name} icon={e.icon} color="#34d399" bg="#0d1f12" border="#14532d"
-              historic={e.balance} monthlyContrib={e.monthlyDeposit||0} returnPct={e.returnPct} years={years}
+          {/* פנסיה */}
+          <div style={{background:"linear-gradient(145deg,#0c1a3e,#1e3a8a)",border:"1px solid #1e40af",borderRadius:"14px",padding:"14px",marginBottom:"10px"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}}>
+              <div style={{fontSize:"13px",fontWeight:"800",color:"#60a5fa"}}>🏦 פנסיה</div>
+              <div style={{textAlign:"left"}}>
+                <div style={{fontSize:"9px",color:"#3b82f688"}}>תשואה שנצברה</div>
+                <div style={{fontSize:"15px",fontWeight:"800",color:"#4ade80"}}>+{fM(Math.round(savCfg.pensionReturn||0))}</div>
+              </div>
+            </div>
+            <ReturnPresetRow
+              selectedId={savCfg.pensionReturnPreset||"general"}
+              customPct={savCfg.pensionReturnCustom||6.5}
+              onSelect={id=>save({...savCfg,pensionReturnPreset:id})}
+              onCustomChange={v=>save({...savCfg,pensionReturnCustom:v})}
             />
+          </div>
+
+          {/* קרן השתלמות */}
+          <div style={{background:"linear-gradient(145deg,#1a0c3e,#3b1d8a)",border:"1px solid #5b21b6",borderRadius:"14px",padding:"14px",marginBottom:"10px"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}}>
+              <div style={{fontSize:"13px",fontWeight:"800",color:"#a78bfa"}}>📈 קרן השתלמות</div>
+              <div style={{textAlign:"left"}}>
+                <div style={{fontSize:"9px",color:"#7c3aed88"}}>תשואה שנצברה</div>
+                <div style={{fontSize:"15px",fontWeight:"800",color:"#4ade80"}}>+{fM(Math.round(savCfg.kerenReturn||0))}</div>
+              </div>
+            </div>
+            <ReturnPresetRow
+              selectedId={savCfg.kerenReturnPreset||"general"}
+              customPct={savCfg.kerenReturnCustom||6.5}
+              onSelect={id=>save({...savCfg,kerenReturnPreset:id})}
+              onCustomChange={v=>save({...savCfg,kerenReturnCustom:v})}
+            />
+          </div>
+
+          {/* חסכונות חיצוניים */}
+          {savCfg.externals.map(e=>(
+            <div key={e.id} style={{background:"#0d1f12",border:"1px solid #14532d",borderRadius:"14px",padding:"14px",marginBottom:"10px"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}}>
+                <div style={{fontSize:"13px",fontWeight:"800",color:"#4ade80"}}>{e.icon} {e.name}</div>
+                <div style={{textAlign:"left"}}>
+                  <div style={{fontSize:"9px",color:"#166534"}}>ריבית שנתית</div>
+                  <div style={{fontSize:"15px",fontWeight:"800",color:"#34d399"}}>{getPct(e.returnPreset||"custom",e.returnPct||0)}%</div>
+                </div>
+              </div>
+              <ReturnPresetRow
+                selectedId={e.returnPreset||"custom"}
+                customPct={e.returnPct||0}
+                onSelect={id=>{
+                  const pct=id==="custom"?e.returnPct:(RETURN_PRESETS.find(p=>p.id===id)?.pct||0);
+                  const upd=savCfg.externals.map(x=>x.id===e.id?{...x,returnPreset:id,returnPct:pct}:x);
+                  save({...savCfg,externals:upd});
+                }}
+                onCustomChange={v=>{
+                  const upd=savCfg.externals.map(x=>x.id===e.id?{...x,returnPct:v,returnPreset:"custom"}:x);
+                  save({...savCfg,externals:upd});
+                }}
+              />
+            </div>
           ))}
 
-          {/* Grand forecast total */}
-          <div style={{background:"linear-gradient(145deg,#052e16,#14532d)",border:"1px solid #166534",borderRadius:"14px",padding:"16px",textAlign:"center",marginBottom:"14px"}}>
-            <div style={{fontSize:"11px",color:"#86efac",fontWeight:"700",marginBottom:"4px"}}>סה״כ חסכונות בעוד {years} שנה</div>
-            <div style={{fontSize:"32px",fontWeight:"900",color:"#4ade80"}}>
-              {fM(Math.round(
-                compoundGrowth(totalPensionNow,monthlyPension,returnPct,years)+
-                compoundGrowth(totalKerenNow,monthlyKeren,returnPct,years)+
-                savCfg.externals.reduce((s,e)=>s+compoundGrowth(e.balance||0,e.monthlyDeposit||0,e.returnPct||0,years),0)
-              ))}
+          {savCfg.externals.length===0&&(
+            <div style={{textAlign:"center",padding:"16px 0",color:"#374151",fontSize:"12px"}}>
+              אין חסכונות חיצוניים — הוסף בלשונית "חיצוני"
             </div>
-          </div>
-
-          {/* Disclaimer */}
-          <div style={{background:"#1a1000",border:"1px solid #92400e44",borderRadius:"10px",padding:"12px",marginBottom:"4px"}}>
-            <div style={{fontSize:"10px",color:"#78350f",lineHeight:"1.7"}}>
-              ⚠️ <strong style={{color:"#92400e"}}>אזהרה:</strong> התחזית מבוססת על תשואות היסטוריות בלבד ואינה מהווה ייעוץ השקעות. ביצועי עבר אינם מבטיחים תוצאות עתידיות. לייעוץ אישי פנה ליועץ השקעות מוסמך.
-            </div>
-          </div>
+          )}
         </>
       )}
 
