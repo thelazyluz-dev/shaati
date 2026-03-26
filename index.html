@@ -3110,7 +3110,11 @@ function App(){
   const saveTpls=useCallback(ns=>{setTpls(ns);LS.set(K.tpls,ns);},[]);
   const saveAls=useCallback(ns=>{setAls(ns);LS.set(K.als,ns);},[]);
   const saveVacCfg=useCallback(ns=>{setVacCfg(ns);LS.set(K.vac,ns);},[]);
-  const addSh=useCallback(s=>saveSh([...shifts,s]),[shifts,saveSh]);
+  const addSh=useCallback(s=>{
+    // לא לשמור משמרת עבודה קצרה מ-3 דקות (0.05 שעות)
+    if(!isSpecialDay(s.type)&&ch(s.start,s.end)<0.05)return;
+    saveSh([...shifts,s]);
+  },[shifts,saveSh]);
   const delSh=useCallback(id=>saveSh(shifts.filter(s=>s.id!==id)),[shifts,saveSh]);
   const editSh=useCallback(s=>saveSh(shifts.map(x=>x.id===s.id?s:x)),[shifts,saveSh]);
 
