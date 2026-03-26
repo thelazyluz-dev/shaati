@@ -514,96 +514,71 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode}){
   const elapsedStr=`${String(hh).padStart(2,"0")}:${String(mm).padStart(2,"0")}:${String(ss).padStart(2,"0")}`;
 
   return(
-    <div style={{marginBottom:"16px"}}>
-      <div style={{background:"linear-gradient(145deg,#052e16,#0a3a1a)",border:`1px solid ${t.color}66`,borderRadius:"20px",padding:"20px",textAlign:"center",position:"relative",overflow:"hidden"}}>
+    <div style={{marginBottom:"10px"}}>
+      <div style={{background:"linear-gradient(145deg,#052e16,#0a3a1a)",border:`1px solid ${t.color}55`,borderRadius:"18px",padding:"14px 16px",position:"relative",overflow:"hidden"}}>
 
-        {/* Floating coins animation */}
+        {/* Floating coins */}
         {coins.map(coin=>(
-          <div key={coin.id} style={{
-            position:"absolute",bottom:0,left:`${coin.x}%`,
-            fontSize:"20px",pointerEvents:"none",
-            animation:"floatUp 2s ease-out forwards",
-            zIndex:5,
-          }}>💰</div>
+          <div key={coin.id} style={{position:"absolute",bottom:0,left:`${coin.x}%`,fontSize:"18px",pointerEvents:"none",animation:"floatUp 2s ease-out forwards",zIndex:5}}>💰</div>
         ))}
-
         <style>{`
-          @keyframes floatUp {
-            0%   { transform: translateY(0) scale(0.5); opacity:1; }
-            100% { transform: translateY(-120px) scale(1.2); opacity:0; }
-          }
-          @keyframes pulse {
-            0%,100% { transform: scale(1); }
-            50%      { transform: scale(1.04); }
-          }
+          @keyframes floatUp{0%{transform:translateY(0) scale(0.5);opacity:1}100%{transform:translateY(-100px) scale(1.2);opacity:0}}
+          @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
         `}</style>
 
-        {/* Shift type badge */}
-        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"8px",marginBottom:"4px"}}>
-          <span>{t.icon}</span>
-          <div style={{fontSize:"11px",color:t.color,fontWeight:"700",letterSpacing:"1px"}}>משמרת {t.label} פעילה</div>
-        </div>
-        <div style={{fontSize:"12px",color:"#6b7280",marginBottom:"14px"}}>התחלה: {clockIn.time}</div>
-
-        {/* Timer */}
-        <div style={{fontSize:"36px",fontWeight:"900",color:"#f1f5f9",letterSpacing:"3px",fontVariantNumeric:"tabular-nums",marginBottom:"4px"}}>
-          {elapsedStr}
-        </div>
-        <div style={{fontSize:"11px",color:"#4b5563",marginBottom:"16px"}}>{fH(hours)} שעות</div>
-
-        <div style={{height:"1px",background:`${t.color}33`,marginBottom:"16px"}}/>
-
-        {/* Net earnings — big, pulsing */}
-        <div style={{position:"relative",display:"inline-block"}}>
-          <div style={{fontSize:"11px",color:"#86efac",marginBottom:"6px",letterSpacing:"0.5px"}}>שכר נטו עד כה</div>
-          <div style={{
-            fontSize:"44px",fontWeight:"900",color:"#4ade80",
-            fontVariantNumeric:"tabular-nums",letterSpacing:"-1px",
-            animation:"pulse 2s ease-in-out infinite",
-            textShadow:"0 0 20px #4ade8044",
-            filter:privacyMode?"blur(10px)":"none",
-            transition:"filter 0.25s ease",
-            userSelect:privacyMode?"none":"auto",
-          }}>
-            {fM(net)}
+        {/* Row 1: type + start time */}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}}>
+          <div style={{display:"flex",alignItems:"center",gap:"5px"}}>
+            <span style={{fontSize:"14px"}}>{t.icon}</span>
+            <span style={{fontSize:"12px",color:t.color,fontWeight:"700"}}>משמרת {t.label} פעילה</span>
           </div>
-
-          {/* Info button */}
-          <button onClick={()=>setShowDetails(!showDetails)} style={{
-            position:"absolute",top:0,left:"-28px",
-            width:"20px",height:"20px",borderRadius:"50%",
-            background:"#1f2937",border:"1px solid #374151",
-            color:"#6b7280",fontSize:"11px",cursor:"pointer",
-            display:"flex",alignItems:"center",justifyContent:"center",
-          }}>ℹ</button>
+          <span style={{fontSize:"11px",color:"#4b5563"}}>התחלה {clockIn.time}</span>
         </div>
 
-        {/* Details panel (hidden by default) */}
-        {showDetails&&(
-          <div style={{marginTop:"14px",background:"#0d1117",borderRadius:"12px",padding:"12px",textAlign:"right",filter:privacyMode?"blur(8px)":"none",transition:"filter 0.25s ease",userSelect:privacyMode?"none":"auto"}}>
-            <div style={{fontSize:"11px",color:"#6b7280",fontWeight:"700",marginBottom:"8px",textAlign:"center"}}>פירוט חישוב</div>
-            <div style={{display:"flex",justifyContent:"space-between",padding:"4px 0",borderBottom:"1px solid #1f2937"}}>
-              <span style={{fontSize:"12px",color:"#9ca3af"}}>שכר ברוטו</span>
-              <span style={{fontSize:"12px",color:"#e2e8f0"}}>{fM(gross)}</span>
+        {/* Row 2: timer (right) + net earnings (left) */}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div>
+            <div style={{fontSize:"10px",color:"#6b7280",marginBottom:"2px"}}>זמן עבודה</div>
+            <div style={{fontSize:"26px",fontWeight:"900",color:"#f1f5f9",letterSpacing:"2px",fontVariantNumeric:"tabular-nums"}}>{elapsedStr}</div>
+            <div style={{fontSize:"10px",color:"#4b5563",marginTop:"1px"}}>{fH(hours)} שעות</div>
+          </div>
+          <div style={{textAlign:"left"}}>
+            <div style={{fontSize:"10px",color:"#86efac",marginBottom:"2px"}}>שכר נטו</div>
+            <div style={{
+              fontSize:"38px",fontWeight:"900",color:"#4ade80",
+              fontVariantNumeric:"tabular-nums",letterSpacing:"-1px",
+              animation:"pulse 2s ease-in-out infinite",
+              textShadow:"0 0 16px #4ade8044",
+              filter:privacyMode?"blur(10px)":"none",
+              transition:"filter 0.25s ease",
+              userSelect:privacyMode?"none":"auto",
+            }}>{fM(net)}</div>
+            <div style={{display:"flex",justifyContent:"flex-end",alignItems:"center",gap:"5px",marginTop:"1px"}}>
+              <span style={{fontSize:"10px",color:"#4b5563",filter:privacyMode?"blur(6px)":"none"}}>ברוטו {fM(gross)}</span>
+              <button onClick={()=>setShowDetails(!showDetails)} style={{width:"16px",height:"16px",borderRadius:"50%",background:"#1f2937",border:"1px solid #374151",color:"#6b7280",fontSize:"10px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>ℹ</button>
             </div>
-            {ded&&[
-              {l:"מס הכנסה",v:ded.tx,p:cfg.taxRate},
-              {l:"ביטוח לאומי",v:ded.bl,p:cfg.bituachLeumi},
-              {l:"מס בריאות",v:ded.br,p:cfg.masBriut},
-              {l:"פנסיה עובד",v:ded.pe,p:cfg.pensionEmployee},
-              {l:"קרן השתלמות",v:ded.ke,p:cfg.kerenEmployee},
-            ].map((r,i)=>(
-              <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",borderBottom:"1px solid #1f2937"}}>
-                <span style={{fontSize:"12px",color:"#9ca3af"}}>{r.l} ({r.p}%)</span>
-                <span style={{fontSize:"12px",color:"#f87171"}}>-{fM(r.v)}</span>
+          </div>
+        </div>
+
+        {/* Details panel */}
+        {showDetails&&(
+          <div style={{marginTop:"10px",background:"#0d1117",borderRadius:"10px",padding:"10px",filter:privacyMode?"blur(8px)":"none",transition:"filter 0.25s ease",userSelect:privacyMode?"none":"auto"}}>
+            <div style={{fontSize:"10px",color:"#6b7280",fontWeight:"700",marginBottom:"6px",textAlign:"center"}}>פירוט חישוב</div>
+            {[{l:"ברוטו",v:gross,c:"#e2e8f0",neg:false},...(ded?[
+              {l:`מס הכנסה ${cfg.taxRate}%`,v:ded.tx,c:"#f87171",neg:true},
+              {l:`ביטוח לאומי ${cfg.bituachLeumi}%`,v:ded.bl,c:"#f87171",neg:true},
+              {l:`מס בריאות ${cfg.masBriut}%`,v:ded.br,c:"#f87171",neg:true},
+              {l:`פנסיה ${cfg.pensionEmployee}%`,v:ded.pe,c:"#f87171",neg:true},
+              {l:`קרן ${cfg.kerenEmployee}%`,v:ded.ke,c:"#f87171",neg:true},
+            ]:[])].map((r,i)=>(
+              <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderBottom:"1px solid #1f293766"}}>
+                <span style={{fontSize:"11px",color:"#9ca3af"}}>{r.l}</span>
+                <span style={{fontSize:"11px",color:r.c}}>{r.neg?"-":""}{fM(r.v)}</span>
               </div>
             ))}
-            <div style={{display:"flex",justifyContent:"space-between",padding:"6px 0 0"}}>
-              <span style={{fontSize:"13px",color:"#4ade80",fontWeight:"700"}}>נטו</span>
-              <span style={{fontSize:"13px",color:"#4ade80",fontWeight:"700"}}>{fM(net)}</span>
-            </div>
-            <div style={{fontSize:"10px",color:"#374151",marginTop:"8px",textAlign:"center"}}>
-              * התוספות יתווספו בסיום המשמרת
+            <div style={{display:"flex",justifyContent:"space-between",padding:"5px 0 0"}}>
+              <span style={{fontSize:"12px",color:"#4ade80",fontWeight:"700"}}>נטו</span>
+              <span style={{fontSize:"12px",color:"#4ade80",fontWeight:"700"}}>{fM(net)}</span>
             </div>
           </div>
         )}
@@ -771,84 +746,72 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
   }
 
   return(
-    <div style={{padding:"20px 16px",paddingBottom:"20px",position:"relative",overflow:"hidden",minHeight:"100%"}}>
-      {/* Animated shift background — behind everything */}
+    <div style={{padding:"12px 16px 16px",position:"relative",overflow:"hidden"}}>
       <ShiftBg type={curType}/>
-      {/* Confetti */}
       {confetti.map(p=>(
         <div key={p.id} style={{position:"fixed",top:0,left:`${p.x}%`,fontSize:"20px",pointerEvents:"none",zIndex:999,
           animation:`confettiFall ${p.dur}s ${p.delay}s ease-in forwards`}}>
           {p.emoji}
         </div>
       ))}
-      {/* Current time display */}
-      <div style={{textAlign:"center",marginBottom:"28px"}}>
-        <div style={{fontSize:"13px",color:"#6b7280",marginBottom:"4px"}}>
+
+      {/* Header: date + clock + badge */}
+      <div style={{textAlign:"center",marginBottom:"12px",position:"relative",zIndex:5}}>
+        <div style={{fontSize:"12px",color:"#6b7280",marginBottom:"2px"}}>
           {new Date().toLocaleDateString("he-IL",{weekday:"long",day:"numeric",month:"long"})}
         </div>
         <LiveClock/>
-        <div style={{display:"inline-flex",alignItems:"center",gap:"6px",background:t.bg,border:`1px solid ${t.color}`,borderRadius:"20px",padding:"4px 14px",marginTop:"8px"}}>
-          <span style={{fontSize:"14px"}}>{t.icon}</span>
-          <span style={{fontSize:"13px",color:t.color,fontWeight:"700"}}>משמרת {t.label}</span>
+        <div style={{display:"inline-flex",alignItems:"center",gap:"6px",background:t.bg,border:`1px solid ${t.color}`,borderRadius:"20px",padding:"3px 12px",marginTop:"6px"}}>
+          <span style={{fontSize:"13px"}}>{t.icon}</span>
+          <span style={{fontSize:"12px",color:t.color,fontWeight:"700"}}>משמרת {t.label}</span>
         </div>
       </div>
 
       {!clockIn?(
-        // CLOCK IN button
         <div style={{position:"relative",zIndex:5}}>
           <button onClick={handleClockIn} style={{
-            width:"100%",height:"180px",borderRadius:"24px",border:"none",cursor:"pointer",
-            background:`linear-gradient(145deg, #052e16, #14532d)`,
+            width:"100%",padding:"26px 0",borderRadius:"22px",cursor:"pointer",
+            background:"linear-gradient(145deg,#052e16,#14532d)",
             border:"2px solid #22c55e",
-            display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"12px",
+            display:"flex",flexDirection:"column",alignItems:"center",gap:"10px",
             boxShadow:"0 0 40px #22c55e33",
             animation:"glowPulse 2.5s ease-in-out infinite",
           }}>
-            <div style={{fontSize:"52px"}}>▶</div>
+            <div style={{fontSize:"48px"}}>▶</div>
             <div style={{fontSize:"22px",fontWeight:"900",color:"#4ade80"}}>כניסה למשמרת</div>
-            <div style={{fontSize:"13px",color:"#86efac"}}>{nowTime()}</div>
+            <div style={{fontSize:"12px",color:"#86efac"}}>{nowTime()}</div>
           </button>
-
-          <div style={{marginTop:"20px",...CARD,background:"#0d1117",textAlign:"center"}}>
-            <div style={{fontSize:"12px",color:"#4b5563"}}>לחץ כניסה כשמתחיל המשמרת</div>
-            <div style={{fontSize:"12px",color:"#4b5563",marginTop:"4px"}}>השעה והתאריך יירשמו אוטומטית</div>
+          <div style={{marginTop:"12px",textAlign:"center",fontSize:"12px",color:"#374151"}}>
+            לחץ כניסה כשמתחיל המשמרת · השעה תירשם אוטומטית
           </div>
         </div>
       ):(
-        // CLOCK OUT view
         <div style={{position:"relative",zIndex:5}}>
-          {/* Live earnings timer */}
           <LiveEarnings clockIn={clockIn} cfg={cfg} selAls={selAls} als={als} privacyMode={privacyMode}/>
 
-          {/* Allowances */}
           {shiftAls.length>0&&(
-            <div style={{marginBottom:"16px"}}>
-              <div style={LBL}>תוספות למשמרת זו</div>
-              <div style={{display:"flex",flexWrap:"wrap",gap:"8px"}}>
-                {shiftAls.map(a=>{const on=selAls.includes(a.id);return(
-                  <button key={a.id} onClick={()=>toggleAl(a.id)} style={{padding:"10px 14px",borderRadius:"10px",cursor:"pointer",border:`1.5px solid ${on?"#34d399":"#2a2d3e"}`,background:on?"#022c22":"#0d1117",color:on?"#34d399":"#6b7280",fontWeight:"700",fontSize:"13px"}}>
-                    🧾 {a.name} {fM(a.amount)}
-                  </button>
-                );})}
-              </div>
+            <div style={{display:"flex",flexWrap:"wrap",gap:"6px",marginBottom:"10px"}}>
+              {shiftAls.map(a=>{const on=selAls.includes(a.id);return(
+                <button key={a.id} onClick={()=>toggleAl(a.id)} style={{padding:"8px 12px",borderRadius:"10px",cursor:"pointer",border:`1.5px solid ${on?"#34d399":"#2a2d3e"}`,background:on?"#022c22":"#0d1117",color:on?"#34d399":"#6b7280",fontWeight:"700",fontSize:"12px"}}>
+                  🧾 {a.name} {fM(a.amount)}
+                </button>
+              );})}
             </div>
           )}
 
-          {/* Note */}
-          <Field label="הערה (אופציונלי)">
-            <input type="text" value={note} onChange={e=>setNote(e.target.value)} placeholder="חג, שעות מיוחדות..." style={SI}/>
-          </Field>
+          <input type="text" value={note} onChange={e=>setNote(e.target.value)}
+            placeholder="הערה אופציונלית (חג, שעות מיוחדות...)"
+            style={{...SI,fontSize:"13px",marginBottom:"10px",width:"100%",boxSizing:"border-box"}}/>
 
-          {/* Clock out button */}
           <button onClick={handleClockOut} style={{
-            width:"100%",height:"140px",borderRadius:"24px",cursor:"pointer",
+            width:"100%",padding:"20px 0",borderRadius:"20px",cursor:"pointer",
             background:"linear-gradient(145deg,#2d0505,#7f1d1d)",
             border:"2px solid #ef4444",
-            display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"10px",
-            boxShadow:"0 0 30px #ef444433",
+            display:"flex",flexDirection:"column",alignItems:"center",gap:"8px",
+            boxShadow:"0 0 24px #ef444433",
           }}>
-            <div style={{fontSize:"42px"}}>⏹</div>
-            <div style={{fontSize:"20px",fontWeight:"900",color:"#f87171"}}>סיום משמרת</div>
+            <div style={{fontSize:"36px"}}>⏹</div>
+            <div style={{fontSize:"19px",fontWeight:"900",color:"#f87171"}}>סיום משמרת</div>
           </button>
         </div>
       )}
