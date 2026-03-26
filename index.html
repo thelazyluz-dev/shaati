@@ -3195,7 +3195,7 @@ function App(){
       )}
 
       {/* Scrollable content */}
-      <div ref={scrollRef} style={{flex:1,overflowY:"auto",overflowX:"hidden",WebkitOverflowScrolling:"touch"}}>
+      <div ref={scrollRef} style={{flex:1,overflowY:"auto",overflowX:"hidden",WebkitOverflowScrolling:"touch",paddingBottom:"68px"}}>
         <div key={tabKey} className={slideClass(prevTab,tab)}>
           {tab==="clock"    &&<ClockScreen clockIn={clockIn} setClockIn={setClockIn} als={als} cfg={cfg} onShiftSaved={s=>{addSh(s);showToast("✓ המשמרת נשמרה!");}} privacyMode={privacyMode} togglePrivacy={togglePrivacy}/>}
           {tab==="dashboard"&&<Dashboard shifts={shifts} cfg={cfg} als={als} selM={selM} setSelM={setSelM} privacyMode={privacyMode}/>}
@@ -3211,8 +3211,8 @@ function App(){
         </div>
       </div>
 
-      {/* Bottom nav — always fixed at bottom of flex container */}
-      <div style={{flexShrink:0,background:"#0d1117",borderTop:"1px solid #1f2937",zIndex:20,paddingBottom:"env(safe-area-inset-bottom, 4px)"}}>
+      {/* Bottom nav — position fixed so it never disappears */}
+      <div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:"430px",background:"#0d1117",borderTop:"1px solid #1f2937",zIndex:50,paddingBottom:"env(safe-area-inset-bottom, 4px)"}}>
         <div style={{display:"flex",width:"100%"}}>
         {tabs.map(t=>(
           <button key={t.id} onClick={()=>switchTab(t.id)} style={{flex:1,padding:"8px 0 10px",background:"none",border:"none",cursor:"pointer",color:tab===t.id?"#4ade80":"#4b5563"}}>
