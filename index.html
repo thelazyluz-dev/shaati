@@ -780,7 +780,7 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
     const h=ch(s.start,s.end);
     const c=getShiftPay(s,cfg);
     const sa=isSpecialDay(s.type)?0:csa(s.allowanceIds||[],als);
-    tG+=c.gross;tA+=sa;tH+=h;
+    tG+=c.gross;tA+=sa;if(!isSpecialDay(s.type))tH+=h;
     // שכר בסיס = שעות רגילות בלבד (ללא שעות נוספות) — בסיס לפנסיה וקרן השתלמות
     const baseMult=isSpecialDay(s.type)?1:(s.customMult?s.customMult/100:(ST[s.type]?.mult||1));
     tBase+=(c.regH||0)*cfg.baseRate*baseMult;
@@ -839,7 +839,7 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
             <div style={{fontSize:"40px",fontWeight:"900",color:"#4ade80",letterSpacing:"-2px",lineHeight:1}}>{prv(tG+tA,privacyMode)}</div>
           </>
         )}
-        {ms.length>0&&<div style={{color:"#4ade8080",fontSize:"12px",marginTop:"10px"}}>{fH(tH)} שעות · {ms.length} משמרות</div>}
+        {ms.length>0&&<div style={{color:"#4ade8080",fontSize:"12px",marginTop:"10px"}}>{fH(tH)} שעות · {ms.filter(s=>!isSpecialDay(s.type)).length} משמרות</div>}
       </div>
 
       {tA>0&&(
@@ -1796,11 +1796,12 @@ function Graph({shifts,cfg,als,privacyMode}){
   const months=Array.from({length:12},(_,i)=>{
     const ym=`${viewYear}-${String(i+1).padStart(2,"0")}`;
     const ms=shifts.filter(s=>s.date.startsWith(ym));
-    let gross=0,hours=0,allow=0,count=0,baseS=0;
+    let gross=0,hours=0,allow=0,count=0,workCount=0,baseS=0;
     ms.forEach(s=>{
       const c=getShiftPay(s,cfg);
       const sa=isSpecialDay(s.type)?0:csa(s.allowanceIds||[],als);
-      gross+=c.gross;hours+=ch(s.start,s.end);allow+=sa;count++;
+      gross+=c.gross;allow+=sa;count++;
+      if(!isSpecialDay(s.type)){hours+=ch(s.start,s.end);workCount++;}
       const baseMult=isSpecialDay(s.type)?1:(s.customMult?s.customMult/100:(ST[s.type]?.mult||1));
       baseS+=(c.regH||0)*cfg.baseRate*baseMult;
     });
@@ -1808,7 +1809,7 @@ function Graph({shifts,cfg,als,privacyMode}){
     const total=gross+allow;
     const ded=cfg.enableDeductions&&total>0?cd(total,cfg,baseS):null;
     const net=ded?total-ded.tot:total;
-    return{ym,i,label:MN[i],labelFull:MNF[i],gross,allow,net,hours,count};
+    return{ym,i,label:MN[i],labelFull:MNF[i],gross,allow,net,hours,count,workCount};
   });
 
   const withData=months.filter(m=>m.count>0);
@@ -1927,7 +1928,7 @@ function Graph({shifts,cfg,als,privacyMode}){
           </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"8px"}}>
             {[
-              {l:"משמרות",v:selData.count,c:"#9ca3af"},
+              {l:"משמרות",v:selData.workCount,c:"#9ca3af"},
               {l:"שעות",v:fH(selData.hours),c:"#9ca3af"},
               {l:"ברוטו",v:fM(selData.gross),c:"#fbbf24"},
               {l:"תוספות",v:fM(selData.allow),c:"#34d399"},
@@ -1962,7 +1963,7 @@ function Graph({shifts,cfg,als,privacyMode}){
           style={{...CARD,marginBottom:"6px",cursor:"pointer",border:selBar===m.i?"1px solid #4ade80":"1px solid #1f2937",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
             <div style={{fontSize:"13px",fontWeight:"700",color:"#e2e8f0"}}>{m.labelFull}</div>
-            <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>{m.count} משמרות · {fH(m.hours)}ש׳</div>
+            <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>{m.workCount} משמרות · {fH(m.hours)}ש׳</div>
           </div>
           <div style={{textAlign:"left"}}>
             <div style={{fontSize:"15px",fontWeight:"800",color:m.i===peakIdx?"#4ade80":m.i===lowIdx?"#f87171":"#e2e8f0"}}>{fM(m.net)}</div>
