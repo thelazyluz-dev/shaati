@@ -704,7 +704,12 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
     if(!clockIn) return;
     const endTime=nowTime();
     const hours=ch(clockIn.time,endTime);
-    if(hours<0.05){setShortMsg(true);setTimeout(()=>setShortMsg(null),2500);return;}
+    if(hours<0.05){
+      setShortMsg(true);
+      setClockIn(null);LS.set(K.clockin,null);setSelAls([]);setNote("");
+      setTimeout(()=>setShortMsg(null),2500);
+      return;
+    }
     const shift={id:Date.now(),date:clockIn.date,start:clockIn.time,end:endTime,type:clockIn.type,allowanceIds:selAls,note,templateName:""};
     onShiftSaved(shift);
     setClockIn(null);
@@ -736,10 +741,10 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
       return(
         <div style={{padding:"40px 24px",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"60vh",textAlign:"center"}}>
           <div style={{fontSize:"72px",marginBottom:"20px"}}>⏱️</div>
-          <div style={{fontSize:"20px",fontWeight:"900",color:"#f97316",lineHeight:"1.5",marginBottom:"16px"}}>
-            כבר סיימת משמרת?
+          <div style={{fontSize:"20px",fontWeight:"900",color:"#f97316",lineHeight:"1.6",marginBottom:"16px"}}>
+            כבר סיימת משמרת??<br/>על מי את/ה עובד/ת
           </div>
-          <div style={{fontSize:"16px",color:"#9ca3af",marginBottom:"8px"}}>קצר מדי — לא מתעד</div>
+          <div style={{fontSize:"16px",color:"#6b7280",marginBottom:"8px"}}>לא מתעד</div>
         </div>
       );
     }
