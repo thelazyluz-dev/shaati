@@ -3064,7 +3064,7 @@ function App(){
             <span>משמרת פעילה</span>
           </div>}
           <div style={{background:"#052e16",border:"1px solid #166534",borderRadius:"8px",padding:"3px 10px",fontSize:"11px",color:"#4ade80",fontWeight:"700"}}>
-            {shifts.filter(s=>s.date.startsWith(tdy().substring(0,7))).length} משמרות החודש
+            {shifts.filter(s=>s.date.startsWith(tdy().substring(0,7))&&!isSpecialDay(s.type)).length} משמרות החודש
           </div>
         </div>
         </div>
