@@ -207,6 +207,50 @@ function buildWeeklyThresholdMap(allShifts,cfg){
   return map;
 }
 
+// חישוב שכר אוטומטי לפי גבולות שעה (רגיל 06-14, צהריים 14-22, לילה 22-06)
+// מחלק את שעות המשמרת לפי התקופות שנכחו בהן ומחשב שכר נכון לכל קטע
+function cpAuto(startTime,endTime,cfg,thresholdOverride){
+  const startM=pt(startTime);
+  const totalH=ch(startTime,endTime);
+  const endM=startM+totalH*60;
+  const dailyThreshold=thresholdOverride!==undefined?thresholdOverride:(cfg.overtimeThreshold||8.6);
+  const ot125Hrs=cfg.overtime125Hours||2;
+  const br=cfg.baseRate;
+  // תקופות בדקות מחצות: לילה 0-360, רגיל 360-840, צהריים 840-1320, לילה 1320-1440
+  const PDEF=[
+    {from:0,    to:360,  mult:1.40},
+    {from:360,  to:840,  mult:1.00},
+    {from:840,  to:1320, mult:1.17},
+    {from:1320, to:1440, mult:1.40},
+  ];
+  const segs=[];
+  for(const day of[0,1440]){
+    for(const p of PDEF){
+      const pf=p.from+day,pt_=p.to+day;
+      const ov=Math.max(0,Math.min(endM,pt_)-Math.max(startM,pf));
+      if(ov>0)segs.push({from:Math.max(startM,pf),hours:ov/60,mult:p.mult});
+    }
+  }
+  segs.sort((a,b)=>a.from-b.from);
+  let cumH=0,regH=0,ot125H=0,ot150H=0,regPay=0,ot125Pay=0,ot150Pay=0;
+  const periodH={regular:0,afternoon:0,night:0};
+  for(const seg of segs){
+    const af=seg.from%1440;
+    const pType=af>=360&&af<840?"regular":af>=840&&af<1320?"afternoon":"night";
+    periodH[pType]+=seg.hours;
+    const prev=cumH,next=cumH+seg.hours;
+    const r =Math.max(0,Math.min(next,dailyThreshold)-prev);
+    const o1=Math.max(0,Math.min(next,dailyThreshold+ot125Hrs)-Math.max(prev,dailyThreshold));
+    const o2=Math.max(0,next-Math.max(prev,dailyThreshold+ot125Hrs));
+    regH+=r;ot125H+=o1;ot150H+=o2;
+    regPay+=r*br*seg.mult;
+    ot125Pay+=o1*br*seg.mult*1.25;
+    ot150Pay+=o2*br*seg.mult*1.50;
+    cumH=next;
+  }
+  return{regH,ot125H,ot150H,regPay,ot125Pay,ot150Pay,gross:regPay+ot125Pay+ot150Pay,hours:totalH,periodH};
+}
+
 // Fixed: overtime on night shifts = 140% * 125% = 175%, afternoon = 117% * 125% = 146.25%
 function cp(hours,type,cfg,customMultPct,thresholdOverride){
   const{baseRate,overtimeThreshold,overtime125Hours}=cfg;
@@ -226,10 +270,12 @@ function cp(hours,type,cfg,customMultPct,thresholdOverride){
 }
 
 // Unified pay calc — handles both regular shifts and special days
+// שמשמרת עבודה ללא מכפיל מותאם: cpAuto מחשב אוטומטית לפי גבולות השעה
 function getShiftPay(s,cfg,thresholdOverride){
   const h=ch(s.start,s.end);
   if(isSpecialDay(s.type)) return {...calcSpecialPay(h,s.type,cfg), ot125H:0,ot150H:0};
-  return cp(h,s.type,cfg,s.customMult||null,thresholdOverride);
+  if(s.customMult) return cp(h,s.type,cfg,s.customMult,thresholdOverride);
+  return cpAuto(s.start,s.end,cfg,thresholdOverride);
 }
 function getShiftTotal(s,cfg,als,thresholdOverride){
   const c=getShiftPay(s,cfg,thresholdOverride);
@@ -811,11 +857,14 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
     const sa=isSpecialDay(s.type)?0:csa(s.allowanceIds||[],als);
     tG+=c.gross;tA+=sa;if(!isSpecialDay(s.type))tH+=h;
     // שכר בסיס = שעות רגילות בלבד (ללא שעות נוספות) — בסיס לפנסיה וקרן השתלמות
-    const baseMult=isSpecialDay(s.type)?1:(s.customMult?s.customMult/100:(ST[s.type]?.mult||1));
-    tBase+=(c.regH||0)*cfg.baseRate*baseMult;
-    if(s.type==="regular")regH+=c.regH||0;
-    if(s.type==="afternoon")aftH+=c.regH||0;
-    if(s.type==="night")ngtH+=c.regH||0;
+    tBase+=(c.regPay!==undefined?c.regPay:c.gross);
+    // פירוט שעות לפי תקופה: cpAuto מחזיר periodH, cp מחזיר רק type
+    if(c.periodH){regH+=c.periodH.regular;aftH+=c.periodH.afternoon;ngtH+=c.periodH.night;}
+    else if(!isSpecialDay(s.type)){
+      if(s.type==="regular")regH+=c.regH||0;
+      if(s.type==="afternoon")aftH+=c.regH||0;
+      if(s.type==="night")ngtH+=c.regH||0;
+    }
     ot125+=c.ot125H||0;ot150+=c.ot150H||0;
   });
   tA+=cma(als);
@@ -1487,13 +1536,14 @@ function Savings({shifts,cfg,privacyMode}){
   const save=(cfg)=>{setSavCfg(cfg);LS.set(K_SAV,cfg);setSavedMsg(true);setTimeout(()=>setSavedMsg(false),2000);};
 
   // חישוב הפרשות חודשיות ממוצעות מהמשמרות
+  // משתמש ב-getShiftPay (כולל cpAuto + מפת סף שבועי) לדיוק מלא
+  const wMapSav=buildWeeklyThresholdMap(shifts,cfg);
   const mon={};
   shifts.forEach(s=>{
     const ym=s.date.substring(0,7);
     if(!mon[ym])mon[ym]=0;
-    const baseMult=s.customMult?s.customMult/100:(ST[s.type]?.mult||1);
-    const c=cp(ch(s.start,s.end),s.type,cfg);
-    mon[ym]+=(c.regH||0)*cfg.baseRate*baseMult; // שכר בסיס בלבד
+    const c=getShiftPay(s,cfg,wMapSav[s.id]);
+    mon[ym]+=(c.regPay!==undefined?c.regPay:c.gross); // שכר בסיס בלבד (ללא שעות נוספות)
   });
   const months=Object.keys(mon).sort();
   let cP=0,cK=0;
