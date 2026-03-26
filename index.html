@@ -81,7 +81,7 @@ const K={shifts:"wt-shifts-v5",cfg:"wt-cfg-v5",tpls:"wt-tpls-v2",als:"wt-als-v2"
 const DEF_VAC={currentBalance:0,sickBalance:0,accrualPerMonth:1.5,startDate:""};
 
 const DEF_CFG={
-  baseRate:34.32,overtimeThreshold:8.6,overtime125Hours:2,
+  baseRate:34.32,overtimeThreshold:8.6,overtime125Hours:2,weeklyOTThreshold:42,
   taxRate:10,bituachLeumi:3.5,masBriut:3.1,
   pensionEmployee:6.5,pensionEmployer:6.5,
   kerenEmployee:2.5,kerenEmployer:7.5,
@@ -180,12 +180,40 @@ function detectShiftType(hour){
 function pt(t){if(!t)return 0;const[h,m]=t.split(":").map(Number);return h*60+(m||0);}
 function ch(s,e){let d=pt(e)-pt(s);if(d<=0)d+=1440;return Math.max(0,d/60);}
 
+// ── שעות נוספות שבועיות ──
+// מחזיר key של השבוע (יום ראשון) לפי תאריך
+function getWeekKey(dateStr){
+  const d=new Date(dateStr+"T12:00:00");
+  const sun=new Date(d);sun.setDate(d.getDate()-d.getDay());
+  return sun.toISOString().split("T")[0];
+}
+// בונה מפה: shiftId → סף יומי אפקטיבי (מינימום בין היומי לשארית השבועי)
+// צו הרחבה 2018: 42 שעות שבועיות. מעבר לכך — שעות נוספות.
+function buildWeeklyThresholdMap(allShifts,cfg){
+  const wt=cfg.weeklyOTThreshold||42;
+  const dt=cfg.overtimeThreshold||8.6;
+  const workShifts=[...allShifts]
+    .filter(s=>!isSpecialDay(s.type))
+    .sort((a,b)=>a.date.localeCompare(b.date));
+  const weekHours={};
+  const map={};
+  workShifts.forEach(s=>{
+    const wk=getWeekKey(s.date);
+    if(!weekHours[wk])weekHours[wk]=0;
+    const remaining=Math.max(0,wt-weekHours[wk]);
+    map[s.id]=Math.min(dt,remaining);
+    weekHours[wk]+=ch(s.start,s.end);
+  });
+  return map;
+}
+
 // Fixed: overtime on night shifts = 140% * 125% = 175%, afternoon = 117% * 125% = 146.25%
-function cp(hours,type,cfg,customMultPct){
+function cp(hours,type,cfg,customMultPct,thresholdOverride){
   const{baseRate,overtimeThreshold,overtime125Hours}=cfg;
+  const dailyThreshold=thresholdOverride!==undefined?thresholdOverride:overtimeThreshold;
   const baseMult=customMultPct?(customMultPct/100):(ST[type]?.mult||1);
-  const regH=Math.min(hours,overtimeThreshold);
-  const ot=Math.max(0,hours-overtimeThreshold);
+  const regH=Math.min(hours,dailyThreshold);
+  const ot=Math.max(0,hours-dailyThreshold);
   const ot125H=Math.min(ot,overtime125Hours);
   const ot150H=Math.max(0,ot-overtime125Hours);
   const regPay=regH*baseRate*baseMult;
@@ -198,13 +226,13 @@ function cp(hours,type,cfg,customMultPct){
 }
 
 // Unified pay calc — handles both regular shifts and special days
-function getShiftPay(s,cfg){
+function getShiftPay(s,cfg,thresholdOverride){
   const h=ch(s.start,s.end);
   if(isSpecialDay(s.type)) return {...calcSpecialPay(h,s.type,cfg), ot125H:0,ot150H:0};
-  return cp(h,s.type,cfg,s.customMult||null);
+  return cp(h,s.type,cfg,s.customMult||null,thresholdOverride);
 }
-function getShiftTotal(s,cfg,als){
-  const c=getShiftPay(s,cfg);
+function getShiftTotal(s,cfg,als,thresholdOverride){
+  const c=getShiftPay(s,cfg,thresholdOverride);
   const allowances=isSpecialDay(s.type)?0:csa(s.allowanceIds||[],als);
   return c.gross+allowances;
 }
@@ -775,12 +803,13 @@ function LiveClock(){
 // ════════════════════════════════════════
 function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
   const ms=shifts.filter(s=>s.date.startsWith(selM));
+  const wMap=buildWeeklyThresholdMap(shifts,cfg);
   let tG=0,tA=0,tH=0,regH=0,aftH=0,ngtH=0,ot125=0,ot150=0,tBase=0;
   ms.forEach(s=>{
     const h=ch(s.start,s.end);
-    const c=getShiftPay(s,cfg);
+    const c=getShiftPay(s,cfg,wMap[s.id]);
     const sa=isSpecialDay(s.type)?0:csa(s.allowanceIds||[],als);
-    tG+=c.gross;tA+=sa;tH+=h;
+    tG+=c.gross;tA+=sa;if(!isSpecialDay(s.type))tH+=h;
     // שכר בסיס = שעות רגילות בלבד (ללא שעות נוספות) — בסיס לפנסיה וקרן השתלמות
     const baseMult=isSpecialDay(s.type)?1:(s.customMult?s.customMult/100:(ST[s.type]?.mult||1));
     tBase+=(c.regH||0)*cfg.baseRate*baseMult;
@@ -839,7 +868,7 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
             <div style={{fontSize:"40px",fontWeight:"900",color:"#4ade80",letterSpacing:"-2px",lineHeight:1}}>{prv(tG+tA,privacyMode)}</div>
           </>
         )}
-        {ms.length>0&&<div style={{color:"#4ade8080",fontSize:"12px",marginTop:"10px"}}>{fH(tH)} שעות · {ms.length} משמרות</div>}
+        {ms.length>0&&<div style={{color:"#4ade8080",fontSize:"12px",marginTop:"10px"}}>{fH(tH)} שעות · {ms.filter(s=>!isSpecialDay(s.type)).length} משמרות</div>}
       </div>
 
       {tA>0&&(
@@ -938,6 +967,7 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift}
     return{y:d.getFullYear(),m:d.getMonth()};
   });
 
+  const wMap=buildWeeklyThresholdMap(shifts,cfg);
   // Build shift map: date -> [shifts]
   const shiftMap={};
   shifts.forEach(s=>{
@@ -1073,7 +1103,7 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift}
                         </div>
                         {s.note&&<div style={{fontSize:"11px",color:"#4b5563",marginTop:"2px"}}>📝 {s.note}</div>}
                       </div>
-                      <div style={{fontSize:"14px",fontWeight:"800",color:"#4ade80"}}>{fM(getShiftTotal(s,cfg,als))}</div>
+                      <div style={{fontSize:"14px",fontWeight:"800",color:"#4ade80"}}>{fM(getShiftTotal(s,cfg,als,wMap[s.id]))}</div>
                     </div>
                     <div style={{display:"flex",gap:"6px"}}>
                       <button onClick={()=>{onEditShift&&onEditShift(s);setOpen(false);setSelectedDay(null);}} style={{flex:1,padding:"7px",background:"#1e3a5f",border:"none",color:"#60a5fa",borderRadius:"8px",cursor:"pointer",fontWeight:"700",fontSize:"12px"}}>✏️ ערוך</button>
@@ -1314,6 +1344,7 @@ function EditModal({shift,cfg,als,onSave,onClose}){
 function ShiftsList({shifts,cfg,als,onDelete,onEdit,privacyMode}){
   const[cid,setCid]=useState(null);
   const[editShift,setEditShift]=useState(null);
+  const wMap=buildWeeklyThresholdMap(shifts,cfg);
   const grp={};shifts.forEach(s=>{const ym=s.date.substring(0,7);if(!grp[ym])grp[ym]=[];grp[ym].push(s);});
   const months=Object.keys(grp).sort().reverse();
   return(
@@ -1331,11 +1362,11 @@ function ShiftsList({shifts,cfg,als,onDelete,onEdit,privacyMode}){
         <div key={ym} style={{marginBottom:"24px"}}>
           <div style={{fontSize:"13px",color:"#9ca3af",fontWeight:"700",marginBottom:"10px",display:"flex",justifyContent:"space-between"}}>
             <span>{mLbl(ym)}</span>
-            <span style={{color:"#4ade80"}}>{prv(grp[ym].reduce((acc,s)=>acc+getShiftTotal(s,cfg,als),0)+cma(als),privacyMode)}</span>
+            <span style={{color:"#4ade80"}}>{prv(grp[ym].reduce((acc,s)=>acc+getShiftTotal(s,cfg,als,wMap[s.id]),0)+cma(als),privacyMode)}</span>
           </div>
           {[...grp[ym]].sort((a,b)=>b.date.localeCompare(a.date)).map(s=>{
             const h=ch(s.start,s.end);
-            const c=getShiftPay(s,cfg);
+            const c=getShiftPay(s,cfg,wMap[s.id]);
             const isSpec=isSpecialDay(s.type);
             const spec=isSpec?SPECIAL[s.type]:null;
             const t=isSpec?spec:ST[s.type];
@@ -1793,14 +1824,16 @@ function Graph({shifts,cfg,als,privacyMode}){
   const MN=["ינו","פבר","מרץ","אפר","מאי","יונ","יול","אוג","ספט","אוק","נוב","דצמ"];
   const MNF=["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 
+  const wMap=buildWeeklyThresholdMap(shifts,cfg);
   const months=Array.from({length:12},(_,i)=>{
     const ym=`${viewYear}-${String(i+1).padStart(2,"0")}`;
     const ms=shifts.filter(s=>s.date.startsWith(ym));
-    let gross=0,hours=0,allow=0,count=0,baseS=0;
+    let gross=0,hours=0,allow=0,count=0,workCount=0,baseS=0;
     ms.forEach(s=>{
-      const c=getShiftPay(s,cfg);
+      const c=getShiftPay(s,cfg,wMap[s.id]);
       const sa=isSpecialDay(s.type)?0:csa(s.allowanceIds||[],als);
-      gross+=c.gross;hours+=ch(s.start,s.end);allow+=sa;count++;
+      gross+=c.gross;allow+=sa;count++;
+      if(!isSpecialDay(s.type)){hours+=ch(s.start,s.end);workCount++;}
       const baseMult=isSpecialDay(s.type)?1:(s.customMult?s.customMult/100:(ST[s.type]?.mult||1));
       baseS+=(c.regH||0)*cfg.baseRate*baseMult;
     });
@@ -1808,7 +1841,7 @@ function Graph({shifts,cfg,als,privacyMode}){
     const total=gross+allow;
     const ded=cfg.enableDeductions&&total>0?cd(total,cfg,baseS):null;
     const net=ded?total-ded.tot:total;
-    return{ym,i,label:MN[i],labelFull:MNF[i],gross,allow,net,hours,count};
+    return{ym,i,label:MN[i],labelFull:MNF[i],gross,allow,net,hours,count,workCount};
   });
 
   const withData=months.filter(m=>m.count>0);
@@ -1927,7 +1960,7 @@ function Graph({shifts,cfg,als,privacyMode}){
           </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"8px"}}>
             {[
-              {l:"משמרות",v:selData.count,c:"#9ca3af"},
+              {l:"משמרות",v:selData.workCount,c:"#9ca3af"},
               {l:"שעות",v:fH(selData.hours),c:"#9ca3af"},
               {l:"ברוטו",v:fM(selData.gross),c:"#fbbf24"},
               {l:"תוספות",v:fM(selData.allow),c:"#34d399"},
@@ -1962,7 +1995,7 @@ function Graph({shifts,cfg,als,privacyMode}){
           style={{...CARD,marginBottom:"6px",cursor:"pointer",border:selBar===m.i?"1px solid #4ade80":"1px solid #1f2937",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
             <div style={{fontSize:"13px",fontWeight:"700",color:"#e2e8f0"}}>{m.labelFull}</div>
-            <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>{m.count} משמרות · {fH(m.hours)}ש׳</div>
+            <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>{m.workCount} משמרות · {fH(m.hours)}ש׳</div>
           </div>
           <div style={{textAlign:"left"}}>
             <div style={{fontSize:"15px",fontWeight:"800",color:m.i===peakIdx?"#4ade80":m.i===lowIdx?"#f87171":"#e2e8f0"}}>{fM(m.net)}</div>
@@ -2313,6 +2346,8 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
           </Field>
           <Field label="שעות עבודה ביום רגיל" hint="לפי חוק: 8.6 שעות"><NumInput value={form.overtimeThreshold} onChange={v=>setForm({...form,overtimeThreshold:v})} step={0.1}/></Field>
           <Field label="שעות ב-125% לפני 150%" hint="לפי חוק: 2 שעות"><NumInput value={form.overtime125Hours} onChange={v=>setForm({...form,overtime125Hours:v})} step={1}/></Field>
+          <Field label="סף שעות נוספות שבועי" hint="צו הרחבה 2018: 42 שעות"><NumInput value={form.weeklyOTThreshold??42} onChange={v=>setForm({...form,weeklyOTThreshold:v})} step={1}/></Field>
+          <div style={{fontSize:"11px",color:"#4b5563",marginTop:"-4px",marginBottom:"8px"}}>מעל הסף השבועי — שעות נוספות אוטומטיות (גם אם לא חצית את הסף היומי)</div>
           <div style={{...CARD,background:"#0d1117",marginTop:"4px"}}>
             <div style={{fontSize:"11px",color:"#6b7280",marginBottom:"4px"}}>שכר בסיס נוכחי</div>
             <div style={{fontSize:"26px",fontWeight:"900",color:"#4ade80",filter:privacyMode?"blur(8px)":"none",transition:"filter 0.25s",userSelect:privacyMode?"none":"auto"}}>₪{form.baseRate}<span style={{fontSize:"13px",color:"#6b7280"}}>/שעה</span></div>
@@ -3029,7 +3064,7 @@ function App(){
             <span>משמרת פעילה</span>
           </div>}
           <div style={{background:"#052e16",border:"1px solid #166534",borderRadius:"8px",padding:"3px 10px",fontSize:"11px",color:"#4ade80",fontWeight:"700"}}>
-            {shifts.filter(s=>s.date.startsWith(tdy().substring(0,7))).length} משמרות החודש
+            {shifts.filter(s=>s.date.startsWith(tdy().substring(0,7))&&!isSpecialDay(s.type)).length} משמרות החודש
           </div>
         </div>
         </div>
