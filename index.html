@@ -178,7 +178,7 @@ function detectShiftType(hour){
 
 // ── Calc ──
 function pt(t){if(!t)return 0;const[h,m]=t.split(":").map(Number);return h*60+(m||0);}
-function ch(s,e){let d=pt(e)-pt(s);if(d<=0)d+=1440;return Math.max(0,d/60);}
+function ch(s,e){let d=pt(e)-pt(s);if(d<0)d+=1440;return Math.max(0,d/60);}
 
 // ── שעות נוספות שבועיות ──
 // מחזיר key של השבוע (יום ראשון) לפי תאריך
@@ -703,6 +703,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
     if(!clockIn) return;
     const endTime=nowTime();
     const hours=ch(clockIn.time,endTime);
+    if(hours<0.05){alert("שעת הסיום זהה לשעת ההתחלה — בדוק את השעות");return;}
     const shift={id:Date.now(),date:clockIn.date,start:clockIn.time,end:endTime,type:clockIn.type,allowanceIds:selAls,note,templateName:""};
     onShiftSaved(shift);
     setClockIn(null);
