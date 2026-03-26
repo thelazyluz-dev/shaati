@@ -674,6 +674,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
   const[note,setNote]=useState("");
   const[inMsg,setInMsg]=useState(null);
   const[outMsg,setOutMsg]=useState(null);
+  const[shortMsg,setShortMsg]=useState(null);
   const[confetti,setConfetti]=useState([]);
 
   useEffect(()=>{
@@ -703,7 +704,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
     if(!clockIn) return;
     const endTime=nowTime();
     const hours=ch(clockIn.time,endTime);
-    if(hours<0.05){alert("שעת הסיום זהה לשעת ההתחלה — בדוק את השעות");return;}
+    if(hours<0.05){setShortMsg(true);setTimeout(()=>setShortMsg(null),2500);return;}
     const shift={id:Date.now(),date:clockIn.date,start:clockIn.time,end:endTime,type:clockIn.type,allowanceIds:selAls,note,templateName:""};
     onShiftSaved(shift);
     setClockIn(null);
@@ -730,7 +731,18 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
   const t=ST[curType]||ST.regular;
 
   // Funny message overlay
-  if(inMsg||outMsg){
+  if(inMsg||outMsg||shortMsg){
+    if(shortMsg){
+      return(
+        <div style={{padding:"40px 24px",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"60vh",textAlign:"center"}}>
+          <div style={{fontSize:"72px",marginBottom:"20px"}}>⏱️</div>
+          <div style={{fontSize:"20px",fontWeight:"900",color:"#f97316",lineHeight:"1.5",marginBottom:"16px"}}>
+            כבר סיימת משמרת?
+          </div>
+          <div style={{fontSize:"16px",color:"#9ca3af",marginBottom:"8px"}}>קצר מדי — לא מתעד</div>
+        </div>
+      );
+    }
     const msg=inMsg||outMsg;
     const isIn=!!inMsg;
     return(
