@@ -976,11 +976,22 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
             </div>
           </div>
           <div style={{...CARD,marginBottom:"12px",background:"#0d1b2a",border:"1px solid #1e3a5f"}}>
-            <div style={{fontSize:"11px",color:"#60a5fa",fontWeight:"700",marginBottom:"8px"}}>הפרשות מעסיק</div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}}>
+              <div style={{fontSize:"11px",color:"#60a5fa",fontWeight:"700"}}>הפרשות מעסיק</div>
+              <div style={{fontSize:"9px",color:"#374151"}}>מצטרף לניכויי העובד בחסכונות</div>
+            </div>
             <div style={{display:"flex",gap:"12px"}}>
-              <div style={{flex:1,textAlign:"center"}}><div style={{fontSize:"10px",color:"#4b5563"}}>פנסיה</div><div style={{fontSize:"15px",fontWeight:"800",color:"#60a5fa"}}>{prv(ded.pr,privacyMode)}</div></div>
+              <div style={{flex:1,textAlign:"center"}}>
+                <div style={{fontSize:"10px",color:"#4b5563"}}>פנסיה מעסיק</div>
+                <div style={{fontSize:"15px",fontWeight:"800",color:"#60a5fa"}}>{prv(ded.pr,privacyMode)}</div>
+                <div style={{fontSize:"9px",color:"#1e3a5f",marginTop:"1px"}}>עובד: {prv(ded.pe,privacyMode)} | סה"כ: {prv(ded.pe+ded.pr,privacyMode)}</div>
+              </div>
               <div style={{width:"1px",background:"#1e3a5f"}}/>
-              <div style={{flex:1,textAlign:"center"}}><div style={{fontSize:"10px",color:"#4b5563"}}>קרן השתלמות</div><div style={{fontSize:"15px",fontWeight:"800",color:"#a78bfa"}}>{prv(ded.kr,privacyMode)}</div></div>
+              <div style={{flex:1,textAlign:"center"}}>
+                <div style={{fontSize:"10px",color:"#4b5563"}}>קרן השתלמות מעסיק</div>
+                <div style={{fontSize:"15px",fontWeight:"800",color:"#a78bfa"}}>{prv(ded.kr,privacyMode)}</div>
+                <div style={{fontSize:"9px",color:"#3b0764",marginTop:"1px"}}>עובד: {prv(ded.ke,privacyMode)} | סה"כ: {prv(ded.ke+ded.kr,privacyMode)}</div>
+              </div>
             </div>
           </div>
         </>
@@ -1620,13 +1631,15 @@ function Savings({shifts,cfg,privacyMode}){
               <div style={{fontSize:"11px",color:"#93c5fd",marginBottom:"4px",fontWeight:"700"}}>🏦 פנסיה</div>
               <div style={{fontSize:"20px",fontWeight:"900",color:"#60a5fa"}}>{fM(Math.round(totalPensionNow))}</div>
               {savCfg.pensionHistoric>0&&<div style={{fontSize:"10px",color:"#3b82f688",marginTop:"3px"}}>כולל {fM(savCfg.pensionHistoric)} היסטורי</div>}
-              <div style={{fontSize:"10px",color:"#3b82f6",marginTop:"3px"}}>{fM(Math.round(monthlyPension))}/חודש</div>
+              <div style={{fontSize:"10px",color:"#3b82f6",marginTop:"3px"}}>{fM(Math.round(monthlyPension))}/חודש (עובד+מעסיק)</div>
+              <div style={{fontSize:"9px",color:"#1e40af",marginTop:"1px"}}>{cfg.pensionEmployee}% עובד + {cfg.pensionEmployer}% מעסיק</div>
             </div>
             <div style={{background:"linear-gradient(145deg,#1a0c3e,#3b1d8a)",border:"1px solid #5b21b6",borderRadius:"14px",padding:"14px",textAlign:"center"}}>
               <div style={{fontSize:"11px",color:"#c4b5fd",marginBottom:"4px",fontWeight:"700"}}>📈 קרן השתלמות</div>
               <div style={{fontSize:"20px",fontWeight:"900",color:"#a78bfa"}}>{fM(Math.round(totalKerenNow))}</div>
               {savCfg.kerenHistoric>0&&<div style={{fontSize:"10px",color:"#7c3aed88",marginTop:"3px"}}>כולל {fM(savCfg.kerenHistoric)} היסטורי</div>}
-              <div style={{fontSize:"10px",color:"#7c3aed",marginTop:"3px"}}>{fM(Math.round(monthlyKeren))}/חודש</div>
+              <div style={{fontSize:"10px",color:"#7c3aed",marginTop:"3px"}}>{fM(Math.round(monthlyKeren))}/חודש (עובד+מעסיק)</div>
+              <div style={{fontSize:"9px",color:"#4c1d95",marginTop:"1px"}}>{cfg.kerenEmployee}% עובד + {cfg.kerenEmployer}% מעסיק</div>
             </div>
           </div>
 
@@ -1838,12 +1851,14 @@ function Savings({shifts,cfg,privacyMode}){
               </div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
                 <div style={{background:"#0c1a3e55",borderRadius:"8px",padding:"8px"}}>
-                  <div style={{fontSize:"10px",color:"#93c5fd",marginBottom:"3px"}}>פנסיה</div>
+                  <div style={{fontSize:"10px",color:"#93c5fd",marginBottom:"3px"}}>פנסיה (עובד+מעסיק)</div>
                   <div style={{fontSize:"14px",fontWeight:"700",color:"#60a5fa"}}>{fM(Math.round(r.pe+r.pr))}</div>
+                  <div style={{fontSize:"9px",color:"#3b82f6",marginTop:"2px"}}>{fM(Math.round(r.pe))} עובד · {fM(Math.round(r.pr))} מעסיק</div>
                 </div>
                 <div style={{background:"#1a0c3e55",borderRadius:"8px",padding:"8px"}}>
-                  <div style={{fontSize:"10px",color:"#c4b5fd",marginBottom:"3px"}}>קרן השתלמות</div>
+                  <div style={{fontSize:"10px",color:"#c4b5fd",marginBottom:"3px"}}>קרן השתלמות (עובד+מעסיק)</div>
                   <div style={{fontSize:"14px",fontWeight:"700",color:"#a78bfa"}}>{fM(Math.round(r.ke+r.kr))}</div>
+                  <div style={{fontSize:"9px",color:"#7c3aed",marginTop:"2px"}}>{fM(Math.round(r.ke))} עובד · {fM(Math.round(r.kr))} מעסיק</div>
                 </div>
               </div>
               <div style={{display:"flex",justifyContent:"space-between",marginTop:"8px"}}>
