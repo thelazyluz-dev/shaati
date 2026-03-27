@@ -1280,7 +1280,7 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
   const displayDate=value?new Date(value+"T12:00:00").toLocaleDateString("he-IL",{weekday:"short",day:"numeric",month:"long",year:"numeric"}):"בחר תאריך";
 
   const calBody=(
-    <div style={inline?{background:"#111827",borderRadius:"14px",padding:"14px"}:{position:"absolute",top:"100%",right:0,left:0,zIndex:50,background:"#111827",border:"1px solid #1f2937",borderRadius:"14px",padding:"14px",marginTop:"6px",boxShadow:"0 10px 40px #000a"}}>
+    <div style={inline?{background:"#111827",padding:"12px 8px 8px"}:{position:"absolute",top:"100%",right:0,left:0,zIndex:50,background:"#111827",border:"1px solid #1f2937",borderRadius:"14px",padding:"14px",marginTop:"6px",boxShadow:"0 10px 40px #000a"}}>
           {/* Month nav */}
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}}>
             <button onClick={prevMonth} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"8px",width:"32px",height:"32px",fontSize:"18px",cursor:"pointer"}}>‹</button>
@@ -1309,8 +1309,8 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
               const holiday=IL_HOLIDAYS[ds];
               const firstType=hasShift?dayShifts[0].type:null;
               const tColor=firstType?(isSpecialDay(firstType)?SPECIAL[firstType].color:ST[firstType].color):null;
-              const bg=isSelected?"#22c55e":isPanelOpen?(tColor+"33"||"#1a2a1a"):hasShift?(tColor+"1a"):isToday?"#1f2937":holiday?"#fcd34d12":"transparent";
-              const border=isSelected?"2px solid #22c55e":isPanelOpen?`2px solid ${tColor||"#22c55e"}`:isToday?"2px solid #22c55e44":"2px solid transparent";
+              const bg=isSelected?"#22c55e":isPanelOpen?(tColor+"33"||"#1a2a1a"):hasShift?(tColor+"22"):isToday?"#1f2937":holiday?"#fcd34d12":"#0d1117";
+              const border=isSelected?"2px solid #22c55e":isPanelOpen?`2px solid ${tColor||"#22c55e"}`:isToday?"2px solid #22c55e66":hasShift?`2px solid ${tColor}55`:"1px solid #1f2937";
               return(
                 <button key={d} onClick={()=>handleDayClick(d)} style={{
                   padding:"4px 2px 5px",borderRadius:"10px",border,cursor:"pointer",background:bg,
@@ -1439,13 +1439,13 @@ function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode}){
   };
   const hol=form.date?IL_HOLIDAYS[form.date]:null;
   return(
-    <div style={{padding:"16px",paddingBottom:"20px"}}>
+    <div style={{paddingBottom:"20px"}}>
       {editingShift&&<EditModal shift={editingShift} cfg={cfg} als={als} onSave={s=>{onEdit(s);setEditingShift(null);}} onClose={()=>setEditingShift(null)}/>}
-      <div style={{fontSize:"15px",fontWeight:"800",marginBottom:"12px",color:"#f1f5f9"}}>📅 בחר יום</div>
+      <div style={{fontSize:"15px",fontWeight:"800",marginBottom:"10px",color:"#f1f5f9",padding:"12px 16px 0"}}>📅 בחר יום</div>
       <ShiftCalendar inline value={form.date} onChange={selectDate} shifts={shifts} cfg={cfg} als={als} onEditShift={s=>setEditingShift(s)} onDeleteShift={id=>onDelete(id)}/>
 
       {form.date&&(
-        <div style={{marginTop:"16px"}}>
+        <div style={{marginTop:"16px",padding:"0 16px"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"14px",paddingBottom:"12px",borderTop:"1px solid #1f2937",paddingTop:"12px"}}>
             <div>
               <div style={{fontSize:"14px",fontWeight:"800",color:"#e2e8f0"}}>{new Date(form.date+"T12:00:00").toLocaleDateString("he-IL",{weekday:"long",day:"numeric",month:"long"})}</div>
