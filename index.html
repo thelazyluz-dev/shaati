@@ -1296,7 +1296,7 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
           </div>
 
           {/* Days grid */}
-          <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:"2px"}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:"4px"}}>
             {Array.from({length:startDay}).map((_,i)=><div key={"e"+i}/>)}
             {Array.from({length:days}).map((_,i)=>{
               const d=i+1;
@@ -1309,31 +1309,24 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
               const holiday=IL_HOLIDAYS[ds];
               const firstType=hasShift?dayShifts[0].type:null;
               const tColor=firstType?(isSpecialDay(firstType)?SPECIAL[firstType].color:ST[firstType].color):null;
+              const bg=isSelected?"#22c55e":isPanelOpen?(tColor+"33"||"#1a2a1a"):hasShift?(tColor+"1a"):isToday?"#1f2937":holiday?"#fcd34d12":"transparent";
+              const border=isSelected?"2px solid #22c55e":isPanelOpen?`2px solid ${tColor||"#22c55e"}`:isToday?"2px solid #22c55e44":"2px solid transparent";
               return(
                 <button key={d} onClick={()=>handleDayClick(d)} style={{
-                  padding:"4px 2px",borderRadius:"8px",border:isPanelOpen?`1.5px solid ${tColor||"#22c55e"}`:"1.5px solid transparent",
-                  cursor:"pointer",
-                  background:isSelected?"#22c55e":isPanelOpen?"#1a2a1a":isToday?"#1f2937":holiday?"#2a1f0055":"none",
-                  color:isSelected?"#000":isToday?"#4ade80":"#e2e8f0",
-                  fontWeight:isSelected||isToday||isPanelOpen?"800":"400",
-                  fontSize:"12px",
-                  display:"flex",flexDirection:"column",alignItems:"center",gap:"1px",
-                  minHeight:"36px",justifyContent:"center",
+                  padding:"4px 2px 5px",borderRadius:"10px",border,cursor:"pointer",background:bg,
+                  color:isSelected?"#000":isToday?"#4ade80":hasShift?tColor:"#e2e8f0",
+                  fontWeight:isSelected||isToday||isPanelOpen?"800":"500",
+                  fontSize:"13px",display:"flex",flexDirection:"column",alignItems:"center",gap:"3px",
+                  minHeight:"48px",justifyContent:"flex-start",paddingTop:"7px",
                 }}>
                   <span>{d}</span>
-                  {holiday&&!isSelected&&(
-                    <span style={{fontSize:"9px"}}>{holiday.icon}</span>
-                  )}
-                  {hasShift&&!isSelected?(
-                    <div style={{display:"flex",gap:"2px",justifyContent:"center"}}>
-                      {dayShifts.slice(0,3).map((s,i)=>{
-                        const c=isSpecialDay(s.type)?SPECIAL[s.type].color:ST[s.type]?.color||"#888";
-                        return <div key={i} style={{width:"4px",height:"4px",borderRadius:"50%",background:c}}/>;
-                      })}
-                    </div>
-                  ):(
-                    !holiday&&<div style={{width:"4px",height:"4px"}}/>
-                  )}
+                  <span style={{fontSize:"11px",lineHeight:1}}>
+                    {hasShift
+                      ? (isSpecialDay(dayShifts[0].type)?SPECIAL[dayShifts[0].type].icon:ST[dayShifts[0].type]?.icon)
+                        +(dayShifts.length>1?" ·":"")
+                      : holiday?<span style={{color:"#fcd34d"}}>{holiday.icon}</span>
+                      : ""}
+                  </span>
                 </button>
               );
             })}
@@ -1386,18 +1379,17 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
           )}
 
           {/* Legend */}
-          <div style={{display:"flex",gap:"8px",marginTop:"10px",paddingTop:"10px",borderTop:"1px solid #1f2937",justifyContent:"center",flexWrap:"wrap"}}>
+          <div style={{display:"flex",gap:"10px",marginTop:"10px",paddingTop:"10px",borderTop:"1px solid #1f2937",justifyContent:"center",flexWrap:"wrap"}}>
             {Object.entries(ST).map(([k,t])=>(
               <div key={k} style={{display:"flex",alignItems:"center",gap:"4px"}}>
-                <div style={{width:"7px",height:"7px",borderRadius:"50%",background:t.color}}/>
-                <span style={{fontSize:"10px",color:"#6b7280"}}>{t.label}</span>
+                <span style={{fontSize:"12px"}}>{t.icon}</span>
+                <span style={{fontSize:"10px",color:t.color}}>{t.label}</span>
               </div>
             ))}
             <div style={{display:"flex",alignItems:"center",gap:"4px"}}>
-              <span style={{fontSize:"10px"}}>✡️</span>
-              <span style={{fontSize:"10px",color:"#fcd34d"}}>חג</span>
+              <span style={{fontSize:"12px"}}>🕯️</span>
+              <span style={{fontSize:"10px",color:"#fcd34d"}}>חג / אירוע</span>
             </div>
-            <div style={{fontSize:"10px",color:"#374151"}}>· לחץ לפרטים</div>
           </div>
         </div>
   );
