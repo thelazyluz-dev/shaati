@@ -894,6 +894,17 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
                 <div style={{fontSize:"20px",fontWeight:"900",color:"#4ade80"}}>{prv(net,privacyMode)}</div>
               </div>
             </div>
+            {cfg.monthlyGoal>0&&(()=>{const pct=Math.min(100,Math.round(net/cfg.monthlyGoal*100));return(
+              <div style={{marginTop:"12px",width:"100%"}}>
+                <div style={{display:"flex",justifyContent:"space-between",fontSize:"11px",color:"#6b7280",marginBottom:"4px"}}>
+                  <span>יעד חודשי <span style={{color:"#4b5563"}}>(נטו)</span></span><span style={{color:pct>=100?"#4ade80":"#6b7280"}}>{pct}%</span>
+                </div>
+                <div style={{background:"#0d2818",borderRadius:"6px",height:"8px",overflow:"hidden"}}>
+                  <div style={{width:`${pct}%`,height:"100%",background:pct>=100?"linear-gradient(90deg,#4ade80,#22d3ee)":"linear-gradient(90deg,#22c55e,#4ade80)",borderRadius:"6px",transition:"width 0.3s"}}/>
+                </div>
+                <div style={{fontSize:"10px",color:"#6b7280",marginTop:"3px"}}>{prv(net,privacyMode)} מתוך {prv(cfg.monthlyGoal,privacyMode)} נטו</div>
+              </div>
+            );})()}
           </>
         ):(
           <>
