@@ -3375,7 +3375,7 @@ function App(){
   if(!onboarded)return <Onboarding onDone={finishOnboarding}/>;
 
   return(
-    <div dir="rtl" style={{fontFamily:"'Heebo','Arial Hebrew',sans-serif",width:"100%",maxWidth:"430px",margin:"0 auto",height:"100%",display:"flex",flexDirection:"column",background:"#090c14",color:"#e2e8f0",filter:nightMode?"brightness(0.82) saturate(0.9)":"none",transition:"filter 1s ease",position:"relative"}}>
+    <div dir="rtl" style={{fontFamily:"'Heebo','Arial Hebrew',sans-serif",minWidth:"100%",maxWidth:"430px",margin:"0 auto",height:"100%",display:"flex",flexDirection:"column",background:"#090c14",color:"#e2e8f0",filter:nightMode?"brightness(0.82) saturate(0.9)":"none",transition:"filter 1s ease",position:"relative"}}>
 
       {/* Toast notification */}
       {toast&&(
