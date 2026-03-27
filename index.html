@@ -3432,7 +3432,7 @@ function App(){
 
       {/* Scrollable content */}
       <div ref={scrollRef} style={{flex:1,overflowY:"auto",overflowX:"hidden",WebkitOverflowScrolling:"touch",minHeight:0}}>
-        <div key={tabKey} className={slideClass(prevTab,tab)}>
+        <div key={tabKey} className={slideClass(prevTab,tab)} style={{width:"100%"}}>
           {tab==="clock"    &&<ClockScreen clockIn={clockIn} setClockIn={setClockIn} als={als} cfg={cfg} onShiftSaved={s=>{addSh(s);showToast("✓ המשמרת נשמרה!");}} privacyMode={privacyMode} togglePrivacy={togglePrivacy}/>}
           {tab==="dashboard"&&<Dashboard shifts={shifts} cfg={cfg} als={als} selM={selM} setSelM={setSelM} privacyMode={privacyMode}/>}
           {tab==="add"      &&<AddShift cfg={cfg} tpls={tpls} als={als} shifts={shifts} onAdd={s=>{addSh(s);showToast("✓ המשמרת נשמרה!");scrollTop();}} onEdit={editSh} onDelete={delSh} privacyMode={privacyMode}/>}
