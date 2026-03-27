@@ -1290,8 +1290,9 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
 
           {/* Day headers */}
           <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:"2px",marginBottom:"6px"}}>
-            {dayNames.map(d=>(
-              <div key={d} style={{textAlign:"center",fontSize:"11px",color:"#4b5563",fontWeight:"700",padding:"4px 0"}}>{d}</div>
+            {dayNames.map((d,i)=>(
+              <div key={d} style={{textAlign:"center",fontSize:"11px",fontWeight:"700",padding:"4px 0",
+                color:i===6?"#a78bfa":i===5?"#fb923c":"#4b5563"}}>{d}</div>
             ))}
           </div>
 
@@ -1309,12 +1310,16 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
               const holiday=IL_HOLIDAYS[ds];
               const firstType=hasShift?dayShifts[0].type:null;
               const tColor=firstType?(isSpecialDay(firstType)?SPECIAL[firstType].color:ST[firstType].color):null;
-              const bg=isSelected?"#22c55e":isPanelOpen?(tColor+"33"||"#1a2a1a"):hasShift?(tColor+"22"):isToday?"#1f2937":holiday?"#fcd34d12":"#0d1117";
-              const border=isSelected?"2px solid #22c55e":isPanelOpen?`2px solid ${tColor||"#22c55e"}`:isToday?"2px solid #22c55e66":hasShift?`2px solid ${tColor}55`:"1px solid #1f2937";
+              const dow=new Date(ds+"T12:00:00").getDay();
+              const isSat=dow===6;const isFri=dow===5;
+              const weekendBase=isSat?"#1e1040":isFri?"#1c110055":"#0d1117";
+              const bg=isSelected?"#22c55e":isPanelOpen?(tColor+"33"||"#1a2a1a"):hasShift?(tColor+"22"):isToday?"#1f2937":holiday?"#fcd34d12":weekendBase;
+              const border=isSelected?"2px solid #22c55e":isPanelOpen?`2px solid ${tColor||"#22c55e"}`:isToday?"2px solid #22c55e66":hasShift?`2px solid ${tColor}55`:isSat?"1px solid #3730a355":isFri?"1px solid #92400e55":"1px solid #1f2937";
+              const textColor=isSelected?"#000":isToday?"#4ade80":hasShift?tColor:isSat?"#a78bfa":isFri?"#fb923c":"#e2e8f0";
               return(
                 <button key={d} onClick={()=>handleDayClick(d)} style={{
                   padding:"4px 2px 5px",borderRadius:"10px",border,cursor:"pointer",background:bg,
-                  color:isSelected?"#000":isToday?"#4ade80":hasShift?tColor:"#e2e8f0",
+                  color:textColor,
                   fontWeight:isSelected||isToday||isPanelOpen?"800":"500",
                   fontSize:"13px",display:"flex",flexDirection:"column",alignItems:"center",gap:"3px",
                   minHeight:"48px",justifyContent:"flex-start",paddingTop:"7px",
