@@ -88,6 +88,7 @@ const DEF_CFG={
   pensionEmployee:6.5,pensionEmployer:6.5,
   kerenEmployee:2.5,kerenEmployer:7.5,
   enableDeductions:true,
+  monthlyGoal:0,
 };
 const DEF_ALS=[];
 const ST={
@@ -898,6 +899,17 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
           <>
             <div style={{fontSize:"11px",color:"#86efac",letterSpacing:"1.5px",fontWeight:"700",marginBottom:"8px"}}>שכר משוער לחודש</div>
             <div style={{fontSize:"40px",fontWeight:"900",color:"#4ade80",letterSpacing:"-2px",lineHeight:1}}>{prv(tG+tA,privacyMode)}</div>
+            {cfg.monthlyGoal>0&&(()=>{const pct=Math.min(100,Math.round((tG+tA)/cfg.monthlyGoal*100));return(
+              <div style={{marginTop:"10px",width:"100%"}}>
+                <div style={{display:"flex",justifyContent:"space-between",fontSize:"11px",color:"#6b7280",marginBottom:"4px"}}>
+                  <span>יעד חודשי</span><span style={{color:pct>=100?"#4ade80":"#6b7280"}}>{pct}%</span>
+                </div>
+                <div style={{background:"#1f2937",borderRadius:"6px",height:"8px",overflow:"hidden"}}>
+                  <div style={{width:`${pct}%`,height:"100%",background:pct>=100?"linear-gradient(90deg,#4ade80,#22d3ee)":"linear-gradient(90deg,#22c55e,#4ade80)",borderRadius:"6px",transition:"width 0.3s"}}/>
+                </div>
+                <div style={{fontSize:"10px",color:"#6b7280",marginTop:"3px"}}>{prv(tG+tA,privacyMode)} מתוך {prv(cfg.monthlyGoal,privacyMode)}</div>
+              </div>
+            );})()}
           </>
         )}
         {ms.length>0&&<div style={{color:"#4ade8080",fontSize:"12px",marginTop:"10px"}}>{fH(tH)} שעות · {ms.filter(s=>!isSpecialDay(s.type)).length} משמרות</div>}
@@ -2460,6 +2472,7 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
           <Field label="שעות ב-125% לפני 150%" hint="לפי חוק: 2 שעות"><NumInput value={form.overtime125Hours} onChange={v=>setForm({...form,overtime125Hours:v})} step={1}/></Field>
           <Field label="סף שעות נוספות שבועי" hint="צו הרחבה 2018: 42 שעות"><NumInput value={form.weeklyOTThreshold??42} onChange={v=>setForm({...form,weeklyOTThreshold:v})} step={1}/></Field>
           <div style={{fontSize:"11px",color:"#4b5563",marginTop:"-4px",marginBottom:"8px"}}>מעל הסף השבועי — שעות נוספות אוטומטיות (גם אם לא חצית את הסף היומי)</div>
+          <Field label="יעד שכר חודשי (₪)" hint="0 = כבוי"><NumInput value={form.monthlyGoal??0} onChange={v=>setForm({...form,monthlyGoal:v})} step={100} min={0}/></Field>
           <div style={{...CARD,background:"#0d1117",marginTop:"4px"}}>
             <div style={{fontSize:"11px",color:"#6b7280",marginBottom:"4px"}}>שכר בסיס נוכחי</div>
             <div style={{fontSize:"26px",fontWeight:"900",color:"#4ade80",filter:privacyMode?"blur(8px)":"none",transition:"filter 0.25s",userSelect:privacyMode?"none":"auto"}}>₪{form.baseRate}<span style={{fontSize:"13px",color:"#6b7280"}}>/שעה</span></div>
