@@ -80,7 +80,7 @@ const LS = {
   get: k=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch{return null;}},
   set: (k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}},
 };
-const K={shifts:"wt-shifts-v5",cfg:"wt-cfg-v5",tpls:"wt-tpls-v2",als:"wt-als-v2",clockin:"wt-clockin-v1",vac:"wt-vac-v1",onboarded:"wt-onboarded-v1",privacy:"wt-privacy-v1"};
+const K={shifts:"wt-shifts-v5",cfg:"wt-cfg-v5",tpls:"wt-tpls-v2",als:"wt-als-v2",clockin:"wt-clockin-v1",vac:"wt-vac-v1",onboarded:"wt-onboarded-v1",privacy:"wt-privacy-v1",lang:"wt-lang-v1"};
 const DEF_VAC={currentBalance:0,sickBalance:0,accrualPerMonth:1.5,startDate:""};
 
 const DEF_CFG={
