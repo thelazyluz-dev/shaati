@@ -1066,11 +1066,11 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
     ot125+=c.ot125H||0;ot150+=c.ot150H||0;
   });
   tA+=cma(als);
-  // חגים בתשלום אוטומטיים — חגים שאין עבורם משמרת מוגדרת
-  const recordedHolDates=new Set(ms.filter(s=>s.type==="holiday").map(s=>s.date));
-  const autoHolDays=Object.entries(IL_HOLIDAYS).filter(([d,h])=>d.startsWith(selM)&&h.paid&&!recordedHolDates.has(d));
+  // חגים בתשלום אוטומטיים — חגים שאין עבורם אף משמרת מוגדרת
+  const recordedDates=new Set(ms.map(s=>s.date));
+  const autoHolDays=Object.entries(IL_HOLIDAYS).filter(([d,h])=>d.startsWith(selM)&&h.paid&&!recordedDates.has(d));
   const holPay=autoHolDays.length*(cfg.baseRate||34.32)*(cfg.overtimeThreshold||8.6);
-  tG+=holPay;
+  tG+=holPay;tBase+=holPay;
   const dedBase=tG+tA; // ברוטו כולל תוספות — בסיס לביטוח לאומי ומס הכנסה
   const ded=cfg.enableDeductions?cd(dedBase,cfg,tBase):null;
   const net=ded?dedBase-ded.tot:dedBase;
@@ -1839,9 +1839,17 @@ function Savings({shifts,cfg,privacyMode}){
     const thisM1=`${now2.getFullYear()}-${String(now2.getMonth()+1).padStart(2,'0')}-01`;
     const updExt=sc.externals.map(e=>{
       const ePct=getPct(e.returnPreset||"custom",e.returnPct||0);
-      if(!ePct)return e;
-      const eFactor=Math.pow(1+ePct/100/12,monthsDiff);
-      return{...e,balance:Math.round(e.balance*eFactor*100)/100};
+      const md=e.monthlyDeposit||0;
+      if(!ePct&&!md)return e;
+      const r=ePct/100/12;
+      let newBal=e.balance;
+      if(r>0){
+        const eFactor=Math.pow(1+r,monthsDiff);
+        newBal=e.balance*eFactor+(md>0?md*(eFactor-1)/r:0);
+      }else{
+        newBal=e.balance+md*monthsDiff;
+      }
+      return{...e,balance:Math.round(newBal*100)/100};
     });
     return{...sc,pensionReturn:newPR,kerenReturn:newKR,externals:updExt,lastReturnApplied:thisM1};
   };
