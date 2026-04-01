@@ -80,7 +80,7 @@ const LS = {
   get: k=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch{return null;}},
   set: (k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}},
 };
-const K={shifts:"wt-shifts-v5",cfg:"wt-cfg-v5",tpls:"wt-tpls-v2",als:"wt-als-v2",clockin:"wt-clockin-v1",vac:"wt-vac-v1",onboarded:"wt-onboarded-v1",privacy:"wt-privacy-v1"};
+const K={shifts:"wt-shifts-v5",cfg:"wt-cfg-v5",tpls:"wt-tpls-v2",als:"wt-als-v2",clockin:"wt-clockin-v1",vac:"wt-vac-v1",onboarded:"wt-onboarded-v1",privacy:"wt-privacy-v1",lang:"wt-lang-v1"};
 const DEF_VAC={currentBalance:0,sickBalance:0,accrualPerMonth:1.5,startDate:""};
 
 const DEF_CFG={
@@ -389,8 +389,14 @@ function ch(s,e){let d=pt(e)-pt(s);if(d<0)d+=1440;return Math.max(0,d/60);}
 
 // ── שעות נוספות שבועיות ──
 // מחזיר key של השבוע (יום ראשון) לפי תאריך
-function getWeekKey(dateStr){
+function getWeekKey(dateStr,startTime){
   const d=new Date(dateStr+"T12:00:00");
+  // מוצאי שבת מ-20:00 — נחשב כבר שבוע חדש (ראשון)
+  if(d.getDay()===6&&startTime&&startTime>="20:00"){
+    const nd=new Date(d);nd.setDate(d.getDate()+1);
+    const sun=new Date(nd);sun.setDate(nd.getDate()-nd.getDay());
+    return sun.toISOString().split("T")[0];
+  }
   const sun=new Date(d);sun.setDate(d.getDate()-d.getDay());
   return sun.toISOString().split("T")[0];
 }
@@ -405,7 +411,7 @@ function buildWeeklyThresholdMap(allShifts,cfg){
   const weekHours={};
   const map={};
   workShifts.forEach(s=>{
-    const wk=getWeekKey(s.date);
+    const wk=getWeekKey(s.date,s.start);
     if(!weekHours[wk])weekHours[wk]=0;
     const remaining=Math.max(0,wt-weekHours[wk]);
     map[s.id]=Math.min(dt,remaining);
@@ -706,13 +712,15 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode}){
   const startDate=new Date(clockIn.iso);
   const diffSec=Math.max(0,Math.floor((now-startDate)/1000));
   const hours=diffSec/3600;
-  const c=cp(hours,clockIn.type,cfg,clockIn.customMult||null);
+  const nowStr2=`${String(new Date(now).getHours()).padStart(2,"0")}:${String(new Date(now).getMinutes()).padStart(2,"0")}`;
+  const c=clockIn.customMult?cp(hours,clockIn.type,cfg,clockIn.customMult):cpAuto(clockIn.time,nowStr2,cfg);
   const gross=c.gross;
-  const baseMult=clockIn.customMult?clockIn.customMult/100:(ST[clockIn.type]?.mult||1);
-  const baseSalary=(c.regH||0)*cfg.baseRate*baseMult;
+  const baseSalary=c.regPay!==undefined?c.regPay:(c.regH||0)*cfg.baseRate;
   const ded=cfg.enableDeductions?cd(gross,cfg,baseSalary):null;
   const net=ded?ded.net:gross;
-  const t=ST[clockIn.type];
+  // סוג משמרת נוכחי לפי שעה (מתעדכן אוטומטית)
+  const curShiftType=clockIn.customMult?clockIn.type:detectShiftType(new Date(now).getHours());
+  const t=ST[curShiftType]||ST.regular;
   const ratePerHour=cfg.baseRate*(clockIn.customMult?clockIn.customMult/100:t.mult);
 
   const hh=Math.floor(diffSec/3600);
@@ -1071,8 +1079,8 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
     const inShift=(sm>em)?(nowMins>=sm||nowMins<=em):(nowMins>=sm&&nowMins<=em);
     if(inShift){activeShift=s;hoursNow=ch(s.start,nowStr);break;}
   }
-  const wkKey=activeShift?getWeekKey(today):"";
-  const weekHT=activeShift?shifts.filter(s=>!isSpecialDay(s.type)&&s.id!==activeShift.id&&getWeekKey(s.date)===wkKey).reduce((a,s)=>a+ch(s.start,s.end),0)+hoursNow:0;
+  const wkKey=activeShift?getWeekKey(today,activeShift.start):"";
+  const weekHT=activeShift?shifts.filter(s=>!isSpecialDay(s.type)&&s.id!==activeShift.id&&getWeekKey(s.date,s.start)===wkKey).reduce((a,s)=>a+ch(s.start,s.end),0)+hoursNow:0;
   const dTh=cfg.overtimeThreshold||8.6,wTh=cfg.weeklyOTThreshold||42;
   const isDOT=activeShift&&hoursNow>dTh,isWOT=activeShift&&weekHT>wTh;
   const OTM={
@@ -2094,14 +2102,58 @@ function Savings({shifts,cfg,privacyMode}){
                       <div style={{fontSize:"11px",color:"#6b7280"}}>{EXT_TYPES.find(t=>t.id===e.type)?.label||e.type} · תשואה {e.returnPct}%{e.monthlyDeposit>0?` · הפקדה ${fM(e.monthlyDeposit)}/חודש`:""}</div>
                     </div>
                   </div>
-                  <div style={{textAlign:"left"}}>
+                  <div style={{textAlign:"left",display:"flex",flexDirection:"column",alignItems:"flex-end",gap:"4px"}}>
                     <div style={{fontSize:"15px",fontWeight:"800",color:"#34d399"}}>{fM(e.balance)}</div>
-                    <button onClick={()=>{const u=savCfg.externals.filter(x=>x.id!==e.id);save({...savCfg,externals:u});}}
-                      style={{background:"none",border:"none",color:"#f87171",fontSize:"11px",cursor:"pointer",marginTop:"4px",padding:0}}>מחק</button>
+                    <div style={{display:"flex",gap:"6px"}}>
+                      <button onClick={()=>setEditExt({...e})}
+                        style={{background:"none",border:"none",color:"#60a5fa",fontSize:"11px",cursor:"pointer",padding:0}}>✏️ ערוך</button>
+                      <button onClick={()=>{const u=savCfg.externals.filter(x=>x.id!==e.id);save({...savCfg,externals:u});}}
+                        style={{background:"none",border:"none",color:"#f87171",fontSize:"11px",cursor:"pointer",padding:0}}>מחק</button>
+                    </div>
                   </div>
                 </div>
               </div>
             ))}
+
+            {editExt&&(
+              <div style={{background:"#111827",borderRadius:"12px",padding:"14px",border:"1px solid #60a5fa44",marginTop:"8px"}}>
+                <div style={{fontSize:"12px",color:"#60a5fa",fontWeight:"700",marginBottom:"12px"}}>✏️ עריכת חיסכון</div>
+                <div style={{display:"flex",gap:"6px",flexWrap:"wrap",marginBottom:"12px"}}>
+                  {EXT_ICONS.map(ic=>(
+                    <button key={ic} onClick={()=>setEditExt(e=>({...e,icon:ic}))}
+                      style={{width:"36px",height:"36px",borderRadius:"8px",border:`2px solid ${editExt.icon===ic?"#60a5fa":"#1f2937"}`,background:editExt.icon===ic?"#0c1a3e":"#0d1117",fontSize:"18px",cursor:"pointer"}}>
+                      {ic}
+                    </button>
+                  ))}
+                </div>
+                <Field label="שם החיסכון">
+                  <input type="text" value={editExt.name} onChange={e=>setEditExt(x=>({...x,name:e.target.value}))} style={SI}/>
+                </Field>
+                <Field label="סוג">
+                  <select value={editExt.type} onChange={e=>setEditExt(x=>({...x,type:e.target.value}))} style={SI}>
+                    {EXT_TYPES.map(tp=><option key={tp.id} value={tp.id}>{tp.label}</option>)}
+                  </select>
+                </Field>
+                <Field label="יתרה נוכחית (₪)">
+                  <NumInput value={editExt.balance||0} onChange={v=>setEditExt(x=>({...x,balance:v}))} step={100}/>
+                </Field>
+                <Field label="ריבית/תשואה שנתית (%)" hint="0 אם לא ידוע">
+                  <NumInput value={editExt.returnPct||0} onChange={v=>setEditExt(x=>({...x,returnPct:v}))} step={0.1} min={0}/>
+                </Field>
+                <Field label="סכום הפקדה חודשי (₪)" hint="0 אם אין">
+                  <NumInput value={editExt.monthlyDeposit||0} onChange={v=>setEditExt(x=>({...x,monthlyDeposit:v}))} step={50} min={0}/>
+                </Field>
+                <div style={{display:"flex",gap:"8px"}}>
+                  <Btn onClick={()=>{
+                    if(!editExt.name.trim())return;
+                    const u=savCfg.externals.map(x=>x.id===editExt.id?{...editExt,balance:Number(editExt.balance)||0,returnPct:Number(editExt.returnPct)||0,monthlyDeposit:Number(editExt.monthlyDeposit)||0}:x);
+                    save({...savCfg,externals:u});
+                    setEditExt(null);
+                  }} color="#1e3a5f" textColor="#60a5fa" style={{border:"1px solid #1e3a5f",fontSize:"13px"}}>שמור שינויים</Btn>
+                  <button onClick={()=>setEditExt(null)} style={{flex:1,padding:"13px",background:"#1f2937",border:"none",borderRadius:"12px",color:"#9ca3af",fontWeight:"700",cursor:"pointer"}}>ביטול</button>
+                </div>
+              </div>
+            )}
 
             {showExtForm?(
               <div style={{background:"#111827",borderRadius:"12px",padding:"14px",border:"1px solid #1f2937",marginTop:"8px"}}>
