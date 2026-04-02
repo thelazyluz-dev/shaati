@@ -130,6 +130,20 @@ const TR={
     cl_short_t:"כבר סיימת משמרת??",cl_short_s:"על מי את/ה עובד/ת",cl_no_rec:"לא מתעד",
     cl_recording:"מתחיל לרשום...",cl_saved:"משמרת נשמרה ✓",
     st_regular:"רגיל",st_afternoon:"צהריים",st_night:"לילה",locale:"he-IL",
+    // AddShift / EditModal / ShiftsList
+    as_pick_day:"📅 בחר יום",as_auto_hol:"נרשם אוטומטית כחג ✓",as_change:"שנה",
+    as_template:"תבנית מהירה",as_hide:"הסתר ▲",as_show:"הצג ▼",
+    as_start:"התחלה",as_end:"סיום",as_shift_type:"סוג משמרת",
+    as_special:"יום מיוחד (חופש / מחלה / חג)",
+    as_no_ot:"⚠️ תוספות ושעות נוספות לא ייחשבו עבור יום זה",
+    as_note:"הערה",as_note_ph:"חג, שעות מיוחדות...",as_preview:"תצוגה מקדימה",
+    as_err_date:"יש למלא תאריך",as_err_times:"יש למלא שעת התחלה וסיום",as_err_hours:"שעות לא תקינות",
+    as_saved:"✓ המשמרת נשמרה!",as_save:"שמור משמרת",as_allowances:"תוספות",
+    em_title:"✏️ עריכת משמרת",em_date:"תאריך",em_save:"שמור שינויים",
+    em_err:"יש למלא תאריך, שעת התחלה וסיום",em_err_h:"שעות לא תקינות",
+    sl_title:"📋 כל המשמרות",sl_empty:"אין משמרות עדיין",
+    sl_empty_hint:"לחץ על ➕ כדי להוסיף משמרת ראשונה",
+    sl_delete:"מחק",sl_cancel:"בטל",
   },
   ru:{
     ob_skip:"Пропустить →",ob_back:"← Назад",ob_next:"Далее →",ob_start:"Начнём →",ob_enter:"🚀 Войти в приложение",
@@ -177,6 +191,20 @@ const TR={
     cl_short_t:"Уже закончил смену??",cl_short_s:"Кого ты пытаешься обмануть",cl_no_rec:"Не записываю",
     cl_recording:"Начинаю запись...",cl_saved:"Смена сохранена ✓",
     st_regular:"обычная",st_afternoon:"дневная",st_night:"ночная",locale:"ru-RU",
+    // AddShift / EditModal / ShiftsList
+    as_pick_day:"📅 Выбрать день",as_auto_hol:"автоматически записан как праздник ✓",as_change:"Изменить",
+    as_template:"Быстрый шаблон",as_hide:"Скрыть ▲",as_show:"Показать ▼",
+    as_start:"Начало",as_end:"Конец",as_shift_type:"Тип смены",
+    as_special:"Особый день (отпуск / больничный / праздник)",
+    as_no_ot:"⚠️ Надбавки и сверхурочные не учитываются для этого дня",
+    as_note:"Заметка",as_note_ph:"Праздник, особые часы...",as_preview:"Предпросмотр",
+    as_err_date:"Укажите дату",as_err_times:"Укажите время начала и конца",as_err_hours:"Некорректное время",
+    as_saved:"✓ Смена сохранена!",as_save:"Сохранить смену",as_allowances:"Надбавки",
+    em_title:"✏️ Редактировать смену",em_date:"Дата",em_save:"Сохранить изменения",
+    em_err:"Укажите дату, начало и конец",em_err_h:"Некорректное время",
+    sl_title:"📋 Все смены",sl_empty:"Нет смен пока",
+    sl_empty_hint:"Нажмите ➕ чтобы добавить первую смену",
+    sl_delete:"Удалить",sl_cancel:"Отмена",
   },
 };
 const DEF_VAC={currentBalance:0,sickBalance:0,accrualPerMonth:1.5,startDate:""};
@@ -1562,6 +1590,7 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
 // MANUAL ADD SHIFT
 // ════════════════════════════════════════
 function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode}){
+  const uT=useT();
   const sAls=als.filter(a=>a.active&&a.type==="per_shift");
   const defIds=sAls.map(a=>a.id);
   const[form,setForm]=useState({date:null,start:"",end:"",type:"regular",note:"",templateName:"",allowanceIds:defIds,customMult:null});
@@ -1578,14 +1607,14 @@ function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode}){
     setForm(f=>({...f,date:ds,type:autoType,start:"",end:"",templateName:""}));
   };
   const add=()=>{
-    if(!form.date){setErr("יש למלא תאריך");return;}
+    if(!form.date){setErr(uT("as_err_date"));return;}
     const isSpec=isSpecialDay(form.type);
     // ימים מיוחדים — שעות ברירת מחדל אם לא הוזנו
     const start=form.start||(isSpec?"08:00":"");
     const end=form.end||(isSpec?`${String(Math.floor(8+cfg.overtimeThreshold)).padStart(2,"0")}:${String(Math.round((cfg.overtimeThreshold%1)*60)).padStart(2,"0")}`:"");
-    if(!isSpec&&(!start||!end)){setErr("יש למלא שעת התחלה וסיום");return;}
+    if(!isSpec&&(!start||!end)){setErr(uT("as_err_times"));return;}
     const h=ch(start,end);
-    if(!isSpec&&h<0.1){setErr("שעות לא תקינות");return;}
+    if(!isSpec&&h<0.1){setErr(uT("as_err_hours"));return;}
     setErr("");onAdd({...form,id:Date.now(),start,end});setSaved(true);
     setForm({date:null,start:"",end:"",type:"regular",note:"",templateName:"",allowanceIds:defIds,customMult:null});
     setTimeout(()=>setSaved(false),2000);
@@ -1594,24 +1623,24 @@ function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode}){
   return(
     <div style={{paddingBottom:"20px",width:"100%",boxSizing:"border-box"}}>
       {editingShift&&<EditModal shift={editingShift} cfg={cfg} als={als} onSave={s=>{onEdit(s);setEditingShift(null);}} onClose={()=>setEditingShift(null)}/>}
-      <div style={{fontSize:"15px",fontWeight:"800",marginBottom:"10px",color:"#f1f5f9",padding:"12px 16px 0"}}>📅 בחר יום</div>
+      <div style={{fontSize:"15px",fontWeight:"800",marginBottom:"10px",color:"#f1f5f9",padding:"12px 16px 0"}}>{uT("as_pick_day")}</div>
       <ShiftCalendar inline value={form.date} onChange={selectDate} shifts={shifts} cfg={cfg} als={als} onEditShift={s=>setEditingShift(s)} onDeleteShift={id=>onDelete(id)}/>
 
       {form.date&&(
         <div style={{marginTop:"16px",padding:"0 16px"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"14px",paddingBottom:"12px",borderTop:"1px solid #1f2937",paddingTop:"12px"}}>
             <div>
-              <div style={{fontSize:"14px",fontWeight:"800",color:"#e2e8f0"}}>{new Date(form.date+"T12:00:00").toLocaleDateString("he-IL",{weekday:"long",day:"numeric",month:"long"})}</div>
-              {hol&&<div style={{fontSize:"12px",color:hol.paid?"#fcd34d":"#6b7280",marginTop:"2px"}}>{hol.icon} {hol.name}{hol.paid?" · נרשם אוטומטית כחג ✓":""}</div>}
+              <div style={{fontSize:"14px",fontWeight:"800",color:"#e2e8f0"}}>{new Date(form.date+"T12:00:00").toLocaleDateString(uT("locale"),{weekday:"long",day:"numeric",month:"long"})}</div>
+              {hol&&<div style={{fontSize:"12px",color:hol.paid?"#fcd34d":"#6b7280",marginTop:"2px"}}>{hol.icon} {hol.name}{hol.paid?" · "+uT("as_auto_hol"):""}</div>}
             </div>
-            <button onClick={()=>setForm(f=>({...f,date:null}))} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"8px",padding:"6px 10px",cursor:"pointer",fontSize:"12px"}}>שנה</button>
+            <button onClick={()=>setForm(f=>({...f,date:null}))} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"8px",padding:"6px 10px",cursor:"pointer",fontSize:"12px"}}>{uT("as_change")}</button>
           </div>
 
           {tpls.length>0&&!isSpecialDay(form.type)&&(
             <div style={{marginBottom:"14px"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}}>
-                <div style={LBL}>תבנית מהירה</div>
-                <button onClick={()=>setShowT(!showT)} style={{background:"none",border:"none",color:"#60a5fa",fontSize:"12px",cursor:"pointer"}}>{showT?"הסתר ▲":"הצג ▼"}</button>
+                <div style={LBL}>{uT("as_template")}</div>
+                <button onClick={()=>setShowT(!showT)} style={{background:"none",border:"none",color:"#60a5fa",fontSize:"12px",cursor:"pointer"}}>{showT?uT("as_hide"):uT("as_show")}</button>
               </div>
               {showT&&<div style={{display:"flex",flexWrap:"wrap",gap:"8px"}}>
                 {tpls.map(t=>{
@@ -1622,7 +1651,7 @@ function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode}){
                   return(
                     <button key={t.id} onClick={()=>applyT(t)} style={{background:active?color+"22":"#0d1117",border:`1.5px solid ${active?color:"#2a2d3e"}`,borderRadius:"10px",padding:"10px 12px",cursor:"pointer",color:active?color:"#9ca3af",textAlign:"right"}}>
                       <div style={{fontWeight:"800",fontSize:"13px"}}>{emoji} {t.name}</div>
-                      <div style={{fontSize:"11px",opacity:0.8,marginTop:"2px"}}>{t.start}–{t.end} · {fH(ch(t.start,t.end))}ש׳ · {pct}%</div>
+                      <div style={{fontSize:"11px",opacity:0.8,marginTop:"2px"}}>{t.start}–{t.end} · {fH(ch(t.start,t.end))}{uT("hr")} · {pct}%</div>
                     </button>
                   );
                 })}
@@ -1632,22 +1661,22 @@ function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode}){
 
           {!isSpecialDay(form.type)&&(
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"14px"}}>
-              <Field label="התחלה"><input type="time" value={form.start} onChange={e=>setForm({...form,start:e.target.value,templateName:""})} style={SI}/></Field>
-              <Field label="סיום"><input type="time" value={form.end} onChange={e=>setForm({...form,end:e.target.value,templateName:""})} style={SI}/></Field>
+              <Field label={uT("as_start")}><input type="time" value={form.start} onChange={e=>setForm({...form,start:e.target.value,templateName:""})} style={SI}/></Field>
+              <Field label={uT("as_end")}><input type="time" value={form.end} onChange={e=>setForm({...form,end:e.target.value,templateName:""})} style={SI}/></Field>
             </div>
           )}
 
-          <Field label="סוג משמרת">
+          <Field label={uT("as_shift_type")}>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"8px"}}>
               {Object.entries(ST).map(([k,t])=>(
                 <button key={k} onClick={()=>setForm({...form,type:k})} style={{padding:"12px 6px",borderRadius:"11px",cursor:"pointer",border:form.type===k?`2px solid ${t.color}`:"2px solid #1f2937",background:form.type===k?t.bg:"#0d1117",color:form.type===k?t.color:"#6b7280",fontWeight:"700",fontSize:"13px"}}>
-                  <div style={{fontSize:"16px",marginBottom:"3px"}}>{t.icon}</div><div>{t.label}</div>
+                  <div style={{fontSize:"16px",marginBottom:"3px"}}>{t.icon}</div><div>{uT("st_"+k)}</div>
                 </button>
               ))}
             </div>
           </Field>
 
-          <Field label="יום מיוחד (חופש / מחלה / חג)">
+          <Field label={uT("as_special")}>
             <div style={{display:"flex",flexWrap:"wrap",gap:"8px"}}>
               {Object.entries(SPECIAL).map(([k,s])=>(
                 <button key={k} onClick={()=>setForm({...form,type:form.type===k?"regular":k})} style={{padding:"10px 12px",borderRadius:"10px",cursor:"pointer",border:`1.5px solid ${form.type===k?s.color:"#2a2d3e"}`,background:form.type===k?s.bg:"#0d1117",color:form.type===k?s.color:"#6b7280",fontWeight:"700",fontSize:"12px",textAlign:"right"}}>
@@ -1657,11 +1686,11 @@ function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode}){
                 </button>
               ))}
             </div>
-            {isSpecialDay(form.type)&&<div style={{marginTop:"8px",fontSize:"11px",color:"#4b5563",background:"#111827",borderRadius:"8px",padding:"8px"}}>⚠️ תוספות ושעות נוספות לא ייחשבו עבור יום זה</div>}
+            {isSpecialDay(form.type)&&<div style={{marginTop:"8px",fontSize:"11px",color:"#4b5563",background:"#111827",borderRadius:"8px",padding:"8px"}}>{uT("as_no_ot")}</div>}
           </Field>
 
           {sAls.length>0&&!isSpecialDay(form.type)&&(
-            <Field label="תוספות">
+            <Field label={uT("as_allowances")}>
               <div style={{display:"flex",flexWrap:"wrap",gap:"8px"}}>
                 {sAls.map(a=>{const on=form.allowanceIds.includes(a.id);return(
                   <button key={a.id} onClick={()=>togA(a.id)} style={{padding:"10px 14px",borderRadius:"10px",cursor:"pointer",border:`1.5px solid ${on?"#34d399":"#2a2d3e"}`,background:on?"#022c22":"#0d1117",color:on?"#34d399":"#6b7280",fontWeight:"700",fontSize:"13px"}}>
@@ -1673,22 +1702,22 @@ function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode}){
           )}
           {prev&&(
             <div style={{background:isSpecialDay(form.type)?(SPECIAL[form.type].bg||"#111827"):"#052e16",border:`1px solid ${isSpecialDay(form.type)?SPECIAL[form.type].color+"44":"#166534"}`,borderRadius:"12px",padding:"14px",marginBottom:"14px"}}>
-              <div style={{fontSize:"11px",color:isSpecialDay(form.type)?SPECIAL[form.type].color:"#86efac",marginBottom:"8px",fontWeight:"700"}}>{isSpecialDay(form.type)?SPECIAL[form.type].icon+" "+SPECIAL[form.type].label:"תצוגה מקדימה"}</div>
+              <div style={{fontSize:"11px",color:isSpecialDay(form.type)?SPECIAL[form.type].color:"#86efac",marginBottom:"8px",fontWeight:"700"}}>{isSpecialDay(form.type)?SPECIAL[form.type].icon+" "+SPECIAL[form.type].label:uT("as_preview")}</div>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <div>
-                  <div style={{fontSize:"13px",color:"#6b7280"}}>{fH(hours)} שעות</div>
-                  {!isSpecialDay(form.type)&&prev.ot125H>0&&<div style={{fontSize:"12px",color:"#f87171"}}>{fH(prev.ot125H)}ש׳ ב-125%{prev.ot150H>0?` + ${fH(prev.ot150H)}ש׳ ב-150%`:""}</div>}
+                  <div style={{fontSize:"13px",color:"#6b7280"}}>{fH(hours)} {uT("hr")}</div>
+                  {!isSpecialDay(form.type)&&prev.ot125H>0&&<div style={{fontSize:"12px",color:"#f87171"}}>{fH(prev.ot125H)}{uT("hr")} ×125%{prev.ot150H>0?` + ${fH(prev.ot150H)}${uT("hr")} ×150%`:""}</div>}
                   {isSpecialDay(form.type)&&<div style={{fontSize:"12px",color:"#6b7280"}}>{SPECIAL[form.type].desc}</div>}
-                  {!isSpecialDay(form.type)&&aTotal>0&&<div style={{fontSize:"12px",color:"#34d399"}}>תוספות {prv(aTotal,privacyMode)}</div>}
+                  {!isSpecialDay(form.type)&&aTotal>0&&<div style={{fontSize:"12px",color:"#34d399"}}>{uT("as_allowances")} {prv(aTotal,privacyMode)}</div>}
                 </div>
                 <div style={{fontSize:"24px",fontWeight:"900",color:isSpecialDay(form.type)?SPECIAL[form.type].color:"#4ade80"}}>{prv(isSpecialDay(form.type)?prev.gross:prev.gross+aTotal,privacyMode)}</div>
               </div>
             </div>
           )}
-          <Field label="הערה"><input type="text" value={form.note} onChange={e=>setForm({...form,note:e.target.value})} placeholder="חג, שעות מיוחדות..." style={SI}/></Field>
+          <Field label={uT("as_note")}><input type="text" value={form.note} onChange={e=>setForm({...form,note:e.target.value})} placeholder={uT("as_note_ph")} style={SI}/></Field>
           {err&&<div style={{color:"#f87171",fontSize:"13px",marginBottom:"10px"}}>⚠ {err}</div>}
           <Btn onClick={add} color={saved?"#16a34a":"#22c55e"} textColor={saved?"#dcfce7":"#000"}>
-            {saved?"✓ המשמרת נשמרה!":(prev?`שמור משמרת · ${prv(isSpecialDay(form.type)?prev.gross:prev.gross+aTotal,privacyMode)}`:"שמור משמרת")}
+            {saved?uT("as_saved"):(prev?`${uT("as_save")} · ${prv(isSpecialDay(form.type)?prev.gross:prev.gross+aTotal,privacyMode)}`:uT("as_save"))}
           </Btn>
         </div>
       )}
@@ -1700,6 +1729,7 @@ function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode}){
 // EDIT SHIFT MODAL
 // ════════════════════════════════════════
 function EditModal({shift,cfg,als,onSave,onClose}){
+  const uT=useT();
   const[form,setForm]=useState({...shift});
   const[err,setErr]=useState("");
   const hours=form.start&&form.end?ch(form.start,form.end):0;
@@ -1709,33 +1739,33 @@ function EditModal({shift,cfg,als,onSave,onClose}){
   const aTotal=csa(form.allowanceIds||[],als);
   const togA=(id)=>setForm(f=>({...f,allowanceIds:(f.allowanceIds||[]).includes(id)?(f.allowanceIds||[]).filter(x=>x!==id):[...(f.allowanceIds||[]),id]}));
   const save=()=>{
-    if(!form.date||!form.start||!form.end){setErr("יש למלא תאריך, שעת התחלה וסיום");return;}
-    if(hours<0.1){setErr("שעות לא תקינות");return;}
+    if(!form.date||!form.start||!form.end){setErr(uT("em_err"));return;}
+    if(hours<0.1){setErr(uT("em_err_h"));return;}
     setErr("");onSave(form);
   };
   return(
     <div style={{position:"fixed",inset:0,background:"#000000cc",zIndex:100,display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
       <div style={{background:"#111827",border:"1px solid #1f2937",borderRadius:"20px 20px 0 0",padding:"20px 16px",paddingBottom:"40px",width:"100%",maxWidth:"430px",maxHeight:"90vh",overflowY:"auto"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"20px"}}>
-          <div style={{fontSize:"18px",fontWeight:"800",color:"#f1f5f9"}}>✏️ עריכת משמרת</div>
+          <div style={{fontSize:"18px",fontWeight:"800",color:"#f1f5f9"}}>{uT("em_title")}</div>
           <button onClick={onClose} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"8px",width:"32px",height:"32px",fontSize:"18px",cursor:"pointer"}}>✕</button>
         </div>
-        <Field label="תאריך"><input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})} style={SI}/></Field>
+        <Field label={uT("em_date")}><input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})} style={SI}/></Field>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
-          <Field label="התחלה"><input type="time" value={form.start} onChange={e=>setForm({...form,start:e.target.value})} style={SI}/></Field>
-          <Field label="סיום"><input type="time" value={form.end} onChange={e=>setForm({...form,end:e.target.value})} style={SI}/></Field>
+          <Field label={uT("as_start")}><input type="time" value={form.start} onChange={e=>setForm({...form,start:e.target.value})} style={SI}/></Field>
+          <Field label={uT("as_end")}><input type="time" value={form.end} onChange={e=>setForm({...form,end:e.target.value})} style={SI}/></Field>
         </div>
-        <Field label="סוג משמרת">
+        <Field label={uT("as_shift_type")}>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"8px"}}>
             {Object.entries(ST).map(([k,t])=>(
               <button key={k} onClick={()=>setForm({...form,type:k})} style={{padding:"12px 4px",borderRadius:"11px",cursor:"pointer",border:form.type===k?`2px solid ${t.color}`:"2px solid #1f2937",background:form.type===k?t.bg:"#0d1117",color:form.type===k?t.color:"#6b7280",fontWeight:"700",fontSize:"13px"}}>
-                <div style={{fontSize:"16px",marginBottom:"3px"}}>{t.icon}</div><div>{t.label}</div>
+                <div style={{fontSize:"16px",marginBottom:"3px"}}>{t.icon}</div><div>{uT("st_"+k)}</div>
               </button>
             ))}
           </div>
         </Field>
         {sAls.length>0&&(
-          <Field label="תוספות">
+          <Field label={uT("as_allowances")}>
             <div style={{display:"flex",flexWrap:"wrap",gap:"8px"}}>
               {sAls.map(a=>{const on=(form.allowanceIds||[]).includes(a.id);return(
                 <button key={a.id} onClick={()=>togA(a.id)} style={{padding:"9px 12px",borderRadius:"10px",cursor:"pointer",border:`1.5px solid ${on?"#34d399":"#2a2d3e"}`,background:on?"#022c22":"#0d1117",color:on?"#34d399":"#6b7280",fontWeight:"700",fontSize:"13px"}}>
@@ -1748,16 +1778,16 @@ function EditModal({shift,cfg,als,onSave,onClose}){
         {prev&&(
           <div style={{background:"#052e16",border:"1px solid #166534",borderRadius:"12px",padding:"12px",marginBottom:"14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <div>
-              <div style={{fontSize:"13px",color:"#6b7280"}}>{fH(hours)} שעות</div>
-              {prev.ot125H>0&&<div style={{fontSize:"12px",color:"#f87171"}}>{fH(prev.ot125H)}ש׳ ב-125%{prev.ot150H>0?` + ${fH(prev.ot150H)}ש׳ ב-150%`:""}</div>}
-              {!isSpecialDay(form.type)&&aTotal>0&&<div style={{fontSize:"12px",color:"#34d399"}}>תוספות {fM(aTotal)}</div>}
+              <div style={{fontSize:"13px",color:"#6b7280"}}>{fH(hours)} {uT("hr")}</div>
+              {prev.ot125H>0&&<div style={{fontSize:"12px",color:"#f87171"}}>{fH(prev.ot125H)}{uT("hr")} ×125%{prev.ot150H>0?` + ${fH(prev.ot150H)}${uT("hr")} ×150%`:""}</div>}
+              {!isSpecialDay(form.type)&&aTotal>0&&<div style={{fontSize:"12px",color:"#34d399"}}>{uT("as_allowances")} {fM(aTotal)}</div>}
             </div>
             <div style={{fontSize:"22px",fontWeight:"900",color:"#4ade80"}}>{fM(prevTotal)}</div>
           </div>
         )}
-        <Field label="הערה"><input type="text" value={form.note||""} onChange={e=>setForm({...form,note:e.target.value})} placeholder="חג, שעות מיוחדות..." style={SI}/></Field>
+        <Field label={uT("as_note")}><input type="text" value={form.note||""} onChange={e=>setForm({...form,note:e.target.value})} placeholder={uT("as_note_ph")} style={SI}/></Field>
         {err&&<div style={{color:"#f87171",fontSize:"13px",marginBottom:"10px"}}>⚠ {err}</div>}
-        <button onClick={save} style={{width:"100%",padding:"14px",background:"#22c55e",border:"none",borderRadius:"12px",color:"#000",fontSize:"15px",fontWeight:"800",cursor:"pointer"}}>שמור שינויים</button>
+        <button onClick={save} style={{width:"100%",padding:"14px",background:"#22c55e",border:"none",borderRadius:"12px",color:"#000",fontSize:"15px",fontWeight:"800",cursor:"pointer"}}>{uT("em_save")}</button>
       </div>
     </div>
   );
@@ -1767,6 +1797,7 @@ function EditModal({shift,cfg,als,onSave,onClose}){
 // SHIFTS LIST
 // ════════════════════════════════════════
 function ShiftsList({shifts,cfg,als,onDelete,onEdit,privacyMode}){
+  const uT=useT();
   const[cid,setCid]=useState(null);
   const[editShift,setEditShift]=useState(null);
   const wMap=buildWeeklyThresholdMap(shifts,cfg);
@@ -1775,12 +1806,12 @@ function ShiftsList({shifts,cfg,als,onDelete,onEdit,privacyMode}){
   return(
     <div style={{padding:"16px",paddingBottom:"20px"}}>
       {editShift&&<EditModal shift={editShift} cfg={cfg} als={als} onSave={s=>{onEdit(s);setEditShift(null);}} onClose={()=>setEditShift(null)}/>}
-      <div style={{fontSize:"18px",fontWeight:"800",marginBottom:"20px",color:"#f1f5f9"}}>📋 כל המשמרות</div>
+      <div style={{fontSize:"18px",fontWeight:"800",marginBottom:"20px",color:"#f1f5f9"}}>{uT("sl_title")}</div>
       {months.length===0&&(
         <div style={{textAlign:"center",padding:"60px 20px"}}>
           <div style={{fontSize:"52px",marginBottom:"14px"}}>📭</div>
-          <div style={{fontSize:"16px",fontWeight:"800",color:"#4b5563",marginBottom:"6px"}}>אין משמרות עדיין</div>
-          <div style={{fontSize:"12px",color:"#374151"}}>לחץ על ➕ כדי להוסיף משמרת ראשונה</div>
+          <div style={{fontSize:"16px",fontWeight:"800",color:"#4b5563",marginBottom:"6px"}}>{uT("sl_empty")}</div>
+          <div style={{fontSize:"12px",color:"#374151"}}>{uT("sl_empty_hint")}</div>
         </div>
       )}
       {months.map((ym,mi)=>(
@@ -1790,7 +1821,7 @@ function ShiftsList({shifts,cfg,als,onDelete,onEdit,privacyMode}){
             <span style={{fontSize:"15px",fontWeight:"900",color:"#4ade80"}}>📅 {mLbl(ym)}</span>
             <div style={{textAlign:"left"}}>
               <div style={{fontSize:"13px",fontWeight:"800",color:"#4ade80"}}>{prv(grp[ym].reduce((acc,s)=>acc+getShiftTotal(s,cfg,als,wMap[s.id]),0)+cma(als),privacyMode)}</div>
-              <div style={{fontSize:"10px",color:"#4ade8066"}}>{grp[ym].length} משמרות</div>
+              <div style={{fontSize:"10px",color:"#4ade8066"}}>{grp[ym].length} {uT("d_shifts")}</div>
             </div>
           </div>
           {[...grp[ym]].sort((a,b)=>b.date.localeCompare(a.date)).map(s=>{
@@ -1809,13 +1840,13 @@ function ShiftsList({shifts,cfg,als,onDelete,onEdit,privacyMode}){
                       <div style={{fontSize:"14px",fontWeight:"700",color:"#e2e8f0"}}>{t.icon} {fD(s.date)}</div>
                       {holiday&&<span style={{fontSize:"10px",color:"#fcd34d",fontWeight:"700"}}>{holiday.icon} {holiday.name}</span>}
                     </div>
-                    <div style={{fontSize:"12px",color:"#6b7280",marginTop:"3px"}}>{s.start}–{s.end} · {fH(h)}ש׳</div>
+                    <div style={{fontSize:"12px",color:"#6b7280",marginTop:"3px"}}>{s.start}–{s.end} · {fH(h)}{uT("hr")}</div>
                     <div style={{marginTop:"6px",display:"flex",gap:"6px",flexWrap:"wrap"}}>
                       <span style={{background:t.bg,color:t.color,fontSize:"11px",padding:"2px 8px",borderRadius:"6px",fontWeight:"700"}}>
                         {isSpec?t.label:`${ST[s.type].label} ${Math.round(ST[s.type].mult*100)}%`}
                       </span>
-                      {!isSpec&&c.ot125H>0&&<span style={{background:"#2d0505",color:"#f87171",fontSize:"11px",padding:"2px 8px",borderRadius:"6px",fontWeight:"700"}}>+{fH(c.ot125H)}ש׳ ×{Math.round(ST[s.type].mult*125)}%</span>}
-                      {!isSpec&&c.ot150H>0&&<span style={{background:"#2d0505",color:"#ef4444",fontSize:"11px",padding:"2px 8px",borderRadius:"6px",fontWeight:"700"}}>+{fH(c.ot150H)}ש׳ ×{Math.round(ST[s.type].mult*150)}%</span>}
+                      {!isSpec&&c.ot125H>0&&<span style={{background:"#2d0505",color:"#f87171",fontSize:"11px",padding:"2px 8px",borderRadius:"6px",fontWeight:"700"}}>+{fH(c.ot125H)}{uT("hr")} ×{Math.round(ST[s.type].mult*125)}%</span>}
+                      {!isSpec&&c.ot150H>0&&<span style={{background:"#2d0505",color:"#ef4444",fontSize:"11px",padding:"2px 8px",borderRadius:"6px",fontWeight:"700"}}>+{fH(c.ot150H)}{uT("hr")} ×{Math.round(ST[s.type].mult*150)}%</span>}
                       {sa>0&&<span style={{background:"#022c22",color:"#34d399",fontSize:"11px",padding:"2px 8px",borderRadius:"6px",fontWeight:"700"}}>🧾 {prv(sa,privacyMode)}</span>}
                     </div>
                     {s.note&&<div style={{fontSize:"11px",color:"#4b5563",marginTop:"4px"}}>📝 {s.note}</div>}
@@ -1826,8 +1857,8 @@ function ShiftsList({shifts,cfg,als,onDelete,onEdit,privacyMode}){
                       <button onClick={()=>setEditShift(s)} style={{background:"#1e3a5f",border:"none",color:"#60a5fa",borderRadius:"6px",padding:"3px 8px",cursor:"pointer",fontSize:"12px",fontWeight:"700"}}>✏️</button>
                       {cid===s.id?(
                         <>
-                          <button onClick={()=>{onDelete(s.id);setCid(null);}} style={{background:"#7f1d1d",border:"none",color:"#f87171",borderRadius:"6px",padding:"3px 8px",cursor:"pointer",fontSize:"12px"}}>מחק</button>
-                          <button onClick={()=>setCid(null)} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"6px",padding:"3px 8px",cursor:"pointer",fontSize:"12px"}}>בטל</button>
+                          <button onClick={()=>{onDelete(s.id);setCid(null);}} style={{background:"#7f1d1d",border:"none",color:"#f87171",borderRadius:"6px",padding:"3px 8px",cursor:"pointer",fontSize:"12px"}}>{uT("sl_delete")}</button>
+                          <button onClick={()=>setCid(null)} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"6px",padding:"3px 8px",cursor:"pointer",fontSize:"12px"}}>{uT("sl_cancel")}</button>
                         </>
                       ):(
                         <button onClick={()=>setCid(s.id)} style={{background:"#2d0505",border:"none",color:"#f87171",borderRadius:"6px",padding:"3px 8px",cursor:"pointer",fontSize:"12px",fontWeight:"700"}}>🗑</button>
