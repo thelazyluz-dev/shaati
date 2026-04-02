@@ -81,6 +81,42 @@ const LS = {
   set: (k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}},
 };
 const K={shifts:"wt-shifts-v5",cfg:"wt-cfg-v5",tpls:"wt-tpls-v2",als:"wt-als-v2",clockin:"wt-clockin-v1",vac:"wt-vac-v1",onboarded:"wt-onboarded-v1",privacy:"wt-privacy-v1",lang:"wt-lang-v1"};
+const LangCtx=React.createContext("he");
+const useT=()=>{const l=React.useContext(LangCtx);return k=>TR[l]?.[k]??TR.he[k]??k;};
+const TR={
+  he:{
+    ob_skip:"דלג →",ob_back:"← חזור",ob_next:"הבא →",ob_start:"בואו נתחיל →",ob_enter:"🚀 כניסה לאפליקציה",
+    ob_tagline:"מעקב שכר חכם לעובדים שעתיים",
+    ob_feat_desc:"מחשב שעות נוספות · ניכויים מדויקים\nפנסיה · קרן השתלמות · חופש ומחלה",
+    ob_f0t:"מעקב משמרות בזמן אמת",ob_f0s:"כניסה/יציאה עם חישוב אוטומטי",
+    ob_f1t:"דשבורד חודשי",ob_f1s:"שכר ברוטו, נטו, ניכויים וסיכומים",
+    ob_f2t:"מעקב חסכונות",ob_f2s:"פנסיה, קרן השתלמות ועוד",
+    ob_ready:"מוכן להתחיל!",ob_saved:"ההגדרות שלך נשמרו בהצלחה",ob_summary:"סיכום הגדרות",
+    ob_settings_hint:"תוכל לשנות כל הגדרה בכל עת מתפריט ⚙️ הגדרות",
+    ob_s0t:"ברוך הבא לשעתי ⏱",ob_s0s:"בואו נגדיר את הנתונים שלך פעם אחת — ושעתי תחשב הכל בדיוק",
+    ob_s1t:"💰 שכר בסיס",ob_s1s:"מה השכר שלך לשעה ומהן שעות העבודה הרגילות ביום?",
+    ob_s2t:"🧾 מסים וביטוח לאומי",ob_s2s:"נחשב את הניכויים שלך בצורה מדויקת",
+    ob_s3t:"🏦 פנסיה וקרן השתלמות",ob_s3s:"הפרשות שנצברות לטובתך",
+    ob_s4t:"🧾 תוספות שכר",ob_s4s:"האם מגיעות לך תוספות קבועות? כלכלה, נסיעות, אחרות",
+    ob_s5t:"✅ הכל מוכן!",ob_s5s:"ההגדרות נשמרו — תוכל לשנות אותן בכל עת מ'הגדרות'",
+  },
+  ru:{
+    ob_skip:"Пропустить →",ob_back:"← Назад",ob_next:"Далее →",ob_start:"Начнём →",ob_enter:"🚀 Войти в приложение",
+    ob_tagline:"Умный учёт зарплаты для почасовых работников",
+    ob_feat_desc:"Сверхурочные · Точные вычеты\nПенсия · Образовательный фонд · Отпуск и больничный",
+    ob_f0t:"Учёт смен в реальном времени",ob_f0s:"Приход/уход с автоматическим расчётом",
+    ob_f1t:"Месячная панель",ob_f1s:"Брутто, нетто, вычеты и итоги",
+    ob_f2t:"Учёт накоплений",ob_f2s:"Пенсия, образовательный фонд и другое",
+    ob_ready:"Готово к старту!",ob_saved:"Ваши настройки успешно сохранены",ob_summary:"Сводка настроек",
+    ob_settings_hint:"Настройки можно изменить в любой момент в меню ⚙️",
+    ob_s0t:"Добро пожаловать в Shaati ⏱",ob_s0s:"Настроим данные один раз — Shaati всё посчитает точно",
+    ob_s1t:"💰 Базовая ставка",ob_s1s:"Какова ваша почасовая ставка и сколько часов в обычный рабочий день?",
+    ob_s2t:"🧾 Налоги и страхование",ob_s2s:"Рассчитаем вычеты точно",
+    ob_s3t:"🏦 Пенсия и образовательный фонд",ob_s3s:"Отчисления, которые накапливаются для вас",
+    ob_s4t:"🧾 Надбавки к зарплате",ob_s4s:"Есть ли постоянные надбавки? Питание, транспорт, другие",
+    ob_s5t:"✅ Всё готово!",ob_s5s:"Настройки сохранены — можно изменить в любое время в 'Настройки'",
+  },
+};
 const DEF_VAC={currentBalance:0,sickBalance:0,accrualPerMonth:1.5,startDate:""};
 
 const DEF_CFG={
@@ -3046,7 +3082,8 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
 // ════════════════════════════════════════
 // ONBOARDING WIZARD
 // ════════════════════════════════════════
-function Onboarding({onDone}){
+function Onboarding({onDone,lang="he",setLang}){
+  const t=useT();
   const[step,setStep]=useState(0);
   const[form,setForm]=useState({...DEF_CFG});
   const[salary,setSalary]=useState(()=>Math.round(DEF_CFG.baseRate*190));
@@ -3057,12 +3094,12 @@ function Onboarding({onDone}){
   const[alErr,setAlErr]=useState("");
 
   const STEPS=[
-    {title:"ברוך הבא לשעתי ⏱",subtitle:"בואו נגדיר את הנתונים שלך פעם אחת — ושעתי תחשב הכל בדיוק"},
-    {title:"💰 שכר בסיס",subtitle:"מה השכר שלך לשעה ומהן שעות העבודה הרגילות ביום?"},
-    {title:"🧾 מסים וביטוח לאומי",subtitle:"נחשב את הניכויים שלך בצורה מדויקת"},
-    {title:"🏦 פנסיה וקרן השתלמות",subtitle:"הפרשות שנצברות לטובתך"},
-    {title:"🧾 תוספות שכר",subtitle:"האם מגיעות לך תוספות קבועות? כלכלה, נסיעות, אחרות"},
-    {title:"✅ הכל מוכן!",subtitle:"ההגדרות נשמרו — תוכל לשנות אותן בכל עת מ'הגדרות'"},
+    {title:t("ob_s0t"),subtitle:t("ob_s0s")},
+    {title:t("ob_s1t"),subtitle:t("ob_s1s")},
+    {title:t("ob_s2t"),subtitle:t("ob_s2s")},
+    {title:t("ob_s3t"),subtitle:t("ob_s3s")},
+    {title:t("ob_s4t"),subtitle:t("ob_s4s")},
+    {title:t("ob_s5t"),subtitle:t("ob_s5s")},
   ];
 
   const go=(dir)=>{
@@ -3096,8 +3133,8 @@ function Onboarding({onDone}){
   const progress=step/(STEPS.length-1);
 
   return(
-    <div dir="rtl" style={{
-      fontFamily:"'Heebo','Arial Hebrew',sans-serif",
+    <div dir={lang==="ru"?"ltr":"rtl"} style={{
+      fontFamily:"'Heebo','Arial Hebrew',Arial,sans-serif",
       height:"100%",background:"#090c14",color:"#e2e8f0",
       display:"flex",flexDirection:"column",maxWidth:"430px",margin:"0 auto",
     }}>
@@ -3105,11 +3142,16 @@ function Onboarding({onDone}){
       <div style={{padding:"env(safe-area-inset-top,28px) 20px 0",background:"#090c14"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"16px"}}>
           <div style={{fontSize:"17px",fontWeight:"900",color:"#f1f5f9"}}>שעתי ⏱</div>
-          {step>0&&step<STEPS.length-1&&(
+          <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+            {setLang&&<button onClick={()=>setLang(lang==="he"?"ru":"he")} style={{background:"#1f2937",border:"1px solid #374151",color:"#9ca3af",borderRadius:"8px",padding:"4px 10px",fontSize:"12px",fontWeight:"700",cursor:"pointer"}}>
+              {lang==="he"?"🇷🇺 Русский":"🇮🇱 עברית"}
+            </button>}
+            {step>0&&step<STEPS.length-1&&(
             <button onClick={finish} style={{background:"none",border:"none",color:"#4b5563",fontSize:"12px",cursor:"pointer",fontWeight:"700"}}>
-              דלג →
+              {t("ob_skip")}
             </button>
-          )}
+            )}
+          </div>
         </div>
         {/* Progress bar */}
         <div style={{height:"4px",background:"#1f2937",borderRadius:"2px",marginBottom:"20px"}}>
@@ -3136,16 +3178,13 @@ function Onboarding({onDone}){
             <div>
               <div style={{background:"linear-gradient(145deg,#052e16,#14532d)",border:"1px solid #166534",borderRadius:"20px",padding:"24px",textAlign:"center",marginBottom:"24px"}}>
                 <div style={{fontSize:"56px",marginBottom:"12px",animation:"spinShekel 3s linear infinite",display:"inline-block"}}>₪</div>
-                <div style={{fontSize:"16px",fontWeight:"800",color:"#4ade80",marginBottom:"8px"}}>מעקב שכר חכם לעובדים שעתיים</div>
-                <div style={{fontSize:"13px",color:"#86efac88",lineHeight:"1.7"}}>
-                  מחשב שעות נוספות · ניכויים מדויקים<br/>
-                  פנסיה · קרן השתלמות · חופש ומחלה
-                </div>
+                <div style={{fontSize:"16px",fontWeight:"800",color:"#4ade80",marginBottom:"8px"}}>{t("ob_tagline")}</div>
+                <div style={{fontSize:"13px",color:"#86efac88",lineHeight:"1.7",whiteSpace:"pre-line"}}>{t("ob_feat_desc")}</div>
               </div>
               {[
-                {icon:"⏱",t:"מעקב משמרות בזמן אמת",s:"כניסה/יציאה עם חישוב אוטומטי"},
-                {icon:"📊",t:"דשבורד חודשי",s:"שכר ברוטו, נטו, ניכויים וסיכומים"},
-                {icon:"🏦",t:"מעקב חסכונות",s:"פנסיה, קרן השתלמות ועוד"},
+                {icon:"⏱",t:t("ob_f0t"),s:t("ob_f0s")},
+                {icon:"📊",t:t("ob_f1t"),s:t("ob_f1s")},
+                {icon:"🏦",t:t("ob_f2t"),s:t("ob_f2s")},
               ].map((f,i)=>(
                 <div key={i} style={{display:"flex",gap:"14px",alignItems:"center",padding:"14px",background:"#111827",borderRadius:"14px",marginBottom:"10px",border:"1px solid #1f2937"}}>
                   <div style={{fontSize:"28px",flexShrink:0}}>{f.icon}</div>
@@ -3340,12 +3379,12 @@ function Onboarding({onDone}){
             <div>
               <div style={{textAlign:"center",marginBottom:"28px"}}>
                 <div style={{fontSize:"64px",marginBottom:"12px"}}>🎉</div>
-                <div style={{fontSize:"18px",fontWeight:"900",color:"#4ade80",marginBottom:"8px"}}>מוכן להתחיל!</div>
-                <div style={{fontSize:"13px",color:"#6b7280"}}>ההגדרות שלך נשמרו בהצלחה</div>
+                <div style={{fontSize:"18px",fontWeight:"900",color:"#4ade80",marginBottom:"8px"}}>{t("ob_ready")}</div>
+                <div style={{fontSize:"13px",color:"#6b7280"}}>{t("ob_saved")}</div>
               </div>
 
               <div style={{...CARD,marginBottom:"14px"}}>
-                <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"12px"}}>סיכום הגדרות</div>
+                <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"12px"}}>{t("ob_summary")}</div>
                 {[
                   {l:"שכר בסיס",v:`₪${form.baseRate}/שעה`},
                   {l:"שעות עבודה ביום רגיל",v:`${form.overtimeThreshold} שעות`},
@@ -3364,7 +3403,7 @@ function Onboarding({onDone}){
               </div>
 
               <div style={{fontSize:"11px",color:"#4b5563",textAlign:"center",marginBottom:"20px"}}>
-                תוכל לשנות כל הגדרה בכל עת מתפריט ⚙️ הגדרות
+                {t("ob_settings_hint")}
               </div>
             </div>
           )}
@@ -3375,17 +3414,17 @@ function Onboarding({onDone}){
       <div style={{padding:"16px 20px",paddingBottom:"env(safe-area-inset-bottom,20px)",background:"#090c14",borderTop:"1px solid #1f2937",display:"flex",gap:"10px"}}>
         {step>0&&step<STEPS.length-1&&(
           <button onClick={()=>go(-1)} style={{flex:"0 0 auto",padding:"14px 18px",background:"#1f2937",border:"none",borderRadius:"12px",color:"#9ca3af",fontSize:"15px",fontWeight:"800",cursor:"pointer"}}>
-            ← חזור
+            {t("ob_back")}
           </button>
         )}
         {step<STEPS.length-1&&(
           <button onClick={()=>go(1)} style={{flex:1,padding:"14px",background:"#22c55e",border:"none",borderRadius:"12px",color:"#000",fontSize:"15px",fontWeight:"800",cursor:"pointer"}}>
-            {step===0?"בואו נתחיל →":step===4?"הבא →":"הבא →"}
+            {step===0?t("ob_start"):t("ob_next")}
           </button>
         )}
         {step===STEPS.length-1&&(
           <button onClick={finish} style={{flex:1,padding:"14px",background:"#22c55e",border:"none",borderRadius:"12px",color:"#000",fontSize:"16px",fontWeight:"900",cursor:"pointer",animation:"glowPulse 2s ease-in-out infinite"}}>
-            🚀 כניסה לאפליקציה
+            {t("ob_enter")}
           </button>
         )}
       </div>
@@ -3427,6 +3466,7 @@ function App(){
   const[loaded,setLoaded]=useState(false);
   const[onboarded,setOnboarded]=useState(false);
   const[privacyMode,setPrivacyMode]=useState(false);
+  const[lang,setLang]=useState("he");
   const[selM,setSelM]=useState(()=>tdy().substring(0,7));
 
   useEffect(()=>{
@@ -3438,9 +3478,11 @@ function App(){
     const ci=LS.get(K.clockin);if(ci)setClockInState(ci);
     const ob=LS.get(K.onboarded);if(ob)setOnboarded(true);
     const pr=LS.get(K.privacy);if(pr)setPrivacyMode(true);
+    const ln=LS.get(K.lang);if(ln)setLang(ln);
     setLoaded(true);
   },[]);
 
+  const saveLang=l=>{setLang(l);LS.set(K.lang,l);};
   const togglePrivacy=()=>{
     const next=!privacyMode;
     setPrivacyMode(next);
@@ -3485,9 +3527,10 @@ function App(){
     </div>
   );
 
-  if(!onboarded)return <Onboarding onDone={finishOnboarding}/>;
+  if(!onboarded)return <LangCtx.Provider value={lang}><Onboarding onDone={finishOnboarding} lang={lang} setLang={saveLang}/></LangCtx.Provider>;
 
   return(
+  <LangCtx.Provider value={lang}>
     <div dir="rtl" style={{fontFamily:"'Heebo','Arial Hebrew',sans-serif",minWidth:"100%",maxWidth:"430px",margin:"0 auto",height:"100%",display:"flex",flexDirection:"column",background:"#090c14",color:"#e2e8f0",filter:nightMode?"brightness(0.82) saturate(0.9)":"none",transition:"filter 1s ease",position:"relative"}}>
 
       {/* Toast notification */}
@@ -3573,6 +3616,7 @@ function App(){
         </div>
       </div>
     </div>
+  </LangCtx.Provider>
   );
 }
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
