@@ -1121,7 +1121,7 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
 
       <div style={{background:"linear-gradient(145deg,#052e16,#14532d)",border:"1px solid #166534",borderRadius:"18px",padding:"20px",marginBottom:"12px",textAlign:"center",position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",top:"-20px",right:"-20px",width:"80px",height:"80px",background:"#22c55e22",borderRadius:"50%"}}/>
-        {ms.length===0?(
+        {ms.length===0&&holPay===0?(
           <div style={{padding:"10px 0"}}>
             <div style={{fontSize:"36px",marginBottom:"10px"}}>📭</div>
             <div style={{fontSize:"14px",fontWeight:"700",color:"#86efac",marginBottom:"4px"}}>אין משמרות בחודש זה</div>
@@ -1174,7 +1174,7 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
             );})()}
           </>
         )}
-        {ms.length>0&&<div style={{color:"#4ade8080",fontSize:"12px",marginTop:"10px"}}>{fH(tH)} שעות · {ms.filter(s=>!isSpecialDay(s.type)).length} משמרות</div>}
+        {(ms.length>0||holPay>0)&&<div style={{color:"#4ade8080",fontSize:"12px",marginTop:"10px"}}>{fH(tH)} שעות · {ms.filter(s=>!isSpecialDay(s.type)).length} משמרות{autoHolDays.length>0?` + ${autoHolDays.length} ימי חג`:""}</div>}
         {holPay>0&&<div style={{fontSize:"11px",color:"#fcd34d",marginTop:"6px"}}>✡️ {autoHolDays.length} יום חג בתשלום · {prv(holPay,privacyMode)}</div>}
       </div>
 
