@@ -266,6 +266,10 @@ const TR={
     sp_sick_1_lbl:"מחלה יום 1",sp_sick_1_desc:"0% — יום ראשון ללא תשלום (לפי חוק)",
     sp_sick_23_lbl:"מחלה ימים 2-3",sp_sick_23_desc:"50% שכר בסיס, ללא תוספות ושעות נוספות",
     sp_sick_4p_lbl:"מחלה יום 4+",sp_sick_4p_desc:"100% שכר בסיס, ללא תוספות ושעות נוספות",
+    // Calendar
+    cal_no_shift:"אין משמרת מוגדרת ליום זה",cal_edit:"✏️ ערוך",cal_holiday:"חג / אירוע",
+    // App
+    app_loading:"שעתי טוען...",app_privacy_show:"הצג סכומים",app_privacy_hide:"הסתר סכומים",
   },
   ru:{
     ob_skip:"Пропустить →",ob_back:"← Назад",ob_next:"Далее →",ob_start:"Начнём →",ob_enter:"🚀 Войти в приложение",
@@ -449,6 +453,10 @@ const TR={
     sp_sick_1_lbl:"Больничный день 1",sp_sick_1_desc:"0% — первый день без оплаты (по закону)",
     sp_sick_23_lbl:"Больничные дни 2-3",sp_sick_23_desc:"50% базовой ставки, без надбавок и сверхурочных",
     sp_sick_4p_lbl:"Больничный день 4+",sp_sick_4p_desc:"100% базовой ставки, без надбавок и сверхурочных",
+    // Calendar
+    cal_no_shift:"Смена на этот день не определена",cal_edit:"✏️ Изменить",cal_holiday:"Праздник / событие",
+    // App
+    app_loading:"Shaati загружается...",app_privacy_show:"Показать суммы",app_privacy_hide:"Скрыть суммы",
   },
 };
 const DEF_VAC={currentBalance:0,sickBalance:0,accrualPerMonth:1.5,startDate:""};
@@ -1652,6 +1660,7 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
 // CUSTOM SHIFT CALENDAR
 // ════════════════════════════════════════
 function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,inline=false}){
+  const uT=useT();
   const[open,setOpen]=useState(false);
   const[selectedDay,setSelectedDay]=useState(null); // date string for detail panel
   const[viewDate,setViewDate]=useState(()=>{
@@ -1771,7 +1780,7 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
               {IL_HOLIDAYS[selectedDay]&&selectedShifts.length===0&&(
                 <div style={{background:"#2a1f00",border:"1px solid #fcd34d44",borderRadius:"10px",padding:"12px",marginBottom:"8px"}}>
                   <div style={{fontSize:"13px",color:"#fcd34d",fontWeight:"700"}}>{IL_HOLIDAYS[selectedDay].icon} {IL_HOLIDAYS[selectedDay].name}</div>
-                  <div style={{fontSize:"11px",color:"#6b7280",marginTop:"3px"}}>אין משמרת מוגדרת ליום זה</div>
+                  <div style={{fontSize:"11px",color:"#6b7280",marginTop:"3px"}}>{uT("cal_no_shift")}</div>
                 </div>
               )}
               {selectedShifts.map(s=>{
@@ -1794,7 +1803,7 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
                       <div style={{fontSize:"14px",fontWeight:"800",color:"#4ade80"}}>{fM(getShiftTotal(s,cfg,als,wMap[s.id]))}</div>
                     </div>
                     <div style={{display:"flex",gap:"6px"}}>
-                      <button onClick={()=>{onEditShift&&onEditShift(s);setOpen(false);setSelectedDay(null);}} style={{flex:1,padding:"7px",background:"#1e3a5f",border:"none",color:"#60a5fa",borderRadius:"8px",cursor:"pointer",fontWeight:"700",fontSize:"12px"}}>✏️ ערוך</button>
+                      <button onClick={()=>{onEditShift&&onEditShift(s);setOpen(false);setSelectedDay(null);}} style={{flex:1,padding:"7px",background:"#1e3a5f",border:"none",color:"#60a5fa",borderRadius:"8px",cursor:"pointer",fontWeight:"700",fontSize:"12px"}}>{uT("cal_edit")}</button>
                       <button onClick={()=>{onDeleteShift&&onDeleteShift(s.id);if(selectedShifts.length<=1)setSelectedDay(null);}} style={{padding:"7px 10px",background:"#2d0505",border:"none",color:"#f87171",borderRadius:"8px",cursor:"pointer",fontWeight:"700",fontSize:"12px"}}>🗑</button>
                     </div>
                   </div>
@@ -1813,7 +1822,7 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
             ))}
             <div style={{display:"flex",alignItems:"center",gap:"4px"}}>
               <span style={{fontSize:"12px"}}>🕯️</span>
-              <span style={{fontSize:"10px",color:"#fcd34d"}}>חג / אירוע</span>
+              <span style={{fontSize:"10px",color:"#fcd34d"}}>{uT("cal_holiday")}</span>
             </div>
           </div>
         </div>
@@ -3899,7 +3908,7 @@ function App(){
   if(!loaded)return(
     <div style={{minHeight:"100vh",background:"#090c14",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"16px"}}>
       <div style={{fontSize:"52px",animation:"spinShekel 1.2s linear infinite",display:"inline-block"}}>₪</div>
-      <div style={{color:"#4ade80",fontSize:"16px",fontWeight:"700",animation:"blink 1.2s ease-in-out infinite"}}>שעתי טוען...</div>
+      <div style={{color:"#4ade80",fontSize:"16px",fontWeight:"700",animation:"blink 1.2s ease-in-out infinite"}}>{appT("app_loading")}</div>
     </div>
   );
 
@@ -3932,7 +3941,7 @@ function App(){
             borderRadius:"8px",padding:"3px 10px",
             fontSize:"14px",cursor:"pointer",
             transition:"all 0.2s ease",
-          }} title={privacyMode?"הצג סכומים":"הסתר סכומים"}>
+          }} title={privacyMode?appT("app_privacy_show"):appT("app_privacy_hide")}>
             {privacyMode?"🙈":"👁"}
           </button>
           {clockIn&&<div style={{background:"#2d0505",border:"1px solid #ef4444",borderRadius:"8px",padding:"3px 10px",fontSize:"11px",color:"#f87171",fontWeight:"700",display:"flex",alignItems:"center",gap:"4px"}}>
@@ -3965,9 +3974,9 @@ function App(){
       {/* Scrollable content */}
       <div ref={scrollRef} style={{flex:1,overflowY:"auto",overflowX:"hidden",WebkitOverflowScrolling:"touch",minHeight:0}}>
         <div key={tabKey} className={slideClass(prevTab,tab)} style={{width:"100%"}}>
-          {tab==="clock"    &&<ClockScreen clockIn={clockIn} setClockIn={setClockIn} als={als} cfg={cfg} onShiftSaved={s=>{addSh(s);showToast("✓ המשמרת נשמרה!");}} privacyMode={privacyMode} togglePrivacy={togglePrivacy}/>}
+          {tab==="clock"    &&<ClockScreen clockIn={clockIn} setClockIn={setClockIn} als={als} cfg={cfg} onShiftSaved={s=>{addSh(s);showToast(appT("as_saved"));}} privacyMode={privacyMode} togglePrivacy={togglePrivacy}/>}
           {tab==="dashboard"&&<Dashboard shifts={shifts} cfg={cfg} als={als} selM={selM} setSelM={setSelM} privacyMode={privacyMode}/>}
-          {tab==="add"      &&<AddShift cfg={cfg} tpls={tpls} als={als} shifts={shifts} onAdd={s=>{addSh(s);showToast("✓ המשמרת נשמרה!");scrollTop();}} onEdit={editSh} onDelete={delSh} privacyMode={privacyMode}/>}
+          {tab==="add"      &&<AddShift cfg={cfg} tpls={tpls} als={als} shifts={shifts} onAdd={s=>{addSh(s);showToast(appT("as_saved"));scrollTop();}} onEdit={editSh} onDelete={delSh} privacyMode={privacyMode}/>}
           {tab==="shifts"   &&<ShiftsList shifts={shifts} cfg={cfg} als={als} onDelete={delSh} onEdit={editSh} privacyMode={privacyMode}/>}
           {tab==="savings"  &&<Savings shifts={shifts} cfg={cfg} privacyMode={privacyMode}/>}
           {tab==="graph"    &&<Graph shifts={shifts} cfg={cfg} als={als} privacyMode={privacyMode}/>}
