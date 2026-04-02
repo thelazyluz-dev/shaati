@@ -198,6 +198,7 @@ const TR={
     sv_cumul:"מצטבר (ללא היסטורי)",sv_no_hist:"הוסף משמרות לראות היסטוריה",
     sv_type_dep:"פיקדון בנקאי",sv_type_gem:"קופת גמל",sv_type_re:"נדל\"ן",sv_type_stk:"מניות/ETF",sv_type_oth:"אחר",
     sv_return_sfx:"תשואה",sv_dep_pfx:"הפקדה",sv_per_month_s:"/חודש",sv_dep_on:"יופקד ב-",sv_of_month:"לחודש",
+    sv_ret_sp500:"S&P 500",sv_ret_equity:"מנייתי",sv_ret_gen:"כללי",sv_ret_bonds:"אג\"ח",sv_ret_custom:"ידני",sv_ret_annual:"% שנתי",
     // Graph
     gr_no_data:"אין נתונים לשנה זו",gr_cur_year:"● שנה נוכחית",
     gr_total_year:"סה״כ שנתי נטו",gr_hours_sfx:"שעות",gr_avg_month:"ממוצע חודשי",gr_active_months:"חודשים פעילים",
@@ -385,6 +386,7 @@ const TR={
     sv_cumul:"Накоплено (без исторического)",sv_no_hist:"Добавьте смены чтобы увидеть историю",
     sv_type_dep:"Банковский депозит",sv_type_gem:"Пенсионный фонд",sv_type_re:"Недвижимость",sv_type_stk:"Акции/ETF",sv_type_oth:"Другое",
     sv_return_sfx:"доходность",sv_dep_pfx:"взнос",sv_per_month_s:"/мес",sv_dep_on:"взнос",sv_of_month:"числа",
+    sv_ret_sp500:"S&P 500",sv_ret_equity:"Акции",sv_ret_gen:"Общий",sv_ret_bonds:"Облигации",sv_ret_custom:"Вручную",sv_ret_annual:"% годовых",
     // Graph
     gr_no_data:"Нет данных за этот год",gr_cur_year:"● Текущий год",
     gr_total_year:"Итого годовых нетто",gr_hours_sfx:"часов",gr_avg_month:"Среднемесячный",gr_active_months:"активных месяцев",
@@ -2177,14 +2179,15 @@ const DEF_SAV_CFG={
 
 // תשואות ממוצעות היסטוריות (5 שנים אחרונות, אומדן)
 const RETURN_PRESETS=[
-  {id:"sp500",   label:"S&P 500",    pct:14.0, color:"#4ade80", icon:"🇺🇸"},
-  {id:"equity",  label:"מנייתי",     pct:9.5,  color:"#60a5fa", icon:"📈"},
-  {id:"general", label:"כללי",       pct:6.5,  color:"#fbbf24", icon:"⚖️"},
-  {id:"bonds",   label:"אג\"ח",      pct:3.5,  color:"#a78bfa", icon:"🏛️"},
-  {id:"custom",  label:"ידני",       pct:null, color:"#f87171", icon:"✏️"},
+  {id:"sp500",   labelKey:"sv_ret_sp500",  label:"S&P 500",  pct:14.0, color:"#4ade80", icon:"🇺🇸"},
+  {id:"equity",  labelKey:"sv_ret_equity", label:"מנייתי",   pct:9.5,  color:"#60a5fa", icon:"📈"},
+  {id:"general", labelKey:"sv_ret_gen",    label:"כללי",     pct:6.5,  color:"#fbbf24", icon:"⚖️"},
+  {id:"bonds",   labelKey:"sv_ret_bonds",  label:"אג\"ח",    pct:3.5,  color:"#a78bfa", icon:"🏛️"},
+  {id:"custom",  labelKey:"sv_ret_custom", label:"ידני",     pct:null, color:"#f87171", icon:"✏️"},
 ];
 
 function ReturnPresetRow({selectedId,customPct,onSelect,onCustomChange}){
+  const uT=useT();
   return(
     <div>
       <div style={{display:"flex",gap:"4px",flexWrap:"wrap",marginBottom:"4px"}}>
@@ -2198,7 +2201,7 @@ function ReturnPresetRow({selectedId,customPct,onSelect,onCustomChange}){
             fontSize:"11px",fontWeight:"700",
           }}>
             <span style={{fontSize:"12px"}}>{p.icon}</span>
-            <span>{p.label}</span>
+            <span>{uT(p.labelKey)}</span>
             {p.pct!==null&&<span style={{opacity:0.8}}>{p.pct}%</span>}
           </button>
         ))}
@@ -2208,7 +2211,7 @@ function ReturnPresetRow({selectedId,customPct,onSelect,onCustomChange}){
           <input type="number" step="0.1" min="0" max="50" value={customPct}
             onChange={e=>onCustomChange(parseFloat(e.target.value)||0)}
             style={{...SI,width:"80px",padding:"4px 8px",fontSize:"12px"}}/>
-          <span style={{fontSize:"11px",color:"#6b7280"}}>% שנתי</span>
+          <span style={{fontSize:"11px",color:"#6b7280"}}>{uT("sv_ret_annual")}</span>
         </div>
       )}
     </div>
