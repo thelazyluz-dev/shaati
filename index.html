@@ -3119,12 +3119,12 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
         <div style={{fontSize:"18px",fontWeight:"800",color:"#f1f5f9"}}>{uT("sg_title")}</div>
         {onSaveLang&&(
           <div style={{display:"flex",gap:"6px"}}>
-            {[{v:"he",label:"🇮🇱"},{v:"ru",label:"🇷🇺"}].map(opt=>(
+            {[{v:"he",label:"🇮🇱 עברית"},{v:"ru",label:"🇷🇺 RU"}].map(opt=>(
               <button key={opt.v} onClick={()=>onSaveLang(opt.v)}
-                style={{padding:"5px 10px",borderRadius:"8px",cursor:"pointer",fontWeight:"700",fontSize:"13px",
-                  background:lang===opt.v?"#1e3a5f":"#111827",
-                  color:lang===opt.v?"#60a5fa":"#4b5563",
-                  border:`1.5px solid ${lang===opt.v?"#60a5fa":"#1f2937"}`}}>
+                style={{padding:"5px 12px",borderRadius:"8px",cursor:"pointer",fontWeight:"700",fontSize:"12px",
+                  background:lang===opt.v?"#1e3a5f":"#1f2937",
+                  color:lang===opt.v?"#60a5fa":"#9ca3af",
+                  border:`1.5px solid ${lang===opt.v?"#60a5fa":"#374151"}`}}>
                 {opt.label}
               </button>
             ))}
@@ -3873,7 +3873,15 @@ function App(){
       <div style={{paddingTop:"env(safe-area-inset-top, 28px)",background:"#090c14",borderBottom:"1px solid #1f2937",flexShrink:0,zIndex:10,position:"relative"}}>
         <div style={{padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
         <div style={{fontSize:"17px",fontWeight:"900",color:"#f1f5f9"}}>שעתי ⏱</div>
-        <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+        <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
+          {/* Language toggle */}
+          <button onClick={()=>saveLang(lang==="he"?"ru":"he")} style={{
+            background:"#1f2937",border:"1px solid #374151",
+            borderRadius:"8px",padding:"3px 10px",
+            fontSize:"13px",fontWeight:"700",cursor:"pointer",color:"#9ca3af",
+          }}>
+            {lang==="he"?"🇷🇺 RU":"🇮🇱 HE"}
+          </button>
           {/* Privacy toggle */}
           <button onClick={togglePrivacy} style={{
             background:privacyMode?"#2d1f00":"#1f2937",
