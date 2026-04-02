@@ -3456,9 +3456,6 @@ function Onboarding({onDone,lang="he",setLang}){
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"16px"}}>
           <div style={{fontSize:"17px",fontWeight:"900",color:"#f1f5f9"}}>שעתי ⏱</div>
           <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
-            {setLang&&<button onClick={()=>setLang(lang==="he"?"ru":"he")} style={{background:"#1f2937",border:"1px solid #374151",color:"#9ca3af",borderRadius:"8px",padding:"4px 10px",fontSize:"12px",fontWeight:"700",cursor:"pointer"}}>
-              {lang==="he"?"🇷🇺 Русский":"🇮🇱 עברית"}
-            </button>}
             {step>0&&step<STEPS.length-1&&(
             <button onClick={finish} style={{background:"none",border:"none",color:"#4b5563",fontSize:"12px",cursor:"pointer",fontWeight:"700"}}>
               {t("ob_skip")}
@@ -3489,6 +3486,21 @@ function Onboarding({onDone,lang="he",setLang}){
           {/* ── Step 0: Welcome ── */}
           {step===0&&(
             <div>
+              {/* Language selector */}
+              {setLang&&(
+                <div style={{display:"flex",gap:"8px",marginBottom:"20px"}}>
+                  {[{v:"he",label:"🇮🇱 עברית"},{v:"ru",label:"🇷🇺 Русский"}].map(opt=>(
+                    <button key={opt.v} onClick={()=>setLang(opt.v)}
+                      style={{flex:1,padding:"10px",borderRadius:"12px",cursor:"pointer",fontWeight:"800",fontSize:"14px",
+                        background:lang===opt.v?"#052e16":"#111827",
+                        color:lang===opt.v?"#4ade80":"#4b5563",
+                        border:`2px solid ${lang===opt.v?"#22c55e":"#1f2937"}`,
+                        transition:"all 0.2s ease"}}>
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              )}
               <div style={{background:"linear-gradient(145deg,#052e16,#14532d)",border:"1px solid #166534",borderRadius:"20px",padding:"24px",textAlign:"center",marginBottom:"24px"}}>
                 <div style={{fontSize:"56px",marginBottom:"12px",animation:"spinShekel 3s linear infinite",display:"inline-block"}}>₪</div>
                 <div style={{fontSize:"16px",fontWeight:"800",color:"#4ade80",marginBottom:"8px"}}>{t("ob_tagline")}</div>
