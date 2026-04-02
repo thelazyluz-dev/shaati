@@ -240,6 +240,26 @@ const TR={
     tx_pt3:"ילד מגיל 6–17",tx_pt3d:"לכל ילד גילאי 6–17",
     tx_pt4:"הורה יחיד",tx_pt4d:"נקודה נוספת",
     tx_pt5:"תואר ראשון",tx_pt5d:"בשנת סיום הלימודים",
+    // Onboarding steps 1-5
+    ob_s1_tip:"💡 את/ה יכול/ה למצוא את הנתונים האלה בתלוש השכר שלך או בחוזה העבודה. אם לא בטוח/ה — השאר את ברירת המחדל ותוכל לשנות מאוחר יותר.",
+    ob_s1_from_contract:"לפי חוזה/תלוש",ob_s1_min_wage:"שכר מינימום 2025: ₪32.30/שעה",
+    ob_s1_daily_hint:"ברירת מחדל: 8.6 שעות (לפי חוק)",ob_s1_ot_hint:"שעות מעל מספר זה יחושבו כשעות נוספות",
+    ob_s1_ot_title:"📋 אחוזי שעות נוספות (לפי חוק)",ob_s1_ot_first:"2 שעות ראשונות",ob_s1_ot_from3:"משעה 3 ואילך",
+    ob_s2_ni_hint:"הזן שכר ברוטו חודשי ממוצע — האחוז משתנה לפי גובה השכר",
+    ob_s2_salary_lbl:"שכר ברוטו חודשי משוער (₪)",ob_s2_calc:"חשב אוטומטית",ob_s2_updated:"✓ עודכן אוטומטית",
+    ob_s2_manual:"עריכה ידנית",ob_s2_tax_hint:"בדוק בתלוש שלך",
+    ob_s2_enable_ded:"הפעל חישוב ניכויים",ob_s2_enable_ded_h:"הצג שכר נטו בדשבורד",
+    ob_s3_tip_title:"💡 חשוב לדעת",
+    ob_s3_tip:"פנסיה וקרן השתלמות מחושבות ",ob_s3_base_only:"רק על שכר הבסיס",ob_s3_tip_sfx:" — ללא שעות נוספות ותוספות. כך לפי חוק.",
+    ob_s3_employee:"עובד (%)",ob_s3_employer:"מעסיק (%)",
+    ob_s3_legal:"📋 מינימום חוקי לפנסיה: עובד 6%, מעסיק 6.5%\n📋 קרן השתלמות: עובד 2.5%, מעסיק 7.5%",
+    ob_s4_tip_title:"💡 מה זה תוספות?",
+    ob_s4_tip:"סכומים קבועים שמתווספים לכל משמרת — למשל דמי נסיעות או כלכלה. אם אין לך — לחץ הבא.",
+    ob_s4_monthly_short:"חודשי",ob_s4_remove:"הסר",ob_s4_add_hdr:"➕ הוסף תוספת",ob_s4_name:"שם התוספת",
+    ob_s4_placeholder:"נסיעות, כלכלה, אחר...",ob_s4_fixed_monthly:"חודשי (קבוע)",ob_s4_add_btn:"+ הוסף תוספת",
+    ob_s5_base_rate:"שכר בסיס",ob_s5_per_h:"/שעה",ob_s5_hours_unit:"שעות",
+    ob_s5_pension:"פנסיה עובד/מעסיק",ob_s5_keren:"קרן השתלמות עובד/מעסיק",
+    ob_s5_allowances:"תוספות",ob_s5_none:"ללא",
   },
   ru:{
     ob_skip:"Пропустить →",ob_back:"← Назад",ob_next:"Далее →",ob_start:"Начнём →",ob_enter:"🚀 Войти в приложение",
@@ -397,6 +417,26 @@ const TR={
     tx_pt3:"Ребёнок 6–17 лет",tx_pt3d:"на каждого ребёнка 6–17 лет",
     tx_pt4:"Одинокий родитель",tx_pt4d:"дополнительный балл",
     tx_pt5:"Степень бакалавра",tx_pt5d:"в год окончания учёбы",
+    // Onboarding steps 1-5
+    ob_s1_tip:"💡 Эти данные можно найти в расчётном листе или трудовом договоре. Если не уверены — оставьте по умолчанию, можно изменить позже.",
+    ob_s1_from_contract:"По договору/листу",ob_s1_min_wage:"Мин. зарплата 2025: ₪32.30/ч",
+    ob_s1_daily_hint:"По умолчанию: 8.6 ч (по закону)",ob_s1_ot_hint:"Часы сверх этого числа считаются сверхурочными",
+    ob_s1_ot_title:"📋 Коэффициенты сверхурочных (по закону)",ob_s1_ot_first:"Первые 2 часа",ob_s1_ot_from3:"С 3-го часа",
+    ob_s2_ni_hint:"Введите среднюю зарплату брутто — процент зависит от суммы",
+    ob_s2_salary_lbl:"Примерная месячная зарплата брутто (₪)",ob_s2_calc:"Рассчитать автоматически",ob_s2_updated:"✓ Обновлено автоматически",
+    ob_s2_manual:"Ручное редактирование",ob_s2_tax_hint:"Проверьте в своём расчётном листе",
+    ob_s2_enable_ded:"Включить расчёт вычетов",ob_s2_enable_ded_h:"Показать чистую зарплату в дашборде",
+    ob_s3_tip_title:"💡 Важно знать",
+    ob_s3_tip:"Пенсия и образовательный фонд рассчитываются ",ob_s3_base_only:"только на базовую ставку",ob_s3_tip_sfx:" — без сверхурочных и надбавок. По закону.",
+    ob_s3_employee:"Работник (%)",ob_s3_employer:"Работодатель (%)",
+    ob_s3_legal:"📋 Мин. по закону (пенсия): раб-к 6%, работод. 6.5%\n📋 Образ. фонд: раб-к 2.5%, работод. 7.5%",
+    ob_s4_tip_title:"💡 Что такое надбавки?",
+    ob_s4_tip:"Фиксированные суммы к каждой смене — например, транспорт или питание. Если нет — нажмите Далее.",
+    ob_s4_monthly_short:"в месяц",ob_s4_remove:"Удалить",ob_s4_add_hdr:"➕ Добавить надбавку",ob_s4_name:"Название надбавки",
+    ob_s4_placeholder:"Транспорт, питание, другое...",ob_s4_fixed_monthly:"Ежемесячно (фикс.)",ob_s4_add_btn:"+ Добавить надбавку",
+    ob_s5_base_rate:"Базовая ставка",ob_s5_per_h:"/ч",ob_s5_hours_unit:"ч",
+    ob_s5_pension:"Пенсия раб-к/работодатель",ob_s5_keren:"Образ. фонд раб-к/работодатель",
+    ob_s5_allowances:"Надбавки",ob_s5_none:"Нет",
   },
 };
 const DEF_VAC={currentBalance:0,sickBalance:0,accrualPerMonth:1.5,startDate:""};
@@ -837,7 +877,7 @@ function fM(n){return "₪"+n.toLocaleString("he-IL",{minimumFractionDigits:2,ma
 function prv(n,hidden){return hidden?"••••":fM(n);}
 function tdy(){return new Date().toISOString().split("T")[0];}
 function nowTime(){const n=new Date();return `${String(n.getHours()).padStart(2,"0")}:${String(n.getMinutes()).padStart(2,"0")}`;}
-function mLbl(ym){const[y,m]=ym.split("-");return["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"][parseInt(m)-1]+" "+y;}
+function mLbl(ym,locale="he-IL"){const[y,m]=ym.split("-");return new Date(+y,parseInt(m)-1,1).toLocaleDateString(locale,{month:"long"})+" "+y;}
 function fD(ds){return new Date(ds+"T12:00:00").toLocaleDateString("he-IL",{weekday:"short",day:"numeric",month:"short"});}
 function elapsed(fromISO){
   const diff=Math.floor((Date.now()-new Date(fromISO).getTime())/1000);
@@ -1297,7 +1337,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
           {new Date().toLocaleDateString(uT("locale"),{weekday:"long",day:"numeric",month:"long"})}
         </div>
         <LiveClock/>
-        <div style={{display:"inline-flex",alignItems:"center",gap:"6px",background:t.bg,border:`1px solid ${t.color}`,borderRadius:"20px",padding:"3px 12px",marginTop:"6px"}}>
+        <div style={{display:"inline-flex",alignItems:"center",gap:"6px",background:sty.bg,border:`1px solid ${sty.color}`,borderRadius:"20px",padding:"3px 12px",marginTop:"6px"}}>
           <span style={{fontSize:"13px"}}>{sty.icon}</span>
           <span style={{fontSize:"12px",color:sty.color,fontWeight:"700"}}>{uT("cl_shift")} {uT("st_"+curType)}</span>
         </div>
@@ -1423,7 +1463,7 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"18px"}}>
         <button onClick={()=>nav(1)} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>‹</button>
         <div style={{textAlign:"center"}}>
-          <div style={{fontSize:"18px",fontWeight:"800",color:"#f1f5f9"}}>{mLbl(selM)}</div>
+          <div style={{fontSize:"18px",fontWeight:"800",color:"#f1f5f9"}}>{mLbl(selM,t("locale"))}</div>
           {selM===tdy().substring(0,7)&&<div style={{fontSize:"11px",color:"#22c55e",marginTop:"2px"}}>{t("d_cur_month")}</div>}
         </div>
         <button onClick={()=>nav(-1)} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>›</button>
@@ -2010,7 +2050,7 @@ function ShiftsList({shifts,cfg,als,onDelete,onEdit,privacyMode}){
         <div key={ym} style={{marginBottom:"28px"}}>
           {mi>0&&<div style={{height:"2px",background:"linear-gradient(90deg,#22c55e44,#22c55e,#22c55e44)",borderRadius:"2px",margin:"0 0 20px"}}/>}
           <div style={{background:"linear-gradient(135deg,#052e16,#0a3a1a)",border:"1px solid #166534",borderRadius:"12px",padding:"10px 14px",marginBottom:"12px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-            <span style={{fontSize:"15px",fontWeight:"900",color:"#4ade80"}}>📅 {mLbl(ym)}</span>
+            <span style={{fontSize:"15px",fontWeight:"900",color:"#4ade80"}}>📅 {mLbl(ym,uT("locale"))}</span>
             <div style={{textAlign:"left"}}>
               <div style={{fontSize:"13px",fontWeight:"800",color:"#4ade80"}}>{prv(grp[ym].reduce((acc,s)=>acc+getShiftTotal(s,cfg,als,wMap[s.id]),0)+cma(als),privacyMode)}</div>
               <div style={{fontSize:"10px",color:"#4ade8066"}}>{grp[ym].length} {uT("d_shifts")}</div>
@@ -2561,7 +2601,7 @@ function Savings({shifts,cfg,privacyMode}){
           {rows.length>0?[...rows].reverse().map(r=>(
             <div key={r.ym} style={{...CARD,marginBottom:"8px"}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:"8px"}}>
-                <span style={{fontWeight:"700",color:"#e2e8f0"}}>{mLbl(r.ym)}</span>
+                <span style={{fontWeight:"700",color:"#e2e8f0"}}>{mLbl(r.ym,uT("locale"))}</span>
                 <span style={{fontSize:"12px",color:"#6b7280"}}>{uT("sv_base")} {fM(Math.round(r.base))}</span>
               </div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
@@ -3429,9 +3469,9 @@ function Onboarding({onDone,lang="he",setLang}){
   };
 
   const addAl=()=>{
-    if(!newAl.name.trim()){setAlErr("יש להזין שם");return;}
+    if(!newAl.name.trim()){setAlErr(t("sg_al_err_n"));return;}
     const amt=parseFloat(newAl.amount);
-    if(!amt||amt<=0){setAlErr("יש להזין סכום");return;}
+    if(!amt||amt<=0){setAlErr(t("sg_al_err_a"));return;}
     setAlErr("");
     setAls(a=>[...a,{...newAl,amount:amt,id:Date.now(),active:true}]);
     setNewAl({name:"",type:"per_shift",amount:""});
@@ -3522,32 +3562,32 @@ function Onboarding({onDone,lang="he",setLang}){
             <div>
               <div style={{...CARD,marginBottom:"16px"}}>
                 <div style={{fontSize:"12px",color:"#6b7280",marginBottom:"16px",lineHeight:"1.6",background:"#0d1117",borderRadius:"10px",padding:"12px",border:"1px solid #1f2937"}}>
-                  💡 את/ה יכול/ה למצוא את הנתונים האלה בתלוש השכר שלך או בחוזה העבודה. אם לא בטוח/ה — השאר את ברירת המחדל ותוכל לשנות מאוחר יותר.
+                  {t("ob_s1_tip")}
                 </div>
-                <Field label="שכר בסיס לשעה (₪)" hint="לפי חוזה/תלוש">
+                <Field label={t("sg_base_rate")} hint={t("ob_s1_from_contract")}>
                   <NumInput value={form.baseRate} onChange={v=>setForm(f=>({...f,baseRate:v}))} step={0.01} min={0}/>
                 </Field>
                 <div style={{fontSize:"11px",color:"#4b5563",marginBottom:"16px",marginTop:"-8px"}}>
-                  שכר מינימום 2025: ₪32.30/שעה
+                  {t("ob_s1_min_wage")}
                 </div>
-                <Field label="שעות עבודה ביום רגיל" hint="ברירת מחדל: 8.6 שעות (לפי חוק)">
+                <Field label={t("sg_daily_h")} hint={t("ob_s1_daily_hint")}>
                   <NumInput value={form.overtimeThreshold} onChange={v=>setForm(f=>({...f,overtimeThreshold:v}))} step={0.1} min={1}/>
                 </Field>
                 <div style={{fontSize:"11px",color:"#4b5563",marginBottom:"16px",marginTop:"-8px"}}>
-                  שעות מעל מספר זה יחושבו כשעות נוספות
+                  {t("ob_s1_ot_hint")}
                 </div>
                 <div style={{background:"#0c1a3e",border:"1px solid #1e3a8a",borderRadius:"10px",padding:"12px",marginTop:"4px"}}>
-                  <div style={{fontSize:"11px",color:"#93c5fd",fontWeight:"700",marginBottom:"8px"}}>📋 אחוזי שעות נוספות (לפי חוק)</div>
+                  <div style={{fontSize:"11px",color:"#93c5fd",fontWeight:"700",marginBottom:"8px"}}>{t("ob_s1_ot_title")}</div>
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
                     <div>
-                      <div style={{fontSize:"10px",color:"#93c5fd",marginBottom:"6px"}}>2 שעות ראשונות</div>
+                      <div style={{fontSize:"10px",color:"#93c5fd",marginBottom:"6px"}}>{t("ob_s1_ot_first")}</div>
                       <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
                         <NumInput value={form.overtime125Pct||125} onChange={v=>setForm(f=>({...f,overtime125Pct:v}))} step={5} min={100} max={200} style={{fontSize:"14px",padding:"8px 10px"}}/>
                         <span style={{color:"#93c5fd",fontWeight:"700"}}>%</span>
                       </div>
                     </div>
                     <div>
-                      <div style={{fontSize:"10px",color:"#93c5fd",marginBottom:"6px"}}>משעה 3 ואילך</div>
+                      <div style={{fontSize:"10px",color:"#93c5fd",marginBottom:"6px"}}>{t("ob_s1_ot_from3")}</div>
                       <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
                         <NumInput value={form.overtime150Pct||150} onChange={v=>setForm(f=>({...f,overtime150Pct:v}))} step={5} min={100} max={200} style={{fontSize:"14px",padding:"8px 10px"}}/>
                         <span style={{color:"#93c5fd",fontWeight:"700"}}>%</span>
@@ -3564,46 +3604,46 @@ function Onboarding({onDone,lang="he",setLang}){
             <div>
               {/* Auto NI calculator */}
               <div style={{...CARD,background:"#0a1628",border:"1px solid #1e3a5f",marginBottom:"14px"}}>
-                <div style={{fontSize:"13px",fontWeight:"700",color:"#60a5fa",marginBottom:"4px"}}>🧮 חשב לי ביטוח לאומי ומס בריאות</div>
-                <div style={{fontSize:"11px",color:"#4b5563",marginBottom:"12px"}}>הזן שכר ברוטו חודשי ממוצע — האחוז משתנה לפי גובה השכר</div>
-                <Field label="שכר ברוטו חודשי משוער (₪)">
+                <div style={{fontSize:"13px",fontWeight:"700",color:"#60a5fa",marginBottom:"4px"}}>{t("ni_title")}</div>
+                <div style={{fontSize:"11px",color:"#4b5563",marginBottom:"12px"}}>{t("ob_s2_ni_hint")}</div>
+                <Field label={t("ob_s2_salary_lbl")}>
                   <NumInput value={salary} onChange={v=>setSalary(v>0?v:0)} step={100}/>
                 </Field>
                 <button onClick={calcNI} style={{width:"100%",padding:"11px",background:"#1e3a8a",border:"none",borderRadius:"10px",color:"#93c5fd",fontWeight:"800",fontSize:"14px",cursor:"pointer",marginBottom:niResult?"12px":"0"}}>
-                  חשב אוטומטית
+                  {t("ob_s2_calc")}
                 </button>
                 {niResult&&(
                   <div style={{background:"#0d1117",borderRadius:"10px",padding:"12px",marginTop:"4px"}}>
                     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
                       <div style={{background:"#0c1a3e",borderRadius:"8px",padding:"10px",textAlign:"center"}}>
-                        <div style={{fontSize:"10px",color:"#93c5fd",marginBottom:"4px"}}>ביטוח לאומי</div>
+                        <div style={{fontSize:"10px",color:"#93c5fd",marginBottom:"4px"}}>{t("ded_ni")}</div>
                         <div style={{fontSize:"20px",fontWeight:"900",color:"#60a5fa"}}>{niResult.niPct}%</div>
                       </div>
                       <div style={{background:"#1a0c3e",borderRadius:"8px",padding:"10px",textAlign:"center"}}>
-                        <div style={{fontSize:"10px",color:"#c4b5fd",marginBottom:"4px"}}>מס בריאות</div>
+                        <div style={{fontSize:"10px",color:"#c4b5fd",marginBottom:"4px"}}>{t("ded_health")}</div>
                         <div style={{fontSize:"20px",fontWeight:"900",color:"#a78bfa"}}>{niResult.healthPct}%</div>
                       </div>
                     </div>
-                    <div style={{fontSize:"10px",color:"#22c55e",textAlign:"center",marginTop:"8px",fontWeight:"700"}}>✓ עודכן אוטומטית</div>
+                    <div style={{fontSize:"10px",color:"#22c55e",textAlign:"center",marginTop:"8px",fontWeight:"700"}}>{t("ob_s2_updated")}</div>
                   </div>
                 )}
               </div>
 
               <div style={CARD}>
-                <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"12px"}}>עריכה ידנית</div>
-                <Field label="מס הכנסה (%)" hint="בדוק בתלוש שלך">
+                <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"12px"}}>{t("ob_s2_manual")}</div>
+                <Field label={t("sg_tax_pct")} hint={t("ob_s2_tax_hint")}>
                   <NumInput value={form.taxRate} onChange={v=>setForm(f=>({...f,taxRate:v}))} step={0.1} min={0} max={50}/>
                 </Field>
-                <Field label="ביטוח לאומי (%)">
+                <Field label={t("sg_ni_pct")}>
                   <NumInput value={form.bituachLeumi} onChange={v=>setForm(f=>({...f,bituachLeumi:v}))} step={0.1} min={0}/>
                 </Field>
-                <Field label="מס בריאות (%)">
+                <Field label={t("sg_health_pct")}>
                   <NumInput value={form.masBriut} onChange={v=>setForm(f=>({...f,masBriut:v}))} step={0.1} min={0}/>
                 </Field>
                 <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"#0d1117",borderRadius:"10px",padding:"12px",marginTop:"4px"}}>
                   <div>
-                    <div style={{fontSize:"13px",fontWeight:"700",color:"#e2e8f0"}}>הפעל חישוב ניכויים</div>
-                    <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>הצג שכר נטו בדשבורד</div>
+                    <div style={{fontSize:"13px",fontWeight:"700",color:"#e2e8f0"}}>{t("ob_s2_enable_ded")}</div>
+                    <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>{t("ob_s2_enable_ded_h")}</div>
                   </div>
                   <Toggle on={form.enableDeductions} onToggle={()=>setForm(f=>({...f,enableDeductions:!f.enableDeductions}))}/>
                 </div>
@@ -3615,36 +3655,35 @@ function Onboarding({onDone,lang="he",setLang}){
           {step===3&&(
             <div>
               <div style={{...CARD,marginBottom:"14px",background:"#0c1a3e",border:"1px solid #1e3a8a"}}>
-                <div style={{fontSize:"11px",color:"#93c5fd",fontWeight:"700",marginBottom:"8px"}}>💡 חשוב לדעת</div>
+                <div style={{fontSize:"11px",color:"#93c5fd",fontWeight:"700",marginBottom:"8px"}}>{t("ob_s3_tip_title")}</div>
                 <div style={{fontSize:"11px",color:"#4b5563",lineHeight:"1.7"}}>
-                  פנסיה וקרן השתלמות מחושבות <span style={{color:"#93c5fd",fontWeight:"700"}}>רק על שכר הבסיס</span> — ללא שעות נוספות ותוספות. כך לפי חוק.
+                  {t("ob_s3_tip")}<span style={{color:"#93c5fd",fontWeight:"700"}}>{t("ob_s3_base_only")}</span>{t("ob_s3_tip_sfx")}
                 </div>
               </div>
 
               <div style={CARD}>
-                <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"14px"}}>🏦 פנסיה</div>
+                <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"14px"}}>{t("sv_pension")}</div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"14px"}}>
-                  <Field label="עובד (%)">
+                  <Field label={t("ob_s3_employee")}>
                     <NumInput value={form.pensionEmployee} onChange={v=>setForm(f=>({...f,pensionEmployee:v}))} step={0.5} min={0}/>
                   </Field>
-                  <Field label="מעסיק (%)">
+                  <Field label={t("ob_s3_employer")}>
                     <NumInput value={form.pensionEmployer} onChange={v=>setForm(f=>({...f,pensionEmployer:v}))} step={0.5} min={0}/>
                   </Field>
                 </div>
                 <div style={{height:"1px",background:"#1f2937",margin:"4px 0 14px"}}/>
-                <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"14px"}}>📈 קרן השתלמות</div>
+                <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"14px"}}>{t("sv_keren")}</div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
-                  <Field label="עובד (%)">
+                  <Field label={t("ob_s3_employee")}>
                     <NumInput value={form.kerenEmployee} onChange={v=>setForm(f=>({...f,kerenEmployee:v}))} step={0.5} min={0}/>
                   </Field>
-                  <Field label="מעסיק (%)">
+                  <Field label={t("ob_s3_employer")}>
                     <NumInput value={form.kerenEmployer} onChange={v=>setForm(f=>({...f,kerenEmployer:v}))} step={0.5} min={0}/>
                   </Field>
                 </div>
                 <div style={{background:"#0d1117",borderRadius:"10px",padding:"10px",marginTop:"12px"}}>
-                  <div style={{fontSize:"11px",color:"#6b7280",lineHeight:"1.6"}}>
-                    📋 מינימום חוקי לפנסיה: עובד 6%, מעסיק 6.5%<br/>
-                    📋 קרן השתלמות: עובד 2.5%, מעסיק 7.5%
+                  <div style={{fontSize:"11px",color:"#6b7280",lineHeight:"1.6",whiteSpace:"pre-line"}}>
+                    {t("ob_s3_legal")}
                   </div>
                 </div>
               </div>
@@ -3655,9 +3694,9 @@ function Onboarding({onDone,lang="he",setLang}){
           {step===4&&(
             <div>
               <div style={{...CARD,marginBottom:"12px",background:"#0d1f12",border:"1px solid #14532d"}}>
-                <div style={{fontSize:"11px",color:"#4ade80",fontWeight:"700",marginBottom:"6px"}}>💡 מה זה תוספות?</div>
+                <div style={{fontSize:"11px",color:"#4ade80",fontWeight:"700",marginBottom:"6px"}}>{t("ob_s4_tip_title")}</div>
                 <div style={{fontSize:"11px",color:"#4b5563",lineHeight:"1.7"}}>
-                  סכומים קבועים שמתווספים לכל משמרת — למשל דמי נסיעות או כלכלה. אם אין לך — לחץ הבא.
+                  {t("ob_s4_tip")}
                 </div>
               </div>
 
@@ -3668,9 +3707,9 @@ function Onboarding({onDone,lang="he",setLang}){
                     <div key={a.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",...CARD,marginBottom:"8px"}}>
                       <div>
                         <div style={{fontSize:"13px",fontWeight:"700",color:"#e2e8f0"}}>{a.name}</div>
-                        <div style={{fontSize:"11px",color:"#6b7280"}}>{a.type==="per_shift"?"לכל משמרת":"חודשי"} · ₪{a.amount}</div>
+                        <div style={{fontSize:"11px",color:"#6b7280"}}>{a.type==="per_shift"?t("sg_per_shift"):t("ob_s4_monthly_short")} · ₪{a.amount}</div>
                       </div>
-                      <button onClick={()=>setAls(x=>x.filter(x=>x.id!==a.id))} style={{background:"#2d0505",border:"none",color:"#f87171",borderRadius:"8px",padding:"6px 10px",cursor:"pointer",fontSize:"12px"}}>הסר</button>
+                      <button onClick={()=>setAls(x=>x.filter(x=>x.id!==a.id))} style={{background:"#2d0505",border:"none",color:"#f87171",borderRadius:"8px",padding:"6px 10px",cursor:"pointer",fontSize:"12px"}}>{t("ob_s4_remove")}</button>
                     </div>
                   ))}
                 </div>
@@ -3678,21 +3717,21 @@ function Onboarding({onDone,lang="he",setLang}){
 
               {/* Add new allowance */}
               <div style={CARD}>
-                <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"12px"}}>➕ הוסף תוספת</div>
-                <Field label="שם התוספת">
-                  <input type="text" value={newAl.name} onChange={e=>setNewAl(a=>({...a,name:e.target.value}))} placeholder="נסיעות, כלכלה, אחר..." style={SI}/>
+                <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"12px"}}>{t("ob_s4_add_hdr")}</div>
+                <Field label={t("ob_s4_name")}>
+                  <input type="text" value={newAl.name} onChange={e=>setNewAl(a=>({...a,name:e.target.value}))} placeholder={t("ob_s4_placeholder")} style={SI}/>
                 </Field>
-                <Field label="סוג">
+                <Field label={t("sg_type")}>
                   <select value={newAl.type} onChange={e=>setNewAl(a=>({...a,type:e.target.value}))} style={SI}>
-                    <option value="per_shift">לכל משמרת</option>
-                    <option value="per_month">חודשי (קבוע)</option>
+                    <option value="per_shift">{t("sg_per_shift")}</option>
+                    <option value="per_month">{t("ob_s4_fixed_monthly")}</option>
                   </select>
                 </Field>
-                <Field label="סכום (₪)">
+                <Field label={t("sg_amount")}>
                   <NumInput value={parseFloat(newAl.amount)||0} onChange={v=>setNewAl(a=>({...a,amount:String(v)}))} step={1} min={0}/>
                 </Field>
                 {alErr&&<div style={{color:"#f87171",fontSize:"12px",marginBottom:"8px"}}>⚠ {alErr}</div>}
-                <Btn onClick={addAl} color="#052e16" textColor="#4ade80" style={{border:"1px solid #166534",fontSize:"13px"}}>+ הוסף תוספת</Btn>
+                <Btn onClick={addAl} color="#052e16" textColor="#4ade80" style={{border:"1px solid #166534",fontSize:"13px"}}>{t("ob_s4_add_btn")}</Btn>
               </div>
             </div>
           )}
@@ -3709,14 +3748,14 @@ function Onboarding({onDone,lang="he",setLang}){
               <div style={{...CARD,marginBottom:"14px"}}>
                 <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"12px"}}>{t("ob_summary")}</div>
                 {[
-                  {l:"שכר בסיס",v:`₪${form.baseRate}/שעה`},
-                  {l:"שעות עבודה ביום רגיל",v:`${form.overtimeThreshold} שעות`},
-                  {l:"מס הכנסה",v:`${form.taxRate}%`},
-                  {l:"ביטוח לאומי",v:`${form.bituachLeumi}%`},
-                  {l:"מס בריאות",v:`${form.masBriut}%`},
-                  {l:"פנסיה עובד/מעסיק",v:`${form.pensionEmployee}%/${form.pensionEmployer}%`},
-                  {l:"קרן השתלמות עובד/מעסיק",v:`${form.kerenEmployee}%/${form.kerenEmployer}%`},
-                  {l:"תוספות",v:als.length>0?als.map(a=>a.name).join(", "):"ללא"},
+                  {l:t("ob_s5_base_rate"),v:`₪${form.baseRate}${t("ob_s5_per_h")}`},
+                  {l:t("sg_daily_h"),v:`${form.overtimeThreshold} ${t("ob_s5_hours_unit")}`},
+                  {l:t("ded_tax"),v:`${form.taxRate}%`},
+                  {l:t("ded_ni"),v:`${form.bituachLeumi}%`},
+                  {l:t("ded_health"),v:`${form.masBriut}%`},
+                  {l:t("ob_s5_pension"),v:`${form.pensionEmployee}%/${form.pensionEmployer}%`},
+                  {l:t("ob_s5_keren"),v:`${form.kerenEmployee}%/${form.kerenEmployer}%`},
+                  {l:t("ob_s5_allowances"),v:als.length>0?als.map(a=>a.name).join(", "):t("ob_s5_none")},
                 ].map((r,i)=>(
                   <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"7px 0",borderBottom:i<7?"1px solid #1f2937":"none"}}>
                     <span style={{fontSize:"12px",color:"#9ca3af"}}>{r.l}</span>
