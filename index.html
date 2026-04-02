@@ -122,6 +122,14 @@ const TR={
     ot_b0t:"יומי + שבועי ביחד!",ot_b0s:"הארנק שלך מפרגן לך 💸🔥",
     ot_b1t:"כפל שעות נוספות!",ot_b1s:"אתה ממש מתאמץ היום 🔥",
     ot_daily:"⏱ יומי:",ot_weekly:"📅 שבועי:",ot_above_th:"ש׳ מעל הסף",
+    // Clock screen
+    cl_shift:"משמרת",cl_active:"פעילה",cl_start:"התחלה",cl_elapsed:"זמן עבודה",
+    cl_net:"שכר נטו",cl_gross_pfx:"ברוטו",cl_calc:"פירוט חישוב",cl_gross_lbl:"ברוטו",cl_net_lbl:"נטו",
+    cl_in:"כניסה למשמרת",cl_in_hint:"לחץ כניסה כשמתחיל המשמרת · השעה תירשם אוטומטית",
+    cl_note_ph:"הערה אופציונלית (חג, שעות מיוחדות...)",cl_out:"סיום משמרת",
+    cl_short_t:"כבר סיימת משמרת??",cl_short_s:"על מי את/ה עובד/ת",cl_no_rec:"לא מתעד",
+    cl_recording:"מתחיל לרשום...",cl_saved:"משמרת נשמרה ✓",
+    st_regular:"רגיל",st_afternoon:"צהריים",st_night:"לילה",locale:"he-IL",
   },
   ru:{
     ob_skip:"Пропустить →",ob_back:"← Назад",ob_next:"Далее →",ob_start:"Начнём →",ob_enter:"🚀 Войти в приложение",
@@ -161,6 +169,14 @@ const TR={
     ot_b0t:"Дневные + недельные вместе!",ot_b0s:"Твой кошелёк благодарит тебя 💸🔥",
     ot_b1t:"Двойные сверхурочные!",ot_b1s:"Ты очень стараешься сегодня 🔥",
     ot_daily:"⏱ Дневные:",ot_weekly:"📅 Недельные:",ot_above_th:"ч выше порога",
+    // Clock screen
+    cl_shift:"Смена",cl_active:"активна",cl_start:"Начало",cl_elapsed:"Время работы",
+    cl_net:"Чистая",cl_gross_pfx:"Брутто",cl_calc:"Детали расчёта",cl_gross_lbl:"Брутто",cl_net_lbl:"Нетто",
+    cl_in:"Начать смену",cl_in_hint:"Нажмите начало · время запишется автоматически",
+    cl_note_ph:"Необязательная заметка...",cl_out:"Закончить смену",
+    cl_short_t:"Уже закончил смену??",cl_short_s:"Кого ты пытаешься обмануть",cl_no_rec:"Не записываю",
+    cl_recording:"Начинаю запись...",cl_saved:"Смена сохранена ✓",
+    st_regular:"обычная",st_afternoon:"дневная",st_night:"ночная",locale:"ru-RU",
   },
 };
 const DEF_VAC={currentBalance:0,sickBalance:0,accrualPerMonth:1.5,startDate:""};
@@ -772,6 +788,7 @@ function playSound(type){
 // LIVE EARNINGS DURING SHIFT
 // ════════════════════════════════════════
 function LiveEarnings({clockIn,cfg,selAls,als,privacyMode}){
+  const uT=useT();
   const[now,setNow]=useState(()=>new Date());
   const[showDetails,setShowDetails]=useState(false);
   const[coins,setCoins]=useState([]);
@@ -802,8 +819,8 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode}){
   const net=ded?ded.net:gross;
   // סוג משמרת נוכחי לפי שעה (מתעדכן אוטומטית)
   const curShiftType=clockIn.customMult?clockIn.type:detectShiftType(new Date(now).getHours());
-  const t=ST[curShiftType]||ST.regular;
-  const ratePerHour=cfg.baseRate*(clockIn.customMult?clockIn.customMult/100:t.mult);
+  const sty=ST[curShiftType]||ST.regular;
+  const ratePerHour=cfg.baseRate*(clockIn.customMult?clockIn.customMult/100:sty.mult);
 
   const hh=Math.floor(diffSec/3600);
   const mm=Math.floor((diffSec%3600)/60);
@@ -812,7 +829,7 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode}){
 
   return(
     <div style={{marginBottom:"10px"}}>
-      <div style={{background:"linear-gradient(145deg,#052e16,#0a3a1a)",border:`1px solid ${t.color}55`,borderRadius:"18px",padding:"14px 16px",position:"relative",overflow:"hidden"}}>
+      <div style={{background:"linear-gradient(145deg,#052e16,#0a3a1a)",border:`1px solid ${sty.color}55`,borderRadius:"18px",padding:"14px 16px",position:"relative",overflow:"hidden"}}>
 
         {/* Floating coins */}
         {coins.map(coin=>(
@@ -826,21 +843,21 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode}){
         {/* Row 1: type + start time */}
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}}>
           <div style={{display:"flex",alignItems:"center",gap:"5px"}}>
-            <span style={{fontSize:"14px"}}>{t.icon}</span>
-            <span style={{fontSize:"12px",color:t.color,fontWeight:"700"}}>משמרת {t.label} פעילה</span>
+            <span style={{fontSize:"14px"}}>{sty.icon}</span>
+            <span style={{fontSize:"12px",color:sty.color,fontWeight:"700"}}>{uT("cl_shift")} {uT("st_"+curShiftType)} {uT("cl_active")}</span>
           </div>
-          <span style={{fontSize:"11px",color:"#4b5563"}}>התחלה {clockIn.time}</span>
+          <span style={{fontSize:"11px",color:"#4b5563"}}>{uT("cl_start")} {clockIn.time}</span>
         </div>
 
         {/* Row 2: timer (right) + net earnings (left) */}
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
-            <div style={{fontSize:"10px",color:"#6b7280",marginBottom:"2px"}}>זמן עבודה</div>
+            <div style={{fontSize:"10px",color:"#6b7280",marginBottom:"2px"}}>{uT("cl_elapsed")}</div>
             <div style={{fontSize:"26px",fontWeight:"900",color:"#f1f5f9",letterSpacing:"2px",fontVariantNumeric:"tabular-nums"}}>{elapsedStr}</div>
-            <div style={{fontSize:"10px",color:"#4b5563",marginTop:"1px"}}>{fH(hours)} שעות</div>
+            <div style={{fontSize:"10px",color:"#4b5563",marginTop:"1px"}}>{fH(hours)} {uT("hr")}</div>
           </div>
           <div style={{textAlign:"left"}}>
-            <div style={{fontSize:"10px",color:"#86efac",marginBottom:"2px"}}>שכר נטו</div>
+            <div style={{fontSize:"10px",color:"#86efac",marginBottom:"2px"}}>{uT("cl_net")}</div>
             <div style={{
               fontSize:"38px",fontWeight:"900",color:"#4ade80",
               fontVariantNumeric:"tabular-nums",letterSpacing:"-1px",
@@ -851,7 +868,7 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode}){
               userSelect:privacyMode?"none":"auto",
             }}>{fM(net)}</div>
             <div style={{display:"flex",justifyContent:"flex-end",alignItems:"center",gap:"5px",marginTop:"1px"}}>
-              <span style={{fontSize:"10px",color:"#4b5563",filter:privacyMode?"blur(6px)":"none"}}>ברוטו {fM(gross)}</span>
+              <span style={{fontSize:"10px",color:"#4b5563",filter:privacyMode?"blur(6px)":"none"}}>{uT("cl_gross_pfx")} {fM(gross)}</span>
               <button onClick={()=>setShowDetails(!showDetails)} style={{width:"16px",height:"16px",borderRadius:"50%",background:"#1f2937",border:"1px solid #374151",color:"#6b7280",fontSize:"10px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>ℹ</button>
             </div>
           </div>
@@ -860,13 +877,13 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode}){
         {/* Details panel */}
         {showDetails&&(
           <div style={{marginTop:"10px",background:"#0d1117",borderRadius:"10px",padding:"10px",filter:privacyMode?"blur(8px)":"none",transition:"filter 0.25s ease",userSelect:privacyMode?"none":"auto"}}>
-            <div style={{fontSize:"10px",color:"#6b7280",fontWeight:"700",marginBottom:"6px",textAlign:"center"}}>פירוט חישוב</div>
-            {[{l:"ברוטו",v:gross,c:"#e2e8f0",neg:false},...(ded?[
-              {l:`מס הכנסה ${cfg.taxRate}%`,v:ded.tx,c:"#f87171",neg:true},
-              {l:`ביטוח לאומי ${cfg.bituachLeumi}%`,v:ded.bl,c:"#f87171",neg:true},
-              {l:`מס בריאות ${cfg.masBriut}%`,v:ded.br,c:"#f87171",neg:true},
-              {l:`פנסיה ${cfg.pensionEmployee}%`,v:ded.pe,c:"#f87171",neg:true},
-              {l:`קרן ${cfg.kerenEmployee}%`,v:ded.ke,c:"#f87171",neg:true},
+            <div style={{fontSize:"10px",color:"#6b7280",fontWeight:"700",marginBottom:"6px",textAlign:"center"}}>{uT("cl_calc")}</div>
+            {[{l:uT("cl_gross_lbl"),v:gross,c:"#e2e8f0",neg:false},...(ded?[
+              {l:`${uT("ded_tax")} ${cfg.taxRate}%`,v:ded.tx,c:"#f87171",neg:true},
+              {l:`${uT("ded_ni")} ${cfg.bituachLeumi}%`,v:ded.bl,c:"#f87171",neg:true},
+              {l:`${uT("ded_health")} ${cfg.masBriut}%`,v:ded.br,c:"#f87171",neg:true},
+              {l:`${uT("ded_pension_e")} ${cfg.pensionEmployee}%`,v:ded.pe,c:"#f87171",neg:true},
+              {l:`${uT("ded_keren_e")} ${cfg.kerenEmployee}%`,v:ded.ke,c:"#f87171",neg:true},
             ]:[])].map((r,i)=>(
               <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderBottom:"1px solid #1f293766"}}>
                 <span style={{fontSize:"11px",color:"#9ca3af"}}>{r.l}</span>
@@ -874,7 +891,7 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode}){
               </div>
             ))}
             <div style={{display:"flex",justifyContent:"space-between",padding:"5px 0 0"}}>
-              <span style={{fontSize:"12px",color:"#4ade80",fontWeight:"700"}}>נטו</span>
+              <span style={{fontSize:"12px",color:"#4ade80",fontWeight:"700"}}>{uT("cl_net_lbl")}</span>
               <span style={{fontSize:"12px",color:"#4ade80",fontWeight:"700"}}>{fM(net)}</span>
             </div>
           </div>
@@ -941,6 +958,8 @@ function ShiftBg({type}){
 // CLOCK IN/OUT SCREEN (main screen)
 // ════════════════════════════════════════
 function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
+  const uT=useT();
+  const lang=React.useContext(LangCtx);
   const[tick,setTick]=useState(0);
   const[selAls,setSelAls]=useState([]);
   const[note,setNote]=useState("");
@@ -1005,7 +1024,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
 
   const now=new Date();
   const curType=clockIn?clockIn.type:detectShiftType(now.getHours());
-  const t=ST[curType]||ST.regular;
+  const sty=ST[curType]||ST.regular;
 
   // Funny message overlay
   if(inMsg||outMsg||shortMsg){
@@ -1014,9 +1033,9 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
         <div style={{padding:"40px 24px",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"60vh",textAlign:"center"}}>
           <div style={{fontSize:"72px",marginBottom:"20px"}}>⏱️</div>
           <div style={{fontSize:"20px",fontWeight:"900",color:"#f97316",lineHeight:"1.6",marginBottom:"16px"}}>
-            כבר סיימת משמרת??<br/>על מי את/ה עובד/ת
+            {uT("cl_short_t")}<br/>{uT("cl_short_s")}
           </div>
-          <div style={{fontSize:"16px",color:"#6b7280",marginBottom:"8px"}}>לא מתעד</div>
+          <div style={{fontSize:"16px",color:"#6b7280",marginBottom:"8px"}}>{uT("cl_no_rec")}</div>
         </div>
       );
     }
@@ -1036,7 +1055,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
           {msg.text}
         </div>
         <div style={{fontSize:"13px",color:"#4b5563"}}>
-          {isIn?"מתחיל לרשום...":"משמרת נשמרה ✓"}
+          {isIn?uT("cl_recording"):uT("cl_saved")}
         </div>
       </div>
     );
@@ -1055,12 +1074,12 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
       {/* Header: date + clock + badge */}
       <div style={{textAlign:"center",marginBottom:"12px",position:"relative",zIndex:5}}>
         <div style={{fontSize:"12px",color:"#6b7280",marginBottom:"2px"}}>
-          {new Date().toLocaleDateString("he-IL",{weekday:"long",day:"numeric",month:"long"})}
+          {new Date().toLocaleDateString(uT("locale"),{weekday:"long",day:"numeric",month:"long"})}
         </div>
         <LiveClock/>
         <div style={{display:"inline-flex",alignItems:"center",gap:"6px",background:t.bg,border:`1px solid ${t.color}`,borderRadius:"20px",padding:"3px 12px",marginTop:"6px"}}>
-          <span style={{fontSize:"13px"}}>{t.icon}</span>
-          <span style={{fontSize:"12px",color:t.color,fontWeight:"700"}}>משמרת {t.label}</span>
+          <span style={{fontSize:"13px"}}>{sty.icon}</span>
+          <span style={{fontSize:"12px",color:sty.color,fontWeight:"700"}}>{uT("cl_shift")} {uT("st_"+curType)}</span>
         </div>
       </div>
 
@@ -1075,11 +1094,11 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
             animation:"glowPulse 2.5s ease-in-out infinite",
           }}>
             <div style={{fontSize:"48px"}}>▶</div>
-            <div style={{fontSize:"22px",fontWeight:"900",color:"#4ade80"}}>כניסה למשמרת</div>
+            <div style={{fontSize:"22px",fontWeight:"900",color:"#4ade80"}}>{uT("cl_in")}</div>
             <div style={{fontSize:"12px",color:"#86efac"}}>{nowTime()}</div>
           </button>
           <div style={{marginTop:"12px",textAlign:"center",fontSize:"12px",color:"#374151"}}>
-            לחץ כניסה כשמתחיל המשמרת · השעה תירשם אוטומטית
+            {uT("cl_in_hint")}
           </div>
         </div>
       ):(
@@ -1097,7 +1116,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
           )}
 
           <input type="text" value={note} onChange={e=>setNote(e.target.value)}
-            placeholder="הערה אופציונלית (חג, שעות מיוחדות...)"
+            placeholder={uT("cl_note_ph")}
             style={{...SI,fontSize:"13px",marginBottom:"10px",width:"100%",boxSizing:"border-box"}}/>
 
           <button onClick={handleClockOut} style={{
@@ -1108,7 +1127,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
             boxShadow:"0 0 24px #ef444433",
           }}>
             <div style={{fontSize:"36px"}}>⏹</div>
-            <div style={{fontSize:"19px",fontWeight:"900",color:"#f87171"}}>סיום משמרת</div>
+            <div style={{fontSize:"19px",fontWeight:"900",color:"#f87171"}}>{uT("cl_out")}</div>
           </button>
         </div>
       )}
