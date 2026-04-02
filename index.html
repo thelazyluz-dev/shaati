@@ -1368,6 +1368,9 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
   const t=useT();
   const[nowStr,setNowStr]=useState(nowTime());
   useEffect(()=>{const id=setInterval(()=>setNowStr(nowTime()),30000);return()=>clearInterval(id);},[]);
+  const[showNet,setShowNet]=useState(true);
+  const[flipKey,setFlipKey]=useState(0);
+  const toggleCard=()=>{setShowNet(v=>!v);setFlipKey(k=>k+1);};
   const ms=shifts.filter(s=>s.date.startsWith(selM));
   const wMap=buildWeeklyThresholdMap(shifts,cfg);
   let tG=0,tA=0,tH=0,regH=0,aftH=0,ngtH=0,ot125=0,ot150=0,tBase=0;
@@ -1441,8 +1444,19 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
         </div>
       )}
 
-      <div style={{background:"linear-gradient(145deg,#052e16,#14532d)",border:"1px solid #166534",borderRadius:"18px",padding:"20px",marginBottom:"12px",textAlign:"center",position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",top:"-20px",right:"-20px",width:"80px",height:"80px",background:"#22c55e22",borderRadius:"50%"}}/>
+      <div
+        onClick={ded?(()=>toggleCard()):undefined}
+        style={{
+          background:"linear-gradient(145deg,#041f10,#0a3a1a,#14532d)",
+          border:"1px solid #166534",borderRadius:"18px",padding:"20px",
+          marginBottom:"12px",textAlign:"center",position:"relative",overflow:"hidden",
+          cursor:ded?"pointer":"default",
+          boxShadow:"0 4px 24px #22c55e18",
+        }}>
+        {/* Decorative circles */}
+        <div style={{position:"absolute",top:"-30px",right:"-30px",width:"100px",height:"100px",background:"#22c55e18",borderRadius:"50%",pointerEvents:"none"}}/>
+        <div style={{position:"absolute",bottom:"-20px",left:"-20px",width:"70px",height:"70px",background:"#22c55e0e",borderRadius:"50%",pointerEvents:"none"}}/>
+
         {ms.length===0&&holPay===0?(
           <div style={{padding:"10px 0"}}>
             <div style={{fontSize:"36px",marginBottom:"10px"}}>📭</div>
@@ -1451,33 +1465,50 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
           </div>
         ):ded?(
           <>
-            <div style={{fontSize:"11px",color:"#86efac",letterSpacing:"1.5px",fontWeight:"700",marginBottom:"4px"}}>{t("d_taxable")}</div>
-            <div style={{fontSize:"28px",fontWeight:"900",color:"#4ade80"}}>{prv(dedBase,privacyMode)}</div>
-            <div style={{fontSize:"11px",color:"#86efac88",marginTop:"2px"}}>{prv(tG,privacyMode)} {t("d_salary")} + {prv(tA,privacyMode)} {t("d_allowances")}</div>
-            <div style={{height:"1px",background:"#166534",margin:"12px 0 10px"}}/>
-            <div style={{display:"flex",justifyContent:"space-around",alignItems:"center"}}>
-              <div>
-                <div style={{fontSize:"10px",color:"#86efac",marginBottom:"3px"}}>{t("d_deductions")}</div>
-                <div style={{fontSize:"17px",fontWeight:"800",color:"#f87171"}}>-{prv(ded.tot,privacyMode)}</div>
-                <div style={{fontSize:"10px",color:"#f8717188"}}>{(ded.tot/dedBase*100).toFixed(1)}{t("d_pct_income")}</div>
-              </div>
-              <div style={{width:"1px",background:"#166534",height:"40px"}}/>
-              <div>
-                <div style={{fontSize:"10px",color:"#86efac",marginBottom:"3px"}}>{t("d_net")}</div>
-                <div style={{fontSize:"20px",fontWeight:"900",color:"#4ade80"}}>{prv(net,privacyMode)}</div>
-              </div>
+            {/* Toggle pill */}
+            <div style={{display:"inline-flex",background:"#041f10",borderRadius:"20px",padding:"3px",marginBottom:"14px",border:"1px solid #166534"}}>
+              {[{v:true,lbl:t("d_neto")},{v:false,lbl:t("cl_gross_lbl")}].map(({v,lbl})=>(
+                <div key={String(v)} onClick={e=>{e.stopPropagation();setShowNet(v);setFlipKey(k=>k+1);}} style={{
+                  padding:"4px 14px",borderRadius:"16px",fontSize:"11px",fontWeight:"700",cursor:"pointer",
+                  background:showNet===v?"#22c55e":"none",
+                  color:showNet===v?"#000":"#4b5563",
+                  transition:"all 0.2s ease",
+                }}>{lbl}</div>
+              ))}
             </div>
-            {cfg.monthlyGoal>0&&(()=>{const pct=Math.min(100,Math.round(net/cfg.monthlyGoal*100));return(
-              <div style={{marginTop:"12px",width:"100%"}}>
-                <div style={{display:"flex",justifyContent:"space-between",fontSize:"11px",color:"#6b7280",marginBottom:"4px"}}>
-                  <span>{t("d_goal_net")}</span><span style={{color:pct>=100?"#4ade80":"#6b7280"}}>{pct}%</span>
-                </div>
-                <div style={{background:"#0d2818",borderRadius:"6px",height:"8px",overflow:"hidden"}}>
-                  <div style={{width:`${pct}%`,height:"100%",background:pct>=100?"linear-gradient(90deg,#4ade80,#22d3ee)":"linear-gradient(90deg,#22c55e,#4ade80)",borderRadius:"6px",transition:"width 0.3s"}}/>
-                </div>
-                <div style={{fontSize:"10px",color:"#6b7280",marginTop:"3px"}}>{prv(net,privacyMode)} {t("d_of")} {prv(cfg.monthlyGoal,privacyMode)} {t("d_neto")}</div>
+            {/* Main number — animates on flip */}
+            <div key={flipKey} style={{animation:"staggerIn 0.2s ease-out"}}>
+              <div style={{fontSize:"11px",color:"#86efac99",letterSpacing:"1px",fontWeight:"700",marginBottom:"4px"}}>
+                {showNet?t("d_net"):t("d_taxable")}
               </div>
-            );})()}
+              <div style={{fontSize:"40px",fontWeight:"900",color:"#4ade80",letterSpacing:"-2px",lineHeight:1}}>
+                {prv(showNet?net:dedBase,privacyMode)}
+              </div>
+              {showNet?(
+                <div style={{fontSize:"11px",color:"#86efac55",marginTop:"4px"}}>
+                  {t("cl_gross_lbl")} {prv(dedBase,privacyMode)} · {t("d_deductions")} -{prv(ded.tot,privacyMode)}
+                </div>
+              ):(
+                <div style={{fontSize:"11px",color:"#86efac55",marginTop:"4px"}}>
+                  {prv(tG,privacyMode)} {t("d_salary")} + {prv(tA,privacyMode)} {t("d_allowances")}
+                </div>
+              )}
+            </div>
+            {cfg.monthlyGoal>0&&(()=>{
+              const goalVal=showNet?net:dedBase;
+              const pct=Math.min(100,Math.round(goalVal/cfg.monthlyGoal*100));
+              return(
+                <div style={{marginTop:"14px",width:"100%"}}>
+                  <div style={{display:"flex",justifyContent:"space-between",fontSize:"11px",color:"#6b7280",marginBottom:"5px"}}>
+                    <span>{t("d_goal_net")}</span><span style={{color:pct>=100?"#4ade80":"#6b7280",fontWeight:"700"}}>{pct}%</span>
+                  </div>
+                  <div style={{background:"#041f10",borderRadius:"6px",height:"8px",overflow:"hidden"}}>
+                    <div style={{width:`${pct}%`,height:"100%",background:pct>=100?"linear-gradient(90deg,#4ade80,#22d3ee)":"linear-gradient(90deg,#16a34a,#4ade80)",borderRadius:"6px",transition:"width 0.4s ease"}}/>
+                  </div>
+                  <div style={{fontSize:"10px",color:"#6b7280",marginTop:"3px"}}>{prv(goalVal,privacyMode)} {t("d_of")} {prv(cfg.monthlyGoal,privacyMode)}</div>
+                </div>
+              );
+            })()}
           </>
         ):(
           <>
@@ -1488,16 +1519,16 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
                 <div style={{display:"flex",justifyContent:"space-between",fontSize:"11px",color:"#6b7280",marginBottom:"4px"}}>
                   <span>{t("d_goal")}</span><span style={{color:pct>=100?"#4ade80":"#6b7280"}}>{pct}%</span>
                 </div>
-                <div style={{background:"#1f2937",borderRadius:"6px",height:"8px",overflow:"hidden"}}>
-                  <div style={{width:`${pct}%`,height:"100%",background:pct>=100?"linear-gradient(90deg,#4ade80,#22d3ee)":"linear-gradient(90deg,#22c55e,#4ade80)",borderRadius:"6px",transition:"width 0.3s"}}/>
+                <div style={{background:"#041f10",borderRadius:"6px",height:"8px",overflow:"hidden"}}>
+                  <div style={{width:`${pct}%`,height:"100%",background:pct>=100?"linear-gradient(90deg,#4ade80,#22d3ee)":"linear-gradient(90deg,#16a34a,#4ade80)",borderRadius:"6px",transition:"width 0.4s ease"}}/>
                 </div>
                 <div style={{fontSize:"10px",color:"#6b7280",marginTop:"3px"}}>{prv(tG+tA,privacyMode)} {t("d_of")} {prv(cfg.monthlyGoal,privacyMode)}</div>
               </div>
             );})()}
           </>
         )}
-        {(ms.length>0||holPay>0)&&<div style={{color:"#4ade8080",fontSize:"12px",marginTop:"10px"}}>{fH(tH)} {t("d_hours")} · {ms.filter(s=>!isSpecialDay(s.type)).length} {t("d_shifts")}{autoHolDays.length>0?` + ${autoHolDays.length} ${t("d_hol_days")}`:""}</div>}
-        {holPay>0&&<div style={{fontSize:"11px",color:"#fcd34d",marginTop:"6px"}}>✡️ {autoHolDays.length} {t("d_paid_hol")} · {prv(holPay,privacyMode)}</div>}
+        {(ms.length>0||holPay>0)&&<div style={{color:"#4ade8066",fontSize:"11px",marginTop:"12px"}}>{fH(tH)} {t("d_hours")} · {ms.filter(s=>!isSpecialDay(s.type)).length} {t("d_shifts")}{autoHolDays.length>0?` + ${autoHolDays.length} ${t("d_hol_days")}`:""}</div>}
+        {holPay>0&&<div style={{fontSize:"11px",color:"#fcd34d",marginTop:"4px"}}>✡️ {autoHolDays.length} {t("d_paid_hol")} · {prv(holPay,privacyMode)}</div>}
       </div>
 
       {tA>0&&(
@@ -3936,16 +3967,33 @@ function App(){
         </div>
       </div>
 
-      {/* Bottom nav — flexShrink:0 guarantees it stays at bottom */}
+      {/* Bottom nav — sliding pill indicator */}
       <div style={{flexShrink:0,background:"#0d1117",borderTop:"1px solid #1f2937",zIndex:20,paddingBottom:"env(safe-area-inset-bottom, 4px)"}}>
-        <div style={{display:"flex",width:"100%"}}>
-        {tabs.map(t=>(
-          <button key={t.id} onClick={()=>switchTab(t.id)} style={{flex:1,padding:"8px 0 10px",background:"none",border:"none",cursor:"pointer",color:tab===t.id?"#4ade80":"#4b5563"}}>
-            <div style={{fontSize:"18px"}}>{t.icon}</div>
-            <div style={{fontSize:"9px",fontWeight:tab===t.id?"800":"400",marginTop:"3px",letterSpacing:"-0.2px"}}>{t.label}</div>
-            {tab===t.id&&<div style={{width:"16px",height:"2px",background:"#4ade80",borderRadius:"2px",margin:"3px auto 0"}}/>}
-          </button>
-        ))}
+        <div style={{display:"flex",width:"100%",position:"relative",padding:"4px"}}>
+          {/* Sliding pill */}
+          <div style={{
+            position:"absolute",
+            top:"4px",bottom:"4px",
+            left:`calc(${tabs.findIndex(t=>t.id===tab)}*${100/tabs.length}% + 4px)`,
+            width:`calc(${100/tabs.length}% - 8px)`,
+            background:"#052e16",
+            border:"1px solid #166534",
+            borderRadius:"10px",
+            transition:"left 0.25s cubic-bezier(0.4,0,0.2,1)",
+            pointerEvents:"none",
+            zIndex:0,
+          }}/>
+          {tabs.map(t=>(
+            <button key={t.id} onClick={()=>switchTab(t.id)} style={{
+              flex:1,padding:"7px 2px 9px",background:"none",border:"none",
+              cursor:"pointer",color:tab===t.id?"#4ade80":"#4b5563",
+              position:"relative",zIndex:1,
+              transition:"color 0.2s ease",
+            }}>
+              <div style={{fontSize:"18px"}}>{t.icon}</div>
+              <div style={{fontSize:"9px",fontWeight:tab===t.id?"800":"500",marginTop:"3px",letterSpacing:"-0.2px"}}>{t.label}</div>
+            </button>
+          ))}
         </div>
       </div>
     </div>
