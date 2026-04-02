@@ -260,6 +260,12 @@ const TR={
     ob_s5_base_rate:"שכר בסיס",ob_s5_per_h:"/שעה",ob_s5_hours_unit:"שעות",
     ob_s5_pension:"פנסיה עובד/מעסיק",ob_s5_keren:"קרן השתלמות עובד/מעסיק",
     ob_s5_allowances:"תוספות",ob_s5_none:"ללא",
+    // Special day types
+    sp_vacation_lbl:"חופש בתשלום",sp_vacation_desc:"100% שכר בסיס, ללא תוספות",
+    sp_holiday_lbl:"חג",sp_holiday_desc:"100% שכר בסיס ליום חג, ללא תוספות",
+    sp_sick_1_lbl:"מחלה יום 1",sp_sick_1_desc:"0% — יום ראשון ללא תשלום (לפי חוק)",
+    sp_sick_23_lbl:"מחלה ימים 2-3",sp_sick_23_desc:"50% שכר בסיס, ללא תוספות ושעות נוספות",
+    sp_sick_4p_lbl:"מחלה יום 4+",sp_sick_4p_desc:"100% שכר בסיס, ללא תוספות ושעות נוספות",
   },
   ru:{
     ob_skip:"Пропустить →",ob_back:"← Назад",ob_next:"Далее →",ob_start:"Начнём →",ob_enter:"🚀 Войти в приложение",
@@ -437,6 +443,12 @@ const TR={
     ob_s5_base_rate:"Базовая ставка",ob_s5_per_h:"/ч",ob_s5_hours_unit:"ч",
     ob_s5_pension:"Пенсия раб-к/работодатель",ob_s5_keren:"Образ. фонд раб-к/работодатель",
     ob_s5_allowances:"Надбавки",ob_s5_none:"Нет",
+    // Special day types
+    sp_vacation_lbl:"Отпуск (оплачиваемый)",sp_vacation_desc:"100% базовой ставки, без надбавок",
+    sp_holiday_lbl:"Праздник",sp_holiday_desc:"100% базовой ставки за праздник, без надбавок",
+    sp_sick_1_lbl:"Больничный день 1",sp_sick_1_desc:"0% — первый день без оплаты (по закону)",
+    sp_sick_23_lbl:"Больничные дни 2-3",sp_sick_23_desc:"50% базовой ставки, без надбавок и сверхурочных",
+    sp_sick_4p_lbl:"Больничный день 4+",sp_sick_4p_desc:"100% базовой ставки, без надбавок и сверхурочных",
   },
 };
 const DEF_VAC={currentBalance:0,sickBalance:0,accrualPerMonth:1.5,startDate:""};
@@ -878,7 +890,7 @@ function prv(n,hidden){return hidden?"••••":fM(n);}
 function tdy(){return new Date().toISOString().split("T")[0];}
 function nowTime(){const n=new Date();return `${String(n.getHours()).padStart(2,"0")}:${String(n.getMinutes()).padStart(2,"0")}`;}
 function mLbl(ym,locale="he-IL"){const[y,m]=ym.split("-");return new Date(+y,parseInt(m)-1,1).toLocaleDateString(locale,{month:"long"})+" "+y;}
-function fD(ds){return new Date(ds+"T12:00:00").toLocaleDateString("he-IL",{weekday:"short",day:"numeric",month:"short"});}
+function fD(ds,locale="he-IL"){return new Date(ds+"T12:00:00").toLocaleDateString(locale,{weekday:"short",day:"numeric",month:"short"});}
 function elapsed(fromISO){
   const diff=Math.floor((Date.now()-new Date(fromISO).getTime())/1000);
   const h=Math.floor(diff/3600),m=Math.floor((diff%3600)/60),s=diff%60;
@@ -1913,8 +1925,8 @@ function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode}){
               {Object.entries(SPECIAL).map(([k,s])=>(
                 <button key={k} onClick={()=>setForm({...form,type:form.type===k?"regular":k})} style={{padding:"10px 12px",borderRadius:"10px",cursor:"pointer",border:`1.5px solid ${form.type===k?s.color:"#2a2d3e"}`,background:form.type===k?s.bg:"#0d1117",color:form.type===k?s.color:"#6b7280",fontWeight:"700",fontSize:"12px",textAlign:"right"}}>
                   <div style={{fontSize:"16px",marginBottom:"3px"}}>{s.icon}</div>
-                  <div>{s.label}</div>
-                  <div style={{fontSize:"10px",opacity:0.7,marginTop:"2px"}}>{s.desc}</div>
+                  <div>{uT("sp_"+k+"_lbl")}</div>
+                  <div style={{fontSize:"10px",opacity:0.7,marginTop:"2px"}}>{uT("sp_"+k+"_desc")}</div>
                 </button>
               ))}
             </div>
@@ -1934,12 +1946,12 @@ function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode}){
           )}
           {prev&&(
             <div style={{background:isSpecialDay(form.type)?(SPECIAL[form.type].bg||"#111827"):"#052e16",border:`1px solid ${isSpecialDay(form.type)?SPECIAL[form.type].color+"44":"#166534"}`,borderRadius:"12px",padding:"14px",marginBottom:"14px"}}>
-              <div style={{fontSize:"11px",color:isSpecialDay(form.type)?SPECIAL[form.type].color:"#86efac",marginBottom:"8px",fontWeight:"700"}}>{isSpecialDay(form.type)?SPECIAL[form.type].icon+" "+SPECIAL[form.type].label:uT("as_preview")}</div>
+              <div style={{fontSize:"11px",color:isSpecialDay(form.type)?SPECIAL[form.type].color:"#86efac",marginBottom:"8px",fontWeight:"700"}}>{isSpecialDay(form.type)?SPECIAL[form.type].icon+" "+uT("sp_"+form.type+"_lbl"):uT("as_preview")}</div>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <div>
                   <div style={{fontSize:"13px",color:"#6b7280"}}>{fH(hours)} {uT("hr")}</div>
                   {!isSpecialDay(form.type)&&prev.ot125H>0&&<div style={{fontSize:"12px",color:"#f87171"}}>{fH(prev.ot125H)}{uT("hr")} ×125%{prev.ot150H>0?` + ${fH(prev.ot150H)}${uT("hr")} ×150%`:""}</div>}
-                  {isSpecialDay(form.type)&&<div style={{fontSize:"12px",color:"#6b7280"}}>{SPECIAL[form.type].desc}</div>}
+                  {isSpecialDay(form.type)&&<div style={{fontSize:"12px",color:"#6b7280"}}>{uT("sp_"+form.type+"_desc")}</div>}
                   {!isSpecialDay(form.type)&&aTotal>0&&<div style={{fontSize:"12px",color:"#34d399"}}>{uT("as_allowances")} {prv(aTotal,privacyMode)}</div>}
                 </div>
                 <div style={{fontSize:"24px",fontWeight:"900",color:isSpecialDay(form.type)?SPECIAL[form.type].color:"#4ade80"}}>{prv(isSpecialDay(form.type)?prev.gross:prev.gross+aTotal,privacyMode)}</div>
@@ -2069,13 +2081,13 @@ function ShiftsList({shifts,cfg,als,onDelete,onEdit,privacyMode}){
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
                   <div style={{flex:1}}>
                     <div style={{display:"flex",alignItems:"center",gap:"6px",flexWrap:"wrap"}}>
-                      <div style={{fontSize:"14px",fontWeight:"700",color:"#e2e8f0"}}>{t.icon} {fD(s.date)}</div>
+                      <div style={{fontSize:"14px",fontWeight:"700",color:"#e2e8f0"}}>{t.icon} {fD(s.date,uT("locale"))}</div>
                       {holiday&&<span style={{fontSize:"10px",color:"#fcd34d",fontWeight:"700"}}>{holiday.icon} {holiday.name}</span>}
                     </div>
                     <div style={{fontSize:"12px",color:"#6b7280",marginTop:"3px"}}>{s.start}–{s.end} · {fH(h)}{uT("hr")}</div>
                     <div style={{marginTop:"6px",display:"flex",gap:"6px",flexWrap:"wrap"}}>
                       <span style={{background:t.bg,color:t.color,fontSize:"11px",padding:"2px 8px",borderRadius:"6px",fontWeight:"700"}}>
-                        {isSpec?t.label:`${ST[s.type].label} ${Math.round(ST[s.type].mult*100)}%`}
+                        {isSpec?uT("sp_"+s.type+"_lbl"):`${uT("st_"+s.type)} ${Math.round(ST[s.type].mult*100)}%`}
                       </span>
                       {!isSpec&&c.ot125H>0&&<span style={{background:"#2d0505",color:"#f87171",fontSize:"11px",padding:"2px 8px",borderRadius:"6px",fontWeight:"700"}}>+{fH(c.ot125H)}{uT("hr")} ×{Math.round(ST[s.type].mult*125)}%</span>}
                       {!isSpec&&c.ot150H>0&&<span style={{background:"#2d0505",color:"#ef4444",fontSize:"11px",padding:"2px 8px",borderRadius:"6px",fontWeight:"700"}}>+{fH(c.ot150H)}{uT("hr")} ×{Math.round(ST[s.type].mult*150)}%</span>}
