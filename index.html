@@ -267,7 +267,7 @@ const TR={
     sp_sick_23_lbl:"מחלה ימים 2-3",sp_sick_23_desc:"50% שכר בסיס, ללא תוספות ושעות נוספות",
     sp_sick_4p_lbl:"מחלה יום 4+",sp_sick_4p_desc:"100% שכר בסיס, ללא תוספות ושעות נוספות",
     // Calendar
-    cal_no_shift:"אין משמרת מוגדרת ליום זה",cal_edit:"✏️ ערוך",cal_holiday:"חג / אירוע",
+    cal_no_shift:"אין משמרת מוגדרת ליום זה",cal_edit:"✏️ ערוך",cal_holiday:"חג",cal_paid_hol:"חג בתשלום",
     // App
     app_loading:"שעתי טוען...",app_privacy_show:"הצג סכומים",app_privacy_hide:"הסתר סכומים",
   },
@@ -454,7 +454,7 @@ const TR={
     sp_sick_23_lbl:"Больничные дни 2-3",sp_sick_23_desc:"50% базовой ставки, без надбавок и сверхурочных",
     sp_sick_4p_lbl:"Больничный день 4+",sp_sick_4p_desc:"100% базовой ставки, без надбавок и сверхурочных",
     // Calendar
-    cal_no_shift:"Смена на этот день не определена",cal_edit:"✏️ Изменить",cal_holiday:"Праздник / событие",
+    cal_no_shift:"Смена на этот день не определена",cal_edit:"✏️ Изменить",cal_holiday:"Праздник",cal_paid_hol:"Оплач. праздник",
     // App
     app_loading:"Shaati загружается...",app_privacy_show:"Показать суммы",app_privacy_hide:"Скрыть суммы",
   },
@@ -1682,8 +1682,11 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
   const{y,m}=viewDate;
   const days=daysInMonth(y,m);
   const startDay=firstDay(y,m);
-  const monthNames=["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
-  const dayNames=["א","ב","ג","ד","ה","ו","ש"];
+  const loc=uT("locale");
+  // Locale-aware month name
+  const monthLabel=new Date(y,m,1).toLocaleDateString(loc,{month:"long"});
+  // Locale-aware day-of-week headers (Sun–Sat)
+  const dayNames=Array.from({length:7},(_,i)=>new Date(2024,0,7+i).toLocaleDateString(loc,{weekday:"narrow"}));
 
   const prevMonth=()=>{setSelectedDay(null);setViewDate(({y,m})=>{const d=new Date(y,m-1);return{y:d.getFullYear(),m:d.getMonth()};});};
   const nextMonth=()=>{setSelectedDay(null);setViewDate(({y,m})=>{const d=new Date(y,m+1);return{y:d.getFullYear(),m:d.getMonth()};});};
@@ -1710,14 +1713,14 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
 
   const selectedShifts=selectedDay?shiftMap[selectedDay]||[]:[];
 
-  const displayDate=value?new Date(value+"T12:00:00").toLocaleDateString("he-IL",{weekday:"short",day:"numeric",month:"long",year:"numeric"}):"בחר תאריך";
+  const displayDate=value?new Date(value+"T12:00:00").toLocaleDateString(loc,{weekday:"short",day:"numeric",month:"long",year:"numeric"}):uT("as_pick_day");
 
   const calBody=(
     <div style={inline?{background:"#111827",padding:"12px 8px 8px",width:"100%",boxSizing:"border-box"}:{position:"absolute",top:"100%",right:0,left:0,zIndex:50,background:"#111827",border:"1px solid #1f2937",borderRadius:"14px",padding:"14px",marginTop:"6px",boxShadow:"0 10px 40px #000a"}}>
           {/* Month nav */}
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}}>
             <button onClick={prevMonth} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"8px",width:"32px",height:"32px",fontSize:"18px",cursor:"pointer"}}>‹</button>
-            <div style={{fontWeight:"800",color:"#f1f5f9",fontSize:"15px"}}>{monthNames[m]} {y}</div>
+            <div style={{fontWeight:"800",color:"#f1f5f9",fontSize:"15px"}}>{monthLabel} {y}</div>
             <button onClick={nextMonth} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"8px",width:"32px",height:"32px",fontSize:"18px",cursor:"pointer"}}>›</button>
           </div>
 
@@ -1741,20 +1744,45 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
               const isPanelOpen=selectedDay===ds;
               const isToday=ds===tdy();
               const holiday=IL_HOLIDAYS[ds];
+              const isPaid=holiday?.paid===true;
               const firstType=hasShift?dayShifts[0].type:null;
               const tColor=firstType?(isSpecialDay(firstType)?SPECIAL[firstType].color:ST[firstType].color):null;
               const dow=new Date(ds+"T12:00:00").getDay();
               const isSat=dow===6;const isFri=dow===5;
-              const weekendBase=isSat?"#1e1040":isFri?"#1c110055":"#0d1117";
-              const bg=isSelected?"#22c55e":isPanelOpen?(tColor+"33"||"#1a2a1a"):hasShift?(tColor+"22"):isToday?"#1f2937":holiday?"#fcd34d12":weekendBase;
-              const border=isSelected?"2px solid #22c55e":isPanelOpen?`2px solid ${tColor||"#22c55e"}`:isToday?"2px solid #22c55e66":hasShift?`2px solid ${tColor}55`:isSat?"1px solid #3730a355":isFri?"1px solid #92400e55":"1px solid #1f2937";
-              const textColor=isSelected?"#000":isToday?"#4ade80":hasShift?tColor:isSat?"#a78bfa":isFri?"#fb923c":"#e2e8f0";
+              const weekendBase=isSat?"#160d2e":isFri?"#1c1100":"#0d1117";
+              // Background — paid holidays brightest gold, unpaid subtle
+              const bg=isSelected?"#22c55e"
+                :isPanelOpen?(tColor?tColor+"44":"#1a2a1a")
+                :hasShift?(tColor?tColor+"28":"#1a2a1a")
+                :isToday?"#1e293b"
+                :isPaid?"#fcd34d28"
+                :holiday?"#fcd34d0d"
+                :weekendBase;
+              // Border
+              const border=isSelected?"2px solid #22c55e"
+                :isPanelOpen?`2px solid ${tColor||"#22c55e"}`
+                :isToday?"2px solid #4ade8077"
+                :hasShift?`1.5px solid ${tColor||"#22c55e"}99`
+                :isPaid?"2px solid #fcd34dcc"
+                :holiday?"1px solid #fcd34d44"
+                :isSat?"1px solid #7c3aed55"
+                :isFri?"1px solid #92400e55"
+                :"1px solid #1f2937";
+              // Text color
+              const textColor=isSelected?"#000"
+                :isToday?"#4ade80"
+                :hasShift?(tColor||"#4ade80")
+                :isPaid?"#fcd34d"
+                :holiday?"#d4a017"
+                :isSat?"#a78bfa"
+                :isFri?"#fb923c"
+                :"#d1d5db";
               return(
                 <button key={d} onClick={()=>handleDayClick(d)} style={{
-                  padding:"4px 2px 5px",borderRadius:"10px",border,cursor:"pointer",background:bg,
+                  padding:"4px 2px 4px",borderRadius:"10px",border,cursor:"pointer",background:bg,
                   color:textColor,
-                  fontWeight:isSelected||isToday||isPanelOpen?"800":"500",
-                  fontSize:"13px",display:"flex",flexDirection:"column",alignItems:"center",gap:"3px",
+                  fontWeight:isSelected||isToday||isPanelOpen||hasShift?"800":"600",
+                  fontSize:"13px",display:"flex",flexDirection:"column",alignItems:"center",gap:"2px",
                   minHeight:"48px",justifyContent:"flex-start",paddingTop:"7px",
                 }}>
                   <span>{d}</span>
@@ -1762,7 +1790,8 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
                     {hasShift
                       ? (isSpecialDay(dayShifts[0].type)?SPECIAL[dayShifts[0].type].icon:ST[dayShifts[0].type]?.icon)
                         +(dayShifts.length>1?" ·":"")
-                      : holiday?<span style={{color:"#fcd34d"}}>{holiday.icon}</span>
+                      : isPaid?<span style={{fontSize:"9px",color:"#fcd34d",fontWeight:"900"}}>₪</span>
+                      : holiday?<span style={{color:"#d4a017"}}>{holiday.icon}</span>
                       : ""}
                   </span>
                 </button>
@@ -1774,12 +1803,12 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
           {selectedDay&&(selectedShifts.length>0||IL_HOLIDAYS[selectedDay])&&(
             <div style={{marginTop:"12px",borderTop:"1px solid #1f2937",paddingTop:"12px"}}>
               <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"8px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <span>{new Date(selectedDay+"T12:00:00").toLocaleDateString("he-IL",{weekday:"long",day:"numeric",month:"long"})}</span>
-                {IL_HOLIDAYS[selectedDay]&&<span style={{fontSize:"12px",color:"#fcd34d",fontWeight:"700"}}>{IL_HOLIDAYS[selectedDay].icon} {IL_HOLIDAYS[selectedDay].name}</span>}
+                <span>{new Date(selectedDay+"T12:00:00").toLocaleDateString(loc,{weekday:"long",day:"numeric",month:"long"})}</span>
+                {IL_HOLIDAYS[selectedDay]&&<span style={{fontSize:"12px",color:"#fcd34d",fontWeight:"700"}}>{IL_HOLIDAYS[selectedDay].icon} {IL_HOLIDAYS[selectedDay].name}{IL_HOLIDAYS[selectedDay].paid?" ₪":""}</span>}
               </div>
               {IL_HOLIDAYS[selectedDay]&&selectedShifts.length===0&&(
-                <div style={{background:"#2a1f00",border:"1px solid #fcd34d44",borderRadius:"10px",padding:"12px",marginBottom:"8px"}}>
-                  <div style={{fontSize:"13px",color:"#fcd34d",fontWeight:"700"}}>{IL_HOLIDAYS[selectedDay].icon} {IL_HOLIDAYS[selectedDay].name}</div>
+                <div style={{background:IL_HOLIDAYS[selectedDay].paid?"#2a1f00":"#181200",border:`1px solid ${IL_HOLIDAYS[selectedDay].paid?"#fcd34d66":"#fcd34d22"}`,borderRadius:"10px",padding:"12px",marginBottom:"8px"}}>
+                  <div style={{fontSize:"13px",color:IL_HOLIDAYS[selectedDay].paid?"#fcd34d":"#b08000",fontWeight:"700"}}>{IL_HOLIDAYS[selectedDay].icon} {IL_HOLIDAYS[selectedDay].name}{IL_HOLIDAYS[selectedDay].paid&&<span style={{fontSize:"11px",marginRight:"6px",background:"#fcd34d22",borderRadius:"4px",padding:"1px 5px"}}>בתשלום ₪</span>}</div>
                   <div style={{fontSize:"11px",color:"#6b7280",marginTop:"3px"}}>{uT("cal_no_shift")}</div>
                 </div>
               )}
@@ -1793,10 +1822,10 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
                       <div>
                         <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
                           <span style={{fontSize:"14px"}}>{c.icon}</span>
-                          <span style={{fontSize:"13px",fontWeight:"700",color:c.color}}>{c.label}</span>
+                          <span style={{fontSize:"13px",fontWeight:"700",color:c.color}}>{isSpec?uT("sp_"+s.type+"_lbl"):uT("st_"+s.type)}</span>
                         </div>
                         <div style={{fontSize:"12px",color:"#6b7280",marginTop:"3px"}}>
-                          {s.start} – {s.end} · {fH(h)} שעות
+                          {s.start} – {s.end} · {fH(h)} {uT("d_hours")}
                         </div>
                         {s.note&&<div style={{fontSize:"11px",color:"#4b5563",marginTop:"2px"}}>📝 {s.note}</div>}
                       </div>
@@ -1817,12 +1846,16 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
             {Object.entries(ST).map(([k,t])=>(
               <div key={k} style={{display:"flex",alignItems:"center",gap:"4px"}}>
                 <span style={{fontSize:"12px"}}>{t.icon}</span>
-                <span style={{fontSize:"10px",color:t.color}}>{t.label}</span>
+                <span style={{fontSize:"10px",color:t.color}}>{uT("st_"+k)}</span>
               </div>
             ))}
             <div style={{display:"flex",alignItems:"center",gap:"4px"}}>
+              <span style={{fontSize:"9px",fontWeight:"900",color:"#fcd34d"}}>₪</span>
+              <span style={{fontSize:"10px",color:"#fcd34d"}}>{uT("cal_paid_hol")}</span>
+            </div>
+            <div style={{display:"flex",alignItems:"center",gap:"4px"}}>
               <span style={{fontSize:"12px"}}>🕯️</span>
-              <span style={{fontSize:"10px",color:"#fcd34d"}}>{uT("cal_holiday")}</span>
+              <span style={{fontSize:"10px",color:"#d4a017"}}>{uT("cal_holiday")}</span>
             </div>
           </div>
         </div>
