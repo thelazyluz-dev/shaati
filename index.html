@@ -3115,7 +3115,22 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
 
   return(
     <div style={{padding:"16px",paddingBottom:"20px"}}>
-      <div style={{fontSize:"18px",fontWeight:"800",marginBottom:"16px",color:"#f1f5f9"}}>{uT("sg_title")}</div>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"16px"}}>
+        <div style={{fontSize:"18px",fontWeight:"800",color:"#f1f5f9"}}>{uT("sg_title")}</div>
+        {onSaveLang&&(
+          <div style={{display:"flex",gap:"6px"}}>
+            {[{v:"he",label:"🇮🇱"},{v:"ru",label:"🇷🇺"}].map(opt=>(
+              <button key={opt.v} onClick={()=>onSaveLang(opt.v)}
+                style={{padding:"5px 10px",borderRadius:"8px",cursor:"pointer",fontWeight:"700",fontSize:"13px",
+                  background:lang===opt.v?"#1e3a5f":"#111827",
+                  color:lang===opt.v?"#60a5fa":"#4b5563",
+                  border:`1.5px solid ${lang===opt.v?"#60a5fa":"#1f2937"}`}}>
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
       <div style={{display:"flex",gap:"6px",marginBottom:"20px"}}>{subs.map(t=><button key={t.id} onClick={()=>setSub(t.id)} style={{flex:1,padding:"9px 2px",borderRadius:"10px",border:"none",cursor:"pointer",fontWeight:"700",fontSize:"12px",background:sub===t.id?"#22c55e":"#1f2937",color:sub===t.id?"#000":"#6b7280"}}>{t.l}</button>)}</div>
 
       {sub==="pay"&&(
@@ -3367,23 +3382,6 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
             style={{width:"100%",padding:"12px",background:"none",border:"1px solid #1f2937",borderRadius:"12px",color:"#4b5563",fontSize:"13px",fontWeight:"700",cursor:"pointer",marginTop:"10px"}}>
             {uT("sg_reset")}
           </button>
-          {/* Language selector */}
-          {onSaveLang&&(
-            <div style={{...CARD,marginTop:"10px",background:"#0d1117",border:"1px solid #1f2937"}}>
-              <div style={{fontSize:"13px",fontWeight:"700",color:"#e2e8f0",marginBottom:"10px"}}>{uT("sg_lang")}</div>
-              <div style={{display:"flex",gap:"8px"}}>
-                {[{v:"he",label:"🇮🇱 עברית"},{v:"ru",label:"🇷🇺 Русский"}].map(opt=>(
-                  <button key={opt.v} onClick={()=>onSaveLang(opt.v)}
-                    style={{flex:1,padding:"8px",borderRadius:"10px",cursor:"pointer",fontWeight:"700",fontSize:"13px",
-                      background:lang===opt.v?"#1e3a5f":"#0d1117",
-                      color:lang===opt.v?"#60a5fa":"#4b5563",
-                      border:`1.5px solid ${lang===opt.v?"#60a5fa":"#1f2937"}`}}>
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </>
       )}
 
