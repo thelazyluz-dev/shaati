@@ -175,6 +175,71 @@ const TR={
     // Header
     hdr_active:"משמרת פעילה",hdr_month_shifts:"משמרות החודש",
     hdr_privacy_on:"מצב פרטיות פעיל — סכומים מוסתרים",hdr_show:"הצג",
+    // Savings
+    sv_title:"💰 מעקב חסכונות",sv_tab_ov:"סיכום",sv_tab_ret:"תשואות",sv_tab_ext:"חיצוני",sv_tab_hist:"היסטוריה",
+    sv_total:"סה״כ חסכונות",sv_no_future:"* ללא תשואה עתידית",
+    sv_pension:"🏦 פנסיה",sv_keren:"📈 קרן השתלמות",sv_ext_savings:"💎 חסכונות חיצוניים",
+    sv_incl:"כולל",sv_hist_sfx:"היסטורי",sv_return_pfx:"תשואה +",
+    sv_per_month_e:"/חודש (עובד+מעסיק)",sv_emp:"עובד",sv_er:"מעסיק",
+    sv_hist_bal:"📅 יתרה היסטורית (מהתלוש)",sv_pen_hist_f:"פנסיה — יתרה קיימת (₪)",sv_ker_hist_f:"קרן השתלמות — יתרה קיימת (₪)",
+    sv_saved:"✓ נשמר!",sv_save_hist:"שמור יתרה היסטורית",
+    sv_ret_update:"🔄 עדכון תשואה חודשי",sv_updated:"✓ עודכן!",sv_update_now:"עדכן עכשיו",
+    sv_auto_calc:"מחושב אוטומטית ב-1 לכל חודש ·",sv_never_upd:"טרם עודכן",
+    sv_return_acc:"תשואה שנצברה",sv_annual_int:"ריבית שנתית",
+    sv_no_ext_ret:"אין חסכונות חיצוניים — הוסף בלשונית \"חיצוני\"",
+    sv_ext_desc:"פיקדונות, קופות גמל, נדל\"ן וכל חיסכון שלא בתלוש",sv_no_ext:"אין חסכונות חיצוניים עדיין",
+    sv_edit_sav:"✏️ עריכת חיסכון",sv_sav_name:"שם החיסכון",sv_type:"סוג",
+    sv_balance:"יתרה נוכחית (₪)",sv_return_rate:"ריבית/תשואה שנתית (%)",
+    sv_hint_unk:"0 אם לא ידוע",sv_monthly_dep:"סכום הפקדה חודשי (₪)",sv_hint_none:"0 אם אין",
+    sv_hint_no_dep:"0 אם אין הפקדה קבועה",sv_dep_day:"תאריך הפקדה בחודש",sv_hint_unk0:"0 = לא ידוע",
+    sv_save_ch:"שמור שינויים",sv_add_ext_hdr:"➕ הוסף חיסכון חיצוני",sv_add_ext_btn:"+ הוסף חיסכון חיצוני",
+    sv_add:"הוסף",sv_edit_btn:"✏️ ערוך",sv_delete_btn:"מחק",
+    sv_base:"בסיס",sv_pen_both:"פנסיה (עובד+מעסיק)",sv_ker_both:"קרן השתלמות (עובד+מעסיק)",
+    sv_cumul:"מצטבר (ללא היסטורי)",sv_no_hist:"הוסף משמרות לראות היסטוריה",
+    sv_type_dep:"פיקדון בנקאי",sv_type_gem:"קופת גמל",sv_type_re:"נדל\"ן",sv_type_stk:"מניות/ETF",sv_type_oth:"אחר",
+    sv_return_sfx:"תשואה",sv_dep_pfx:"הפקדה",sv_per_month_s:"/חודש",sv_dep_on:"יופקד ב-",sv_of_month:"לחודש",
+    // Graph
+    gr_no_data:"אין נתונים לשנה זו",gr_cur_year:"● שנה נוכחית",
+    gr_total_year:"סה״כ שנתי נטו",gr_hours_sfx:"שעות",gr_avg_month:"ממוצע חודשי",gr_active_months:"חודשים פעילים",
+    gr_peak:"🏆 שיא חודשי",gr_low:"📉 חודש נמוך",gr_vs_avg:"לעומת ממוצע שנתי",
+    gr_monthly_dtl:"פירוט חודשי",gr_peak_lbl:"🏆 שיא",gr_low_lbl:"📉 נמוך",
+    gr_gross:"ברוטו",gr_net:"נטו",
+    // Vacation
+    vac_days_vac:"🏖️ ימי חופש",vac_used:"נוצלו",vac_accrued:"נצברו",vac_days_sick:"🤒 ימי מחלה",
+    vac_settings:"הגדרות יתרה",vac_how:"💡 איך זה עובד?",
+    vac_how_desc_1:"הזן את היתרות",vac_how_desc_2:"מהתלוש האחרון",vac_how_desc_3:"שלך ואת",vac_how_desc_4:"תאריך אותו תלוש",
+    vac_how_desc_5:"האפליקציה תחשב צבירה אוטומטית רק מאותו תאריך קדימה.",
+    vac_payslip_date:"📅 תאריך התלוש האחרון",vac_annual_vac:"🏖️ חופש שנתי",
+    vac_bal_label:"יתרה בתלוש (ימים)",vac_accrual:"צבירה לחודש",vac_accrual_h:"ברירת מחדל: 1.5 ימים",
+    vac_months_ago:"חודשים מאז התלוש · +",vac_days_accr:"ימים נצברו",
+    vac_sick_title:"🤒 ימי מחלה",vac_sick_fixed:"צבירה: 1.5 ימים/חודש (קבוע לפי חוק)",
+    vac_sick_since:"+",vac_days_since:"ימים נצברו מאז התלוש",
+    vac_saved:"✓ נשמר!",vac_save:"שמור יתרה",
+    // AutoCalcNI
+    ni_title:"🧮 חשב לי ביטוח לאומי ומס בריאות",ni_desc:"האחוז משתנה לפי גובה השכר",
+    ni_close:"סגור ▲",ni_open:"פתח ▼",
+    ni_hint:"הזן את השכר הברוטו החודשי הממוצע שלך — האפליקציה תחשב את האחוזים האפקטיביים לפי חוק 2026.",
+    ni_salary:"שכר ברוטו חודשי ממוצע (₪)",ni_calc:"חשב",
+    ni_result_pfx:"תוצאת החישוב לשכר",ni_ni:"ביטוח לאומי",ni_health:"מס בריאות",ni_per_month:"/חודש",
+    ni_footnote:"* מחושב לפי מדרגות ביטוח לאומי 2026: עד ₪7,703 — 1.04%+3.23%, מעל — 7%+5.17%",
+    ni_apply:"✓ עדכן הגדרות אוטומטית",ni_ref_table:"טבלת אחוזים לפי שכר:",
+    ni_click:"← לחץ",ni_bl:"ב.ל.",ni_briut:"בריאות",
+    // IncomeTaxHelper
+    tx_title:"💡 מס הכנסה — איך מחשבים?",tx_desc:"לחץ להסבר ועזר חישוב",
+    tx_close:"סגור ▲",tx_open:"פתח ▼",
+    tx_hint_1:"מס הכנסה לא קבוע — הוא תלוי ב",tx_hint_pts:" נקודות זיכוי",tx_hint_2:". כל נקודה = ₪",tx_hint_3:" הנחה במס לחודש.",
+    tx_hint_tip:"הכי פשוט: תסתכל בתלוש שלך — כמה שולם בפועל ÷ ברוטו = האחוז שלך.",
+    tx_pts_title:"נקודות זיכוי נפוצות:",tx_pts_sfx:"נקודות",
+    tx_estimate_pfx:"אומדן מהיר לפי שכר שלך (",tx_estimate_sfx:"ברוטו/חודש):",
+    tx_pts_lbl:"נקודות זיכוי:",tx_estimated:"מס הכנסה משוער",tx_exempt:"0% — פטור ✓",tx_per_month:"/חודש",
+    tx_apply_pfx:"✓ עדכן מס הכנסה ל-",tx_apply_sfx:"%",
+    tx_warning:"⚠️ זהו אומדן בלבד. האחוז המדויק תלוי בנסיבות אישיות. תמיד בדוק בתלוש שלך.",
+    tx_pt0:"ישראלי/ת",tx_pt0d:"כולם מקבלים",
+    tx_pt1:"אישה",tx_pt1d:"נקודה נוספת לנשים",
+    tx_pt2:"ילד עד גיל 18 (ילד 1)",tx_pt2d:"לכל ילד עד גיל 5: 2.5 נקודות",
+    tx_pt3:"ילד מגיל 6–17",tx_pt3d:"לכל ילד גילאי 6–17",
+    tx_pt4:"הורה יחיד",tx_pt4d:"נקודה נוספת",
+    tx_pt5:"תואר ראשון",tx_pt5d:"בשנת סיום הלימודים",
   },
   ru:{
     ob_skip:"Пропустить →",ob_back:"← Назад",ob_next:"Далее →",ob_start:"Начнём →",ob_enter:"🚀 Войти в приложение",
@@ -267,6 +332,71 @@ const TR={
     // Header
     hdr_active:"Смена активна",hdr_month_shifts:"смен за месяц",
     hdr_privacy_on:"Режим приватности — суммы скрыты",hdr_show:"Показать",
+    // Savings
+    sv_title:"💰 Накопления",sv_tab_ov:"Обзор",sv_tab_ret:"Доходность",sv_tab_ext:"Внешние",sv_tab_hist:"История",
+    sv_total:"Итого накоплений",sv_no_future:"* без будущей доходности",
+    sv_pension:"🏦 Пенсия",sv_keren:"📈 Образ. фонд",sv_ext_savings:"💎 Внешние накопления",
+    sv_incl:"включая",sv_hist_sfx:"исторических",sv_return_pfx:"Доходность +",
+    sv_per_month_e:"/мес (раб-к+работодатель)",sv_emp:"раб-к",sv_er:"работодатель",
+    sv_hist_bal:"📅 Исторический баланс (из расчётного листа)",sv_pen_hist_f:"Пенсия — текущий баланс (₪)",sv_ker_hist_f:"Образ. фонд — текущий баланс (₪)",
+    sv_saved:"✓ Сохранено!",sv_save_hist:"Сохранить исторический баланс",
+    sv_ret_update:"🔄 Обновление доходности",sv_updated:"✓ Обновлено!",sv_update_now:"Обновить сейчас",
+    sv_auto_calc:"Автоматически 1-го числа каждого месяца ·",sv_never_upd:"Ещё не обновлялось",
+    sv_return_acc:"Накопленная доходность",sv_annual_int:"Годовая доходность",
+    sv_no_ext_ret:"Нет внешних накоплений — добавьте во вкладке \"Внешние\"",
+    sv_ext_desc:"Депозиты, пенсионные фонды, недвижимость и любые накопления вне расчётного листа",sv_no_ext:"Нет внешних накоплений",
+    sv_edit_sav:"✏️ Редактировать накопление",sv_sav_name:"Название накопления",sv_type:"Тип",
+    sv_balance:"Текущий баланс (₪)",sv_return_rate:"Доходность годовая (%)",
+    sv_hint_unk:"0 если не известно",sv_monthly_dep:"Ежемесячный депозит (₪)",sv_hint_none:"0 если нет",
+    sv_hint_no_dep:"0 если нет регулярного депозита",sv_dep_day:"День пополнения в месяце",sv_hint_unk0:"0 = не известно",
+    sv_save_ch:"Сохранить изменения",sv_add_ext_hdr:"➕ Добавить внешнее накопление",sv_add_ext_btn:"+ Добавить накопление",
+    sv_add:"Добавить",sv_edit_btn:"✏️ Изменить",sv_delete_btn:"Удалить",
+    sv_base:"База",sv_pen_both:"Пенсия (раб-к+работодатель)",sv_ker_both:"Образ. фонд (раб-к+работодатель)",
+    sv_cumul:"Накоплено (без исторического)",sv_no_hist:"Добавьте смены чтобы увидеть историю",
+    sv_type_dep:"Банковский депозит",sv_type_gem:"Пенсионный фонд",sv_type_re:"Недвижимость",sv_type_stk:"Акции/ETF",sv_type_oth:"Другое",
+    sv_return_sfx:"доходность",sv_dep_pfx:"взнос",sv_per_month_s:"/мес",sv_dep_on:"взнос",sv_of_month:"числа",
+    // Graph
+    gr_no_data:"Нет данных за этот год",gr_cur_year:"● Текущий год",
+    gr_total_year:"Итого годовых нетто",gr_hours_sfx:"часов",gr_avg_month:"Среднемесячный",gr_active_months:"активных месяцев",
+    gr_peak:"🏆 Лучший месяц",gr_low:"📉 Худший месяц",gr_vs_avg:"относительно среднегодового",
+    gr_monthly_dtl:"Детализация по месяцам",gr_peak_lbl:"🏆 пик",gr_low_lbl:"📉 минимум",
+    gr_gross:"Брутто",gr_net:"Нетто",
+    // Vacation
+    vac_days_vac:"🏖️ Дней отпуска",vac_used:"использовано",vac_accrued:"накоплено",vac_days_sick:"🤒 Дней больничного",
+    vac_settings:"Настройки баланса",vac_how:"💡 Как это работает?",
+    vac_how_desc_1:"Введите балансы",vac_how_desc_2:"из последнего расчётного листа",vac_how_desc_3:"и",vac_how_desc_4:"дату этого листа",
+    vac_how_desc_5:"Приложение будет начислять автоматически только с этой даты.",
+    vac_payslip_date:"📅 Дата последнего расчётного листа",vac_annual_vac:"🏖️ Ежегодный отпуск",
+    vac_bal_label:"Баланс в листе (дней)",vac_accrual:"Накопление в месяц",vac_accrual_h:"По умолчанию: 1.5 дня",
+    vac_months_ago:"месяцев с листа · +",vac_days_accr:"дней накоплено",
+    vac_sick_title:"🤒 Дни больничного",vac_sick_fixed:"Накопление: 1.5 дня/мес (по закону)",
+    vac_sick_since:"+",vac_days_since:"дней накоплено с листа",
+    vac_saved:"✓ Сохранено!",vac_save:"Сохранить баланс",
+    // AutoCalcNI
+    ni_title:"🧮 Рассчитать нац. страхование и налог здоровья",ni_desc:"Процент зависит от размера зарплаты",
+    ni_close:"Закрыть ▲",ni_open:"Открыть ▼",
+    ni_hint:"Введите среднюю месячную зарплату брутто — приложение рассчитает эффективные проценты по закону 2026.",
+    ni_salary:"Средняя месячная зарплата брутто (₪)",ni_calc:"Рассчитать",
+    ni_result_pfx:"Результат расчёта для зарплаты",ni_ni:"Нац. страхование",ni_health:"Налог на здоровье",ni_per_month:"/мес",
+    ni_footnote:"* рассчитано по ставкам НС 2026: до ₪7,703 — 1.04%+3.23%, выше — 7%+5.17%",
+    ni_apply:"✓ Обновить настройки автоматически",ni_ref_table:"Таблица процентов по зарплате:",
+    ni_click:"← нажать",ni_bl:"НС",ni_briut:"здоровье",
+    // IncomeTaxHelper
+    tx_title:"💡 Подоходный налог — как считают?",tx_desc:"Нажмите для объяснения и расчёта",
+    tx_close:"Закрыть ▲",tx_open:"Открыть ▼",
+    tx_hint_1:"Подоходный налог непостоянен — он зависит от",tx_hint_pts:" кредитных баллов",tx_hint_2:". Каждый балл = ₪",tx_hint_3:" скидки в месяц.",
+    tx_hint_tip:"Проще всего: посмотри в своём расчётном листе — сколько удержали ÷ брутто = твой процент.",
+    tx_pts_title:"Распространённые кредитные баллы:",tx_pts_sfx:"баллов",
+    tx_estimate_pfx:"Быстрая оценка по твоей зарплате (",tx_estimate_sfx:"брутто/мес):",
+    tx_pts_lbl:"Кредитных баллов:",tx_estimated:"Примерный налог",tx_exempt:"0% — освобождён ✓",tx_per_month:"/мес",
+    tx_apply_pfx:"✓ Обновить налог на ",tx_apply_sfx:"%",
+    tx_warning:"⚠️ Это только оценка. Точный процент зависит от личных обстоятельств. Всегда проверяй в расчётном листе.",
+    tx_pt0:"Израильтянин/ка",tx_pt0d:"получают все",
+    tx_pt1:"Женщина",tx_pt1d:"дополнительный балл для женщин",
+    tx_pt2:"Ребёнок до 18 (1-й ребёнок)",tx_pt2d:"на каждого ребёнка до 5 лет: 2.5 балла",
+    tx_pt3:"Ребёнок 6–17 лет",tx_pt3d:"на каждого ребёнка 6–17 лет",
+    tx_pt4:"Одинокий родитель",tx_pt4d:"дополнительный балл",
+    tx_pt5:"Степень бакалавра",tx_pt5d:"в год окончания учёбы",
   },
 };
 const DEF_VAC={currentBalance:0,sickBalance:0,accrualPerMonth:1.5,startDate:""};
@@ -1992,6 +2122,7 @@ function ReturnPresetRow({selectedId,customPct,onSelect,onCustomChange}){
 }
 
 function Savings({shifts,cfg,privacyMode}){
+  const uT=useT();
   const[savCfg,setSavCfg]=useState(()=>{
     const s=LS.get(K_SAV); return s?{...DEF_SAV_CFG,...s}:DEF_SAV_CFG;
   });
@@ -2106,23 +2237,23 @@ function Savings({shifts,cfg,privacyMode}){
 
   const EXT_ICONS=["🏦","🏠","💎","📊","🪙","💵","🏛️","🌍"];
   const EXT_TYPES=[
-    {id:"deposit",label:"פיקדון בנקאי"},
-    {id:"gemel",label:"קופת גמל"},
-    {id:"real_estate",label:"נדל\"ן"},
-    {id:"stocks",label:"מניות/ETF"},
-    {id:"other",label:"אחר"},
+    {id:"deposit",label:uT("sv_type_dep")},
+    {id:"gemel",label:uT("sv_type_gem")},
+    {id:"real_estate",label:uT("sv_type_re")},
+    {id:"stocks",label:uT("sv_type_stk")},
+    {id:"other",label:uT("sv_type_oth")},
   ];
 
   const TABS=[
-    {id:"overview",label:"סיכום",icon:"📊"},
-    {id:"returns",label:"תשואות",icon:"💹"},
-    {id:"external",label:"חיצוני",icon:"➕"},
-    {id:"history", label:"היסטוריה",icon:"📋"},
+    {id:"overview",label:uT("sv_tab_ov"),icon:"📊"},
+    {id:"returns",label:uT("sv_tab_ret"),icon:"💹"},
+    {id:"external",label:uT("sv_tab_ext"),icon:"➕"},
+    {id:"history", label:uT("sv_tab_hist"),icon:"📋"},
   ];
 
   return(
     <div style={{padding:"16px",paddingBottom:"20px"}}>
-      <div style={{fontSize:"18px",fontWeight:"800",marginBottom:"16px",color:"#f1f5f9"}}>💰 מעקב חסכונות</div>
+      <div style={{fontSize:"18px",fontWeight:"800",marginBottom:"16px",color:"#f1f5f9"}}>{uT("sv_title")}</div>
 
       {/* Sub tabs */}
       <div style={{display:"flex",gap:"6px",marginBottom:"16px",background:"#0d1117",borderRadius:"12px",padding:"4px"}}>
@@ -2147,35 +2278,35 @@ function Savings({shifts,cfg,privacyMode}){
           {/* Grand total */}
           <div style={{background:"linear-gradient(145deg,#0a1628,#1e2d4a)",border:"1px solid #1e3a5f",borderRadius:"18px",padding:"20px",textAlign:"center",marginBottom:"12px",position:"relative",overflow:"hidden"}}>
             <div style={{position:"absolute",top:"-30px",right:"-30px",width:"100px",height:"100px",background:"#38bdf822",borderRadius:"50%"}}/>
-            <div style={{fontSize:"11px",color:"#7dd3fc",fontWeight:"700",marginBottom:"4px",letterSpacing:"1px"}}>סה״כ חסכונות</div>
+            <div style={{fontSize:"11px",color:"#7dd3fc",fontWeight:"700",marginBottom:"4px",letterSpacing:"1px"}}>{uT("sv_total")}</div>
             <div style={{fontSize:"38px",fontWeight:"900",color:"#38bdf8",letterSpacing:"-1px"}}>{fM(Math.round(grandTotal))}</div>
-            <div style={{fontSize:"11px",color:"#334155",marginTop:"4px"}}>* ללא תשואה עתידית</div>
+            <div style={{fontSize:"11px",color:"#334155",marginTop:"4px"}}>{uT("sv_no_future")}</div>
           </div>
 
           {/* Cards */}
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"10px"}}>
             <div style={{background:"linear-gradient(145deg,#0c1a3e,#1e3a8a)",border:"1px solid #1e40af",borderRadius:"14px",padding:"14px",textAlign:"center"}}>
-              <div style={{fontSize:"11px",color:"#93c5fd",marginBottom:"4px",fontWeight:"700"}}>🏦 פנסיה</div>
+              <div style={{fontSize:"11px",color:"#93c5fd",marginBottom:"4px",fontWeight:"700"}}>{uT("sv_pension")}</div>
               <div style={{fontSize:"20px",fontWeight:"900",color:"#60a5fa"}}>{fM(Math.round(totalPensionNow))}</div>
-              {savCfg.pensionHistoric>0&&<div style={{fontSize:"10px",color:"#3b82f688",marginTop:"3px"}}>כולל {fM(savCfg.pensionHistoric)} היסטורי</div>}
-              {(savCfg.pensionReturn||0)>0&&<div style={{fontSize:"10px",color:"#4ade80",marginTop:"2px"}}>תשואה +{fM(Math.round(savCfg.pensionReturn))}</div>}
-              <div style={{fontSize:"10px",color:"#3b82f6",marginTop:"3px"}}>{fM(Math.round(monthlyPension))}/חודש (עובד+מעסיק)</div>
-              <div style={{fontSize:"9px",color:"#1e40af",marginTop:"1px"}}>{cfg.pensionEmployee}% עובד + {cfg.pensionEmployer}% מעסיק</div>
+              {savCfg.pensionHistoric>0&&<div style={{fontSize:"10px",color:"#3b82f688",marginTop:"3px"}}>{uT("sv_incl")} {fM(savCfg.pensionHistoric)} {uT("sv_hist_sfx")}</div>}
+              {(savCfg.pensionReturn||0)>0&&<div style={{fontSize:"10px",color:"#4ade80",marginTop:"2px"}}>{uT("sv_return_pfx")}{fM(Math.round(savCfg.pensionReturn))}</div>}
+              <div style={{fontSize:"10px",color:"#3b82f6",marginTop:"3px"}}>{fM(Math.round(monthlyPension))}{uT("sv_per_month_e")}</div>
+              <div style={{fontSize:"9px",color:"#1e40af",marginTop:"1px"}}>{cfg.pensionEmployee}% {uT("sv_emp")} + {cfg.pensionEmployer}% {uT("sv_er")}</div>
             </div>
             <div style={{background:"linear-gradient(145deg,#1a0c3e,#3b1d8a)",border:"1px solid #5b21b6",borderRadius:"14px",padding:"14px",textAlign:"center"}}>
-              <div style={{fontSize:"11px",color:"#c4b5fd",marginBottom:"4px",fontWeight:"700"}}>📈 קרן השתלמות</div>
+              <div style={{fontSize:"11px",color:"#c4b5fd",marginBottom:"4px",fontWeight:"700"}}>{uT("sv_keren")}</div>
               <div style={{fontSize:"20px",fontWeight:"900",color:"#a78bfa"}}>{fM(Math.round(totalKerenNow))}</div>
-              {savCfg.kerenHistoric>0&&<div style={{fontSize:"10px",color:"#7c3aed88",marginTop:"3px"}}>כולל {fM(savCfg.kerenHistoric)} היסטורי</div>}
-              {(savCfg.kerenReturn||0)>0&&<div style={{fontSize:"10px",color:"#4ade80",marginTop:"2px"}}>תשואה +{fM(Math.round(savCfg.kerenReturn))}</div>}
-              <div style={{fontSize:"10px",color:"#7c3aed",marginTop:"3px"}}>{fM(Math.round(monthlyKeren))}/חודש (עובד+מעסיק)</div>
-              <div style={{fontSize:"9px",color:"#4c1d95",marginTop:"1px"}}>{cfg.kerenEmployee}% עובד + {cfg.kerenEmployer}% מעסיק</div>
+              {savCfg.kerenHistoric>0&&<div style={{fontSize:"10px",color:"#7c3aed88",marginTop:"3px"}}>{uT("sv_incl")} {fM(savCfg.kerenHistoric)} {uT("sv_hist_sfx")}</div>}
+              {(savCfg.kerenReturn||0)>0&&<div style={{fontSize:"10px",color:"#4ade80",marginTop:"2px"}}>{uT("sv_return_pfx")}{fM(Math.round(savCfg.kerenReturn))}</div>}
+              <div style={{fontSize:"10px",color:"#7c3aed",marginTop:"3px"}}>{fM(Math.round(monthlyKeren))}{uT("sv_per_month_e")}</div>
+              <div style={{fontSize:"9px",color:"#4c1d95",marginTop:"1px"}}>{cfg.kerenEmployee}% {uT("sv_emp")} + {cfg.kerenEmployer}% {uT("sv_er")}</div>
             </div>
           </div>
 
           {extTotal>0&&(
             <div style={{...CARD,marginBottom:"10px",background:"#0d1f12",border:"1px solid #14532d"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <div style={{fontSize:"12px",color:"#4ade80",fontWeight:"700"}}>💎 חסכונות חיצוניים</div>
+                <div style={{fontSize:"12px",color:"#4ade80",fontWeight:"700"}}>{uT("sv_ext_savings")}</div>
                 <div style={{fontSize:"16px",fontWeight:"800",color:"#4ade80"}}>{fM(extTotal)}</div>
               </div>
               {savCfg.externals.map(e=>(
@@ -2189,17 +2320,17 @@ function Savings({shifts,cfg,privacyMode}){
 
           {/* יתרה היסטורית */}
           <div style={{...CARD,marginBottom:"10px"}}>
-            <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"12px"}}>📅 יתרה היסטורית (מהתלוש)</div>
+            <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"12px"}}>{uT("sv_hist_bal")}</div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"12px"}}>
-              <Field label="פנסיה — יתרה קיימת (₪)">
+              <Field label={uT("sv_pen_hist_f")}>
                 <NumInput value={savCfg.pensionHistoric} onChange={v=>setSavCfg(c=>({...c,pensionHistoric:v}))} step={100}/>
               </Field>
-              <Field label="קרן השתלמות — יתרה קיימת (₪)">
+              <Field label={uT("sv_ker_hist_f")}>
                 <NumInput value={savCfg.kerenHistoric} onChange={v=>setSavCfg(c=>({...c,kerenHistoric:v}))} step={100}/>
               </Field>
             </div>
             <Btn onClick={()=>save(savCfg)} color={savedMsg?"#15803d":"#22c55e"} textColor={savedMsg?"#dcfce7":"#000"} style={{fontSize:"13px"}}>
-              {savedMsg?"✓ נשמר!":"שמור יתרה היסטורית"}
+              {savedMsg?uT("sv_saved"):uT("sv_save_hist")}
             </Btn>
           </div>
 
@@ -2212,23 +2343,23 @@ function Savings({shifts,cfg,privacyMode}){
           {/* כרטיס סטטוס עדכון */}
           <div style={{...CARD,marginBottom:"12px"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}}>
-              <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700"}}>🔄 עדכון תשואה חודשי</div>
+              <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700"}}>{uT("sv_ret_update")}</div>
               <Btn onClick={handleApplyReturns} color={savedMsg?"#15803d":"#22c55e"} textColor={savedMsg?"#dcfce7":"#000"} style={{fontSize:"11px",padding:"6px 14px"}}>
-                {savedMsg?"✓ עודכן!":"עדכן עכשיו"}
+                {savedMsg?uT("sv_updated"):uT("sv_update_now")}
               </Btn>
             </div>
             <div style={{fontSize:"11px",color:"#4b5563"}}>
-              מחושב אוטומטית ב-1 לכל חודש ·{" "}
-              <span style={{color:"#4ade80",fontWeight:"700"}}>{savCfg.lastReturnApplied||"טרם עודכן"}</span>
+              {uT("sv_auto_calc")}{" "}
+              <span style={{color:"#4ade80",fontWeight:"700"}}>{savCfg.lastReturnApplied||uT("sv_never_upd")}</span>
             </div>
           </div>
 
           {/* פנסיה */}
           <div style={{background:"linear-gradient(145deg,#0c1a3e,#1e3a8a)",border:"1px solid #1e40af",borderRadius:"14px",padding:"14px",marginBottom:"10px"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}}>
-              <div style={{fontSize:"13px",fontWeight:"800",color:"#60a5fa"}}>🏦 פנסיה</div>
+              <div style={{fontSize:"13px",fontWeight:"800",color:"#60a5fa"}}>{uT("sv_pension")}</div>
               <div style={{textAlign:"left"}}>
-                <div style={{fontSize:"9px",color:"#3b82f688"}}>תשואה שנצברה</div>
+                <div style={{fontSize:"9px",color:"#3b82f688"}}>{uT("sv_return_acc")}</div>
                 <div style={{fontSize:"15px",fontWeight:"800",color:"#4ade80"}}>+{fM(Math.round(savCfg.pensionReturn||0))}</div>
               </div>
             </div>
@@ -2243,9 +2374,9 @@ function Savings({shifts,cfg,privacyMode}){
           {/* קרן השתלמות */}
           <div style={{background:"linear-gradient(145deg,#1a0c3e,#3b1d8a)",border:"1px solid #5b21b6",borderRadius:"14px",padding:"14px",marginBottom:"10px"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}}>
-              <div style={{fontSize:"13px",fontWeight:"800",color:"#a78bfa"}}>📈 קרן השתלמות</div>
+              <div style={{fontSize:"13px",fontWeight:"800",color:"#a78bfa"}}>{uT("sv_keren")}</div>
               <div style={{textAlign:"left"}}>
-                <div style={{fontSize:"9px",color:"#7c3aed88"}}>תשואה שנצברה</div>
+                <div style={{fontSize:"9px",color:"#7c3aed88"}}>{uT("sv_return_acc")}</div>
                 <div style={{fontSize:"15px",fontWeight:"800",color:"#4ade80"}}>+{fM(Math.round(savCfg.kerenReturn||0))}</div>
               </div>
             </div>
@@ -2263,7 +2394,7 @@ function Savings({shifts,cfg,privacyMode}){
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}}>
                 <div style={{fontSize:"13px",fontWeight:"800",color:"#4ade80"}}>{e.icon} {e.name}</div>
                 <div style={{textAlign:"left"}}>
-                  <div style={{fontSize:"9px",color:"#166534"}}>ריבית שנתית</div>
+                  <div style={{fontSize:"9px",color:"#166534"}}>{uT("sv_annual_int")}</div>
                   <div style={{fontSize:"15px",fontWeight:"800",color:"#34d399"}}>{getPct(e.returnPreset||"custom",e.returnPct||0)}%</div>
                 </div>
               </div>
@@ -2285,7 +2416,7 @@ function Savings({shifts,cfg,privacyMode}){
 
           {savCfg.externals.length===0&&(
             <div style={{textAlign:"center",padding:"16px 0",color:"#374151",fontSize:"12px"}}>
-              אין חסכונות חיצוניים — הוסף בלשונית "חיצוני"
+              {uT("sv_no_ext_ret")}
             </div>
           )}
         </>
@@ -2295,13 +2426,13 @@ function Savings({shifts,cfg,privacyMode}){
       {tab==="external"&&(
         <>
           <div style={{...CARD,marginBottom:"14px",background:"#0d1f12",border:"1px solid #14532d"}}>
-            <div style={{fontSize:"13px",color:"#4ade80",fontWeight:"700",marginBottom:"4px"}}>💎 חסכונות חיצוניים</div>
-            <div style={{fontSize:"11px",color:"#4b5563",marginBottom:"14px"}}>פיקדונות, קופות גמל, נדל"ן וכל חיסכון שלא בתלוש</div>
+            <div style={{fontSize:"13px",color:"#4ade80",fontWeight:"700",marginBottom:"4px"}}>{uT("sv_ext_savings")}</div>
+            <div style={{fontSize:"11px",color:"#4b5563",marginBottom:"14px"}}>{uT("sv_ext_desc")}</div>
 
             {savCfg.externals.length===0&&!showExtForm&&(
               <div style={{textAlign:"center",padding:"20px 0",color:"#374151"}}>
                 <div style={{fontSize:"32px",marginBottom:"8px"}}>🏦</div>
-                <div style={{fontSize:"12px"}}>אין חסכונות חיצוניים עדיין</div>
+                <div style={{fontSize:"12px"}}>{uT("sv_no_ext")}</div>
               </div>
             )}
 
@@ -2312,16 +2443,16 @@ function Savings({shifts,cfg,privacyMode}){
                     <span style={{fontSize:"20px"}}>{e.icon}</span>
                     <div>
                       <div style={{fontSize:"13px",fontWeight:"700",color:"#e2e8f0"}}>{e.name}</div>
-                      <div style={{fontSize:"11px",color:"#6b7280"}}>{EXT_TYPES.find(t=>t.id===e.type)?.label||e.type} · תשואה {e.returnPct}%{e.monthlyDeposit>0?` · הפקדה ${fM(e.monthlyDeposit)}/חודש`:""}{ e.depositDay>0?` · יופקד ב-${e.depositDay} לחודש`:""}</div>
+                      <div style={{fontSize:"11px",color:"#6b7280"}}>{EXT_TYPES.find(t=>t.id===e.type)?.label||e.type} · {uT("sv_return_sfx")} {e.returnPct}%{e.monthlyDeposit>0?` · ${uT("sv_dep_pfx")} ${fM(e.monthlyDeposit)}${uT("sv_per_month_s")}`:""}{ e.depositDay>0?` · ${uT("sv_dep_on")}${e.depositDay} ${uT("sv_of_month")}`:""}</div>
                     </div>
                   </div>
                   <div style={{textAlign:"left",display:"flex",flexDirection:"column",alignItems:"flex-end",gap:"4px"}}>
                     <div style={{fontSize:"15px",fontWeight:"800",color:"#34d399"}}>{fM(e.balance)}</div>
                     <div style={{display:"flex",gap:"6px"}}>
                       <button onClick={()=>setEditExt({...e})}
-                        style={{background:"none",border:"none",color:"#60a5fa",fontSize:"11px",cursor:"pointer",padding:0}}>✏️ ערוך</button>
+                        style={{background:"none",border:"none",color:"#60a5fa",fontSize:"11px",cursor:"pointer",padding:0}}>{uT("sv_edit_btn")}</button>
                       <button onClick={()=>{const u=savCfg.externals.filter(x=>x.id!==e.id);save({...savCfg,externals:u});}}
-                        style={{background:"none",border:"none",color:"#f87171",fontSize:"11px",cursor:"pointer",padding:0}}>מחק</button>
+                        style={{background:"none",border:"none",color:"#f87171",fontSize:"11px",cursor:"pointer",padding:0}}>{uT("sv_delete_btn")}</button>
                     </div>
                   </div>
                 </div>
@@ -2330,7 +2461,7 @@ function Savings({shifts,cfg,privacyMode}){
 
             {editExt&&(
               <div style={{background:"#111827",borderRadius:"12px",padding:"14px",border:"1px solid #60a5fa44",marginTop:"8px"}}>
-                <div style={{fontSize:"12px",color:"#60a5fa",fontWeight:"700",marginBottom:"12px"}}>✏️ עריכת חיסכון</div>
+                <div style={{fontSize:"12px",color:"#60a5fa",fontWeight:"700",marginBottom:"12px"}}>{uT("sv_edit_sav")}</div>
                 <div style={{display:"flex",gap:"6px",flexWrap:"wrap",marginBottom:"12px"}}>
                   {EXT_ICONS.map(ic=>(
                     <button key={ic} onClick={()=>setEditExt(e=>({...e,icon:ic}))}
@@ -2339,24 +2470,24 @@ function Savings({shifts,cfg,privacyMode}){
                     </button>
                   ))}
                 </div>
-                <Field label="שם החיסכון">
+                <Field label={uT("sv_sav_name")}>
                   <input type="text" value={editExt.name} onChange={e=>setEditExt(x=>({...x,name:e.target.value}))} style={SI}/>
                 </Field>
-                <Field label="סוג">
+                <Field label={uT("sv_type")}>
                   <select value={editExt.type} onChange={e=>setEditExt(x=>({...x,type:e.target.value}))} style={SI}>
                     {EXT_TYPES.map(tp=><option key={tp.id} value={tp.id}>{tp.label}</option>)}
                   </select>
                 </Field>
-                <Field label="יתרה נוכחית (₪)">
+                <Field label={uT("sv_balance")}>
                   <NumInput value={editExt.balance||0} onChange={v=>setEditExt(x=>({...x,balance:v}))} step={100}/>
                 </Field>
-                <Field label="ריבית/תשואה שנתית (%)" hint="0 אם לא ידוע">
+                <Field label={uT("sv_return_rate")} hint={uT("sv_hint_unk")}>
                   <NumInput value={editExt.returnPct||0} onChange={v=>setEditExt(x=>({...x,returnPct:v}))} step={0.1} min={0}/>
                 </Field>
-                <Field label="סכום הפקדה חודשי (₪)" hint="0 אם אין">
+                <Field label={uT("sv_monthly_dep")} hint={uT("sv_hint_none")}>
                   <NumInput value={editExt.monthlyDeposit||0} onChange={v=>setEditExt(x=>({...x,monthlyDeposit:v}))} step={50} min={0}/>
                 </Field>
-                <Field label="תאריך הפקדה בחודש" hint="0 = לא ידוע">
+                <Field label={uT("sv_dep_day")} hint={uT("sv_hint_unk0")}>
                   <NumInput value={editExt.depositDay||0} onChange={v=>setEditExt(x=>({...x,depositDay:Math.min(31,Math.max(0,v))}))} step={1} min={0} max={31}/>
                 </Field>
                 <div style={{display:"flex",gap:"8px"}}>
@@ -2365,15 +2496,15 @@ function Savings({shifts,cfg,privacyMode}){
                     const u=savCfg.externals.map(x=>x.id===editExt.id?{...editExt,balance:Number(editExt.balance)||0,returnPct:Number(editExt.returnPct)||0,monthlyDeposit:Number(editExt.monthlyDeposit)||0,depositDay:Number(editExt.depositDay)||0}:x);
                     save({...savCfg,externals:u});
                     setEditExt(null);
-                  }} color="#1e3a5f" textColor="#60a5fa" style={{border:"1px solid #1e3a5f",fontSize:"13px"}}>שמור שינויים</Btn>
-                  <button onClick={()=>setEditExt(null)} style={{flex:1,padding:"13px",background:"#1f2937",border:"none",borderRadius:"12px",color:"#9ca3af",fontWeight:"700",cursor:"pointer"}}>ביטול</button>
+                  }} color="#1e3a5f" textColor="#60a5fa" style={{border:"1px solid #1e3a5f",fontSize:"13px"}}>{uT("sv_save_ch")}</Btn>
+                  <button onClick={()=>setEditExt(null)} style={{flex:1,padding:"13px",background:"#1f2937",border:"none",borderRadius:"12px",color:"#9ca3af",fontWeight:"700",cursor:"pointer"}}>{uT("sl_cancel")}</button>
                 </div>
               </div>
             )}
 
             {showExtForm?(
               <div style={{background:"#111827",borderRadius:"12px",padding:"14px",border:"1px solid #1f2937",marginTop:"8px"}}>
-                <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"12px"}}>➕ הוסף חיסכון חיצוני</div>
+                <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"12px"}}>{uT("sv_add_ext_hdr")}</div>
                 {/* Icon picker */}
                 <div style={{display:"flex",gap:"6px",flexWrap:"wrap",marginBottom:"12px"}}>
                   {EXT_ICONS.map(ic=>(
@@ -2383,24 +2514,24 @@ function Savings({shifts,cfg,privacyMode}){
                     </button>
                   ))}
                 </div>
-                <Field label="שם החיסכון">
-                  <input type="text" value={newExt.name} onChange={e=>setNewExt(x=>({...x,name:e.target.value}))} placeholder="פיקדון בנק הפועלים..." style={SI}/>
+                <Field label={uT("sv_sav_name")}>
+                  <input type="text" value={newExt.name} onChange={e=>setNewExt(x=>({...x,name:e.target.value}))} placeholder={uT("sv_type_dep")+"..."} style={SI}/>
                 </Field>
-                <Field label="סוג">
+                <Field label={uT("sv_type")}>
                   <select value={newExt.type} onChange={e=>setNewExt(x=>({...x,type:e.target.value}))} style={SI}>
                     {EXT_TYPES.map(t=><option key={t.id} value={t.id}>{t.label}</option>)}
                   </select>
                 </Field>
-                <Field label="יתרה נוכחית (₪)">
+                <Field label={uT("sv_balance")}>
                   <NumInput value={newExt.balance||0} onChange={v=>setNewExt(x=>({...x,balance:v}))} step={100}/>
                 </Field>
-                <Field label="ריבית/תשואה שנתית (%)" hint="0 אם לא ידוע">
+                <Field label={uT("sv_return_rate")} hint={uT("sv_hint_unk")}>
                   <NumInput value={newExt.returnPct||0} onChange={v=>setNewExt(x=>({...x,returnPct:v}))} step={0.1} min={0}/>
                 </Field>
-                <Field label="סכום הפקדה חודשי (₪)" hint="0 אם אין הפקדה קבועה">
+                <Field label={uT("sv_monthly_dep")} hint={uT("sv_hint_no_dep")}>
                   <NumInput value={newExt.monthlyDeposit||0} onChange={v=>setNewExt(x=>({...x,monthlyDeposit:v}))} step={50} min={0}/>
                 </Field>
-                <Field label="תאריך הפקדה בחודש" hint="0 = לא ידוע">
+                <Field label={uT("sv_dep_day")} hint={uT("sv_hint_unk0")}>
                   <NumInput value={newExt.depositDay||0} onChange={v=>setNewExt(x=>({...x,depositDay:Math.min(31,Math.max(0,v))}))} step={1} min={0} max={31}/>
                 </Field>
                 <div style={{display:"flex",gap:"8px"}}>
@@ -2410,14 +2541,14 @@ function Savings({shifts,cfg,privacyMode}){
                     save({...savCfg,externals:u});
                     setNewExt({name:"",balance:"",returnPct:"",monthlyDeposit:"",type:"deposit",icon:"🏦"});
                     setShowExtForm(false);
-                  }} color="#22c55e" textColor="#000" style={{fontSize:"13px"}}>הוסף</Btn>
-                  <button onClick={()=>setShowExtForm(false)} style={{flex:1,padding:"13px",background:"#1f2937",border:"none",borderRadius:"12px",color:"#9ca3af",fontWeight:"700",cursor:"pointer"}}>ביטול</button>
+                  }} color="#22c55e" textColor="#000" style={{fontSize:"13px"}}>{uT("sv_add")}</Btn>
+                  <button onClick={()=>setShowExtForm(false)} style={{flex:1,padding:"13px",background:"#1f2937",border:"none",borderRadius:"12px",color:"#9ca3af",fontWeight:"700",cursor:"pointer"}}>{uT("sl_cancel")}</button>
                 </div>
               </div>
             ):(
               <button onClick={()=>setShowExtForm(true)}
                 style={{width:"100%",padding:"13px",background:"#052e16",border:"1.5px dashed #166534",borderRadius:"12px",color:"#4ade80",fontWeight:"800",fontSize:"14px",cursor:"pointer",marginTop:"8px"}}>
-                + הוסף חיסכון חיצוני
+                {uT("sv_add_ext_btn")}
               </button>
             )}
           </div>
@@ -2431,29 +2562,29 @@ function Savings({shifts,cfg,privacyMode}){
             <div key={r.ym} style={{...CARD,marginBottom:"8px"}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:"8px"}}>
                 <span style={{fontWeight:"700",color:"#e2e8f0"}}>{mLbl(r.ym)}</span>
-                <span style={{fontSize:"12px",color:"#6b7280"}}>בסיס {fM(Math.round(r.base))}</span>
+                <span style={{fontSize:"12px",color:"#6b7280"}}>{uT("sv_base")} {fM(Math.round(r.base))}</span>
               </div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
                 <div style={{background:"#0c1a3e55",borderRadius:"8px",padding:"8px"}}>
-                  <div style={{fontSize:"10px",color:"#93c5fd",marginBottom:"3px"}}>פנסיה (עובד+מעסיק)</div>
+                  <div style={{fontSize:"10px",color:"#93c5fd",marginBottom:"3px"}}>{uT("sv_pen_both")}</div>
                   <div style={{fontSize:"14px",fontWeight:"700",color:"#60a5fa"}}>{fM(Math.round(r.pe+r.pr))}</div>
-                  <div style={{fontSize:"9px",color:"#3b82f6",marginTop:"2px"}}>{fM(Math.round(r.pe))} עובד · {fM(Math.round(r.pr))} מעסיק</div>
+                  <div style={{fontSize:"9px",color:"#3b82f6",marginTop:"2px"}}>{fM(Math.round(r.pe))} {uT("sv_emp")} · {fM(Math.round(r.pr))} {uT("sv_er")}</div>
                 </div>
                 <div style={{background:"#1a0c3e55",borderRadius:"8px",padding:"8px"}}>
-                  <div style={{fontSize:"10px",color:"#c4b5fd",marginBottom:"3px"}}>קרן השתלמות (עובד+מעסיק)</div>
+                  <div style={{fontSize:"10px",color:"#c4b5fd",marginBottom:"3px"}}>{uT("sv_ker_both")}</div>
                   <div style={{fontSize:"14px",fontWeight:"700",color:"#a78bfa"}}>{fM(Math.round(r.ke+r.kr))}</div>
-                  <div style={{fontSize:"9px",color:"#7c3aed",marginTop:"2px"}}>{fM(Math.round(r.ke))} עובד · {fM(Math.round(r.kr))} מעסיק</div>
+                  <div style={{fontSize:"9px",color:"#7c3aed",marginTop:"2px"}}>{fM(Math.round(r.ke))} {uT("sv_emp")} · {fM(Math.round(r.kr))} {uT("sv_er")}</div>
                 </div>
               </div>
               <div style={{display:"flex",justifyContent:"space-between",marginTop:"8px"}}>
-                <span style={{fontSize:"11px",color:"#4b5563"}}>מצטבר (ללא היסטורי)</span>
+                <span style={{fontSize:"11px",color:"#4b5563"}}>{uT("sv_cumul")}</span>
                 <span style={{fontSize:"12px",fontWeight:"700",color:"#38bdf8"}}>{fM(Math.round(r.cP+r.cK))}</span>
               </div>
             </div>
           )):(
             <div style={{textAlign:"center",color:"#374151",padding:"40px 0"}}>
               <div style={{fontSize:"36px"}}>📊</div>
-              <div style={{marginTop:"12px"}}>הוסף משמרות לראות היסטוריה</div>
+              <div style={{marginTop:"12px"}}>{uT("sv_no_hist")}</div>
             </div>
           )}
         </>
@@ -2468,10 +2599,12 @@ function Savings({shifts,cfg,privacyMode}){
 // ANNUAL GRAPH
 // ════════════════════════════════════════
 function Graph({shifts,cfg,als,privacyMode}){
+  const uT=useT();
   const[selBar,setSelBar]=useState(null);
   const[viewYear,setViewYear]=useState(()=>new Date().getFullYear());
-  const MN=["ינו","פבר","מרץ","אפר","מאי","יונ","יול","אוג","ספט","אוק","נוב","דצמ"];
-  const MNF=["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
+  const loc=uT("locale");
+  const MN=Array.from({length:12},(_,i)=>new Date(2024,i,1).toLocaleDateString(loc,{month:"short"}));
+  const MNF=Array.from({length:12},(_,i)=>new Date(2024,i,1).toLocaleDateString(loc,{month:"long"}));
 
   const wMap=buildWeeklyThresholdMap(shifts,cfg);
   const months=Array.from({length:12},(_,i)=>{
@@ -2513,7 +2646,7 @@ function Graph({shifts,cfg,als,privacyMode}){
         </div>
         <div style={{textAlign:"center",color:"#374151",padding:"60px 0"}}>
           <div style={{fontSize:"40px",marginBottom:"12px"}}>📊</div>
-          <div>אין נתונים לשנה זו</div>
+          <div>{uT("gr_no_data")}</div>
         </div>
       </div>
     );
@@ -2528,7 +2661,7 @@ function Graph({shifts,cfg,als,privacyMode}){
         <button onClick={()=>{setViewYear(y=>y-1);setSelBar(null);}} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>‹</button>
         <div style={{textAlign:"center"}}>
           <div style={{fontSize:"18px",fontWeight:"800",color:"#f1f5f9"}}>📈 {viewYear}</div>
-          {viewYear===curYear&&<div style={{fontSize:"11px",color:"#22c55e",marginTop:"2px"}}>● שנה נוכחית</div>}
+          {viewYear===curYear&&<div style={{fontSize:"11px",color:"#22c55e",marginTop:"2px"}}>{uT("gr_cur_year")}</div>}
         </div>
         <button onClick={()=>{setViewYear(y=>y+1);setSelBar(null);}} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>›</button>
       </div>
@@ -2538,26 +2671,26 @@ function Graph({shifts,cfg,als,privacyMode}){
       {/* Summary cards */}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"16px"}}>
         <div style={{...CARD,textAlign:"center"}}>
-          <div style={{fontSize:"11px",color:"#6b7280",marginBottom:"4px"}}>סה״כ שנתי נטו</div>
+          <div style={{fontSize:"11px",color:"#6b7280",marginBottom:"4px"}}>{uT("gr_total_year")}</div>
           <div style={{fontSize:"19px",fontWeight:"900",color:"#4ade80"}}>{fM(totalYear)}</div>
-          <div style={{fontSize:"10px",color:"#374151",marginTop:"2px"}}>{fH(totalHours)} שעות</div>
+          <div style={{fontSize:"10px",color:"#374151",marginTop:"2px"}}>{fH(totalHours)} {uT("gr_hours_sfx")}</div>
         </div>
         <div style={{...CARD,textAlign:"center"}}>
-          <div style={{fontSize:"11px",color:"#6b7280",marginBottom:"4px"}}>ממוצע חודשי</div>
+          <div style={{fontSize:"11px",color:"#6b7280",marginBottom:"4px"}}>{uT("gr_avg_month")}</div>
           <div style={{fontSize:"19px",fontWeight:"900",color:"#60a5fa"}}>{fM(avgNet)}</div>
-          <div style={{fontSize:"10px",color:"#374151",marginTop:"2px"}}>{withData.length} חודשים פעילים</div>
+          <div style={{fontSize:"10px",color:"#374151",marginTop:"2px"}}>{withData.length} {uT("gr_active_months")}</div>
         </div>
       </div>
 
       {/* Highlights */}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"16px"}}>
         <div style={{...CARD,background:"#052e16",border:"1px solid #166534",textAlign:"center"}}>
-          <div style={{fontSize:"10px",color:"#86efac",marginBottom:"3px"}}>🏆 שיא חודשי</div>
+          <div style={{fontSize:"10px",color:"#86efac",marginBottom:"3px"}}>{uT("gr_peak")}</div>
           <div style={{fontSize:"13px",fontWeight:"800",color:"#4ade80"}}>{MNF[peakIdx]}</div>
           <div style={{fontSize:"12px",color:"#34d399"}}>{fM(months[peakIdx].net)}</div>
         </div>
         {lowIdx>=0&&<div style={{...CARD,background:"#1a0505",border:"1px solid #7f1d1d",textAlign:"center"}}>
-          <div style={{fontSize:"10px",color:"#fca5a5",marginBottom:"3px"}}>📉 חודש נמוך</div>
+          <div style={{fontSize:"10px",color:"#fca5a5",marginBottom:"3px"}}>{uT("gr_low")}</div>
           <div style={{fontSize:"13px",fontWeight:"800",color:"#f87171"}}>{MNF[lowIdx]}</div>
           <div style={{fontSize:"12px",color:"#ef4444"}}>{fM(months[lowIdx].net)}</div>
         </div>}
@@ -2609,12 +2742,12 @@ function Graph({shifts,cfg,als,privacyMode}){
           </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"8px"}}>
             {[
-              {l:"משמרות",v:selData.workCount,c:"#9ca3af"},
-              {l:"שעות",v:fH(selData.hours),c:"#9ca3af"},
-              {l:"ברוטו",v:fM(selData.gross),c:"#fbbf24"},
-              {l:"תוספות",v:fM(selData.allow),c:"#34d399"},
-              {l:"ניכויים",v:fM(selData.gross+selData.allow-selData.net),c:"#f87171"},
-              {l:"נטו",v:fM(selData.net),c:"#4ade80"},
+              {l:uT("d_shifts"),v:selData.workCount,c:"#9ca3af"},
+              {l:uT("d_hours"),v:fH(selData.hours),c:"#9ca3af"},
+              {l:uT("gr_gross"),v:fM(selData.gross),c:"#fbbf24"},
+              {l:uT("d_allowances"),v:fM(selData.allow),c:"#34d399"},
+              {l:uT("d_deductions"),v:fM(selData.gross+selData.allow-selData.net),c:"#f87171"},
+              {l:uT("gr_net"),v:fM(selData.net),c:"#4ade80"},
             ].map((r,i)=>(
               <div key={i} style={{background:"#0d1117",borderRadius:"8px",padding:"8px",textAlign:"center"}}>
                 <div style={{fontSize:"10px",color:"#4b5563",marginBottom:"3px"}}>{r.l}</div>
@@ -2624,7 +2757,7 @@ function Graph({shifts,cfg,als,privacyMode}){
           </div>
           {/* Mini bar vs avg */}
           <div style={{marginTop:"10px"}}>
-            <div style={{fontSize:"10px",color:"#4b5563",marginBottom:"4px"}}>לעומת ממוצע שנתי</div>
+            <div style={{fontSize:"10px",color:"#4b5563",marginBottom:"4px"}}>{uT("gr_vs_avg")}</div>
             <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
               <div style={{flex:1,height:"6px",background:"#1f2937",borderRadius:"3px",overflow:"hidden"}}>
                 <div style={{height:"100%",width:`${Math.min(100,(selData.net/avgNet)*100)}%`,background:selData.net>=avgNet?"#4ade80":"#f87171",borderRadius:"3px",transition:"width 0.4s"}}/>
@@ -2638,17 +2771,17 @@ function Graph({shifts,cfg,als,privacyMode}){
       )}
 
       {/* Monthly table */}
-      <div style={SEC}>פירוט חודשי</div>
+      <div style={SEC}>{uT("gr_monthly_dtl")}</div>
       {[...months].filter(m=>m.count>0).reverse().map(m=>(
         <div key={m.ym} onClick={()=>setSelBar(selBar===m.i?null:m.i)}
           style={{...CARD,marginBottom:"6px",cursor:"pointer",border:selBar===m.i?"1px solid #4ade80":"1px solid #1f2937",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
             <div style={{fontSize:"13px",fontWeight:"700",color:"#e2e8f0"}}>{m.labelFull}</div>
-            <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>{m.workCount} משמרות · {fH(m.hours)}ש׳</div>
+            <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>{m.workCount} {uT("d_shifts")} · {fH(m.hours)}{uT("hr")}</div>
           </div>
           <div style={{textAlign:"left"}}>
             <div style={{fontSize:"15px",fontWeight:"800",color:m.i===peakIdx?"#4ade80":m.i===lowIdx?"#f87171":"#e2e8f0"}}>{fM(m.net)}</div>
-            <div style={{fontSize:"10px",color:"#374151",marginTop:"2px"}}>{m.i===peakIdx?"🏆 שיא":m.i===lowIdx?"📉 נמוך":""}</div>
+            <div style={{fontSize:"10px",color:"#374151",marginTop:"2px"}}>{m.i===peakIdx?uT("gr_peak_lbl"):m.i===lowIdx?uT("gr_low_lbl"):""}</div>
           </div>
         </div>
       ))}
@@ -2661,6 +2794,7 @@ function Graph({shifts,cfg,als,privacyMode}){
 // VACATION BALANCE (in Settings)
 // ════════════════════════════════════════
 function VacationBalance({shifts,vacCfg,onSaveVacCfg}){
+  const uT=useT();
   const[form,setForm]=useState({...vacCfg});
   const[saved,setSaved]=useState(false);
 
@@ -2689,65 +2823,65 @@ function VacationBalance({shifts,vacCfg,onSaveVacCfg}){
       {/* Balance display */}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"16px"}}>
         <div style={{background:"linear-gradient(145deg,#0c1a3e,#1e3a8a)",border:"1px solid #1e40af",borderRadius:"14px",padding:"14px",textAlign:"center"}}>
-          <div style={{fontSize:"11px",color:"#93c5fd",marginBottom:"6px",fontWeight:"700"}}>🏖️ ימי חופש</div>
+          <div style={{fontSize:"11px",color:"#93c5fd",marginBottom:"6px",fontWeight:"700"}}>{uT("vac_days_vac")}</div>
           <div style={{fontSize:"30px",fontWeight:"900",color:"#60a5fa"}}>{vacBalance.toFixed(1)}</div>
           <div style={{fontSize:"10px",color:"#3b82f6",marginTop:"4px"}}>
-            {vacUsed>0?`${vacUsed} נוצלו · `:""}
-            {vacAccrued>0?`+${vacAccrued.toFixed(1)} נצברו`:""}
+            {vacUsed>0?`${vacUsed} ${uT("vac_used")} · `:""}
+            {vacAccrued>0?`+${vacAccrued.toFixed(1)} ${uT("vac_accrued")}`:""}
           </div>
         </div>
         <div style={{background:"linear-gradient(145deg,#1a0c3e,#3b1d8a)",border:"1px solid #5b21b6",borderRadius:"14px",padding:"14px",textAlign:"center"}}>
-          <div style={{fontSize:"11px",color:"#c4b5fd",marginBottom:"6px",fontWeight:"700"}}>🤒 ימי מחלה</div>
+          <div style={{fontSize:"11px",color:"#c4b5fd",marginBottom:"6px",fontWeight:"700"}}>{uT("vac_days_sick")}</div>
           <div style={{fontSize:"30px",fontWeight:"900",color:"#a78bfa"}}>{sickBalance.toFixed(1)}</div>
           <div style={{fontSize:"10px",color:"#7c3aed",marginTop:"4px"}}>
-            {sickUsed>0?`${sickUsed} נוצלו · `:""}
-            {sickAccrued>0?`+${sickAccrued.toFixed(1)} נצברו`:""}
+            {sickUsed>0?`${sickUsed} ${uT("vac_used")} · `:""}
+            {sickAccrued>0?`+${sickAccrued.toFixed(1)} ${uT("vac_accrued")}`:""}
           </div>
         </div>
       </div>
 
       {/* Settings */}
       <div style={CARD}>
-        <div style={SEC}>הגדרות יתרה</div>
+        <div style={SEC}>{uT("vac_settings")}</div>
 
         {/* Info box */}
         <div style={{background:"#0d1117",border:"1px solid #1f2937",borderRadius:"10px",padding:"12px",marginBottom:"16px"}}>
-          <div style={{fontSize:"12px",color:"#60a5fa",fontWeight:"700",marginBottom:"6px"}}>💡 איך זה עובד?</div>
+          <div style={{fontSize:"12px",color:"#60a5fa",fontWeight:"700",marginBottom:"6px"}}>{uT("vac_how")}</div>
           <div style={{fontSize:"11px",color:"#6b7280",lineHeight:"1.7"}}>
-            הזן את היתרות <span style={{color:"#e2e8f0",fontWeight:"700"}}>מהתלוש האחרון</span> שלך ואת <span style={{color:"#e2e8f0",fontWeight:"700"}}>תאריך אותו תלוש</span>.<br/>
-            האפליקציה תחשב צבירה אוטומטית רק מאותו תאריך קדימה.
+            {uT("vac_how_desc_1")} <span style={{color:"#e2e8f0",fontWeight:"700"}}>{uT("vac_how_desc_2")}</span> {uT("vac_how_desc_3")} <span style={{color:"#e2e8f0",fontWeight:"700"}}>{uT("vac_how_desc_4")}</span>.<br/>
+            {uT("vac_how_desc_5")}
           </div>
         </div>
 
         {/* Payslip date */}
-        <Field label="📅 תאריך התלוש האחרון">
+        <Field label={uT("vac_payslip_date")}>
           <input type="date" value={form.payslipDate||""} onChange={e=>setForm({...form,payslipDate:e.target.value})} style={SI}/>
         </Field>
 
         {/* Vacation section */}
         <div style={{background:"#0c1a3e33",border:"1px solid #1e3a8a",borderRadius:"10px",padding:"12px",marginBottom:"12px"}}>
-          <div style={{fontSize:"11px",color:"#93c5fd",fontWeight:"700",marginBottom:"10px"}}>🏖️ חופש שנתי</div>
-          <Field label="יתרה בתלוש (ימים)">
+          <div style={{fontSize:"11px",color:"#93c5fd",fontWeight:"700",marginBottom:"10px"}}>{uT("vac_annual_vac")}</div>
+          <Field label={uT("vac_bal_label")}>
             <NumInput value={form.currentBalance||0} onChange={v=>setForm({...form,currentBalance:v})} step={0.5}/>
           </Field>
-          <Field label="צבירה לחודש" hint="ברירת מחדל: 1.5 ימים">
+          <Field label={uT("vac_accrual")} hint={uT("vac_accrual_h")}>
             <NumInput value={form.accrualPerMonth||1.5} onChange={v=>setForm({...form,accrualPerMonth:v})} step={0.5}/>
           </Field>
-          {monthsSincePayslip>0&&<div style={{fontSize:"11px",color:"#3b82f6",marginTop:"4px"}}>{monthsSincePayslip} חודשים מאז התלוש · +{vacAccrued.toFixed(1)} ימים נצברו</div>}
+          {monthsSincePayslip>0&&<div style={{fontSize:"11px",color:"#3b82f6",marginTop:"4px"}}>{monthsSincePayslip} {uT("vac_months_ago")}{vacAccrued.toFixed(1)} {uT("vac_days_accr")}</div>}
         </div>
 
         {/* Sick section */}
         <div style={{background:"#1a0c3e33",border:"1px solid #5b21b6",borderRadius:"10px",padding:"12px",marginBottom:"16px"}}>
-          <div style={{fontSize:"11px",color:"#c4b5fd",fontWeight:"700",marginBottom:"10px"}}>🤒 ימי מחלה</div>
-          <Field label="יתרה בתלוש (ימים)">
+          <div style={{fontSize:"11px",color:"#c4b5fd",fontWeight:"700",marginBottom:"10px"}}>{uT("vac_sick_title")}</div>
+          <Field label={uT("vac_bal_label")}>
             <NumInput value={form.sickBalance||0} onChange={v=>setForm({...form,sickBalance:v})} step={0.5}/>
           </Field>
-          <div style={{fontSize:"11px",color:"#6b7280",marginTop:"4px"}}>צבירה: 1.5 ימים/חודש (קבוע לפי חוק)</div>
-          {monthsSincePayslip>0&&<div style={{fontSize:"11px",color:"#7c3aed",marginTop:"4px"}}>+{sickAccrued.toFixed(1)} ימים נצברו מאז התלוש</div>}
+          <div style={{fontSize:"11px",color:"#6b7280",marginTop:"4px"}}>{uT("vac_sick_fixed")}</div>
+          {monthsSincePayslip>0&&<div style={{fontSize:"11px",color:"#7c3aed",marginTop:"4px"}}>+{sickAccrued.toFixed(1)} {uT("vac_days_since")}</div>}
         </div>
 
         <button onClick={save} style={{width:"100%",padding:"13px",background:saved?"#15803d":"#22c55e",border:"none",borderRadius:"12px",color:saved?"#dcfce7":"#000",fontSize:"14px",fontWeight:"800",cursor:"pointer"}}>
-          {saved?"✓ נשמר!":"שמור יתרה"}
+          {saved?uT("vac_saved"):uT("vac_save")}
         </button>
       </div>
     </div>
@@ -2772,6 +2906,7 @@ function calcNIRates(grossSalary){
 }
 
 function AutoCalcNI({form,setForm}){
+  const uT=useT();
   const[show,setShow]=useState(false);
   const[salary,setSalary]=useState(form.baseRate*190||0);
   const[result,setResult]=useState(null);
@@ -2796,52 +2931,52 @@ function AutoCalcNI({form,setForm}){
     <div style={{...CARD,marginBottom:"12px",background:"#0a1628",border:"1px solid #1e3a5f"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div>
-          <div style={{fontSize:"13px",fontWeight:"700",color:"#60a5fa"}}>🧮 חשב לי ביטוח לאומי ומס בריאות</div>
-          <div style={{fontSize:"11px",color:"#4b5563",marginTop:"2px"}}>האחוז משתנה לפי גובה השכר</div>
+          <div style={{fontSize:"13px",fontWeight:"700",color:"#60a5fa"}}>{uT("ni_title")}</div>
+          <div style={{fontSize:"11px",color:"#4b5563",marginTop:"2px"}}>{uT("ni_desc")}</div>
         </div>
         <button onClick={()=>setShow(!show)} style={{background:"#1e3a5f",border:"none",color:"#93c5fd",borderRadius:"8px",padding:"6px 12px",cursor:"pointer",fontWeight:"700",fontSize:"12px"}}>
-          {show?"סגור ▲":"פתח ▼"}
+          {show?uT("ni_close"):uT("ni_open")}
         </button>
       </div>
 
       {show&&(
         <div style={{marginTop:"14px"}}>
           <div style={{fontSize:"11px",color:"#6b7280",marginBottom:"6px",lineHeight:"1.6"}}>
-            הזן את השכר הברוטו החודשי הממוצע שלך — האפליקציה תחשב את האחוזים האפקטיביים לפי חוק 2026.
+            {uT("ni_hint")}
           </div>
-          <Field label="שכר ברוטו חודשי ממוצע (₪)">
+          <Field label={uT("ni_salary")}>
             <NumInput value={salary} onChange={v=>setSalary(v)} step={100}/>
           </Field>
           <button onClick={calc} style={{width:"100%",padding:"11px",background:"#1e3a8a",border:"none",borderRadius:"10px",color:"#93c5fd",fontWeight:"800",fontSize:"14px",cursor:"pointer",marginBottom:"12px"}}>
-            חשב
+            {uT("ni_calc")}
           </button>
 
           {result&&(
             <div style={{background:"#0d1117",borderRadius:"10px",padding:"12px",marginBottom:"12px"}}>
-              <div style={{fontSize:"11px",color:"#6b7280",marginBottom:"10px"}}>תוצאת החישוב לשכר {fM(salary)}:</div>
+              <div style={{fontSize:"11px",color:"#6b7280",marginBottom:"10px"}}>{uT("ni_result_pfx")} {fM(salary)}:</div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px",marginBottom:"10px"}}>
                 <div style={{background:"#0c1a3e",borderRadius:"8px",padding:"10px",textAlign:"center"}}>
-                  <div style={{fontSize:"10px",color:"#93c5fd",marginBottom:"4px"}}>ביטוח לאומי</div>
+                  <div style={{fontSize:"10px",color:"#93c5fd",marginBottom:"4px"}}>{uT("ni_ni")}</div>
                   <div style={{fontSize:"20px",fontWeight:"900",color:"#60a5fa"}}>{result.niPct}%</div>
-                  <div style={{fontSize:"10px",color:"#374151",marginTop:"2px"}}>{fM(result.niTotal)}/חודש</div>
+                  <div style={{fontSize:"10px",color:"#374151",marginTop:"2px"}}>{fM(result.niTotal)}{uT("ni_per_month")}</div>
                 </div>
                 <div style={{background:"#1a0c3e",borderRadius:"8px",padding:"10px",textAlign:"center"}}>
-                  <div style={{fontSize:"10px",color:"#c4b5fd",marginBottom:"4px"}}>מס בריאות</div>
+                  <div style={{fontSize:"10px",color:"#c4b5fd",marginBottom:"4px"}}>{uT("ni_health")}</div>
                   <div style={{fontSize:"20px",fontWeight:"900",color:"#a78bfa"}}>{result.healthPct}%</div>
-                  <div style={{fontSize:"10px",color:"#374151",marginTop:"2px"}}>{fM(result.healthTotal)}/חודש</div>
+                  <div style={{fontSize:"10px",color:"#374151",marginTop:"2px"}}>{fM(result.healthTotal)}{uT("ni_per_month")}</div>
                 </div>
               </div>
               <div style={{fontSize:"10px",color:"#4b5563",marginBottom:"10px",lineHeight:"1.5"}}>
-                * מחושב לפי מדרגות ביטוח לאומי 2026: עד ₪7,703 — 1.04%+3.23%, מעל — 7%+5.17%
+                {uT("ni_footnote")}
               </div>
               <button onClick={apply} style={{width:"100%",padding:"11px",background:"#22c55e",border:"none",borderRadius:"10px",color:"#000",fontWeight:"800",fontSize:"14px",cursor:"pointer"}}>
-                ✓ עדכן הגדרות אוטומטית
+                {uT("ni_apply")}
               </button>
             </div>
           )}
 
           {/* Reference table */}
-          <div style={{fontSize:"11px",color:"#4b5563",marginBottom:"6px",fontWeight:"700"}}>טבלת אחוזים לפי שכר:</div>
+          <div style={{fontSize:"11px",color:"#4b5563",marginBottom:"6px",fontWeight:"700"}}>{uT("ni_ref_table")}</div>
           <div style={{borderRadius:"8px",overflow:"hidden",border:"1px solid #1f2937"}}>
             {[6000,8000,10000,12000,15000].map((s,i)=>{
               const r=calcNIRates(s);
@@ -2849,9 +2984,9 @@ function AutoCalcNI({form,setForm}){
               <div key={i} onClick={()=>{setSalary(s);setResult(calcNIRates(s));}}
                 style={{display:"flex",justifyContent:"space-between",padding:"7px 10px",background:i%2===0?"#0d1117":"#111827",cursor:"pointer",fontSize:"11px"}}>
                 <span style={{color:"#9ca3af"}}>{fM(s)}</span>
-                <span style={{color:"#60a5fa"}}>ב.ל. {r.niPct}%</span>
-                <span style={{color:"#a78bfa"}}>בריאות {r.healthPct}%</span>
-                <span style={{color:"#374151"}}>← לחץ</span>
+                <span style={{color:"#60a5fa"}}>{uT("ni_bl")} {r.niPct}%</span>
+                <span style={{color:"#a78bfa"}}>{uT("ni_briut")} {r.healthPct}%</span>
+                <span style={{color:"#374151"}}>{uT("ni_click")}</span>
               </div>
               );
             })}
@@ -2864,14 +2999,15 @@ function AutoCalcNI({form,setForm}){
 
 // ── Income Tax Helper ──
 function IncomeTaxHelper({form,setForm}){
+  const uT=useT();
   const[show,setShow]=useState(false);
   const POINTS=[
-    {l:"ישראלי/ת",v:2.25,desc:"כולם מקבלים"},
-    {l:"אישה",v:0.5,desc:"נקודה נוספת לנשים"},
-    {l:"ילד עד גיל 18 (ילד 1)",v:2.5,desc:"לכל ילד עד גיל 5: 2.5 נקודות"},
-    {l:"ילד מגיל 6–17",v:2.0,desc:"לכל ילד גילאי 6–17"},
-    {l:"הורה יחיד",v:1.0,desc:"נקודה נוספת"},
-    {l:"תואר ראשון",v:1.0,desc:"בשנת סיום הלימודים"},
+    {l:uT("tx_pt0"),v:2.25,desc:uT("tx_pt0d")},
+    {l:uT("tx_pt1"),v:0.5,desc:uT("tx_pt1d")},
+    {l:uT("tx_pt2"),v:2.5,desc:uT("tx_pt2d")},
+    {l:uT("tx_pt3"),v:2.0,desc:uT("tx_pt3d")},
+    {l:uT("tx_pt4"),v:1.0,desc:uT("tx_pt4d")},
+    {l:uT("tx_pt5"),v:1.0,desc:uT("tx_pt5d")},
   ];
   const POINT_VALUE=242; // ₪ per month per point (2025)
 
@@ -2904,49 +3040,49 @@ function IncomeTaxHelper({form,setForm}){
     <div style={{background:"#1a1000",border:"1px solid #92400e",borderRadius:"10px",padding:"12px",marginBottom:"14px"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div>
-          <div style={{fontSize:"12px",fontWeight:"700",color:"#fbbf24"}}>💡 מס הכנסה — איך מחשבים?</div>
-          <div style={{fontSize:"11px",color:"#4b5563",marginTop:"2px"}}>לחץ להסבר ועזר חישוב</div>
+          <div style={{fontSize:"12px",fontWeight:"700",color:"#fbbf24"}}>{uT("tx_title")}</div>
+          <div style={{fontSize:"11px",color:"#4b5563",marginTop:"2px"}}>{uT("tx_desc")}</div>
         </div>
         <button onClick={()=>setShow(!show)} style={{background:"#2a1800",border:"none",color:"#fbbf24",borderRadius:"8px",padding:"5px 10px",cursor:"pointer",fontSize:"12px",fontWeight:"700"}}>
-          {show?"סגור ▲":"פתח ▼"}
+          {show?uT("tx_close"):uT("tx_open")}
         </button>
       </div>
 
       {show&&(
         <div style={{marginTop:"12px"}}>
           <div style={{fontSize:"11px",color:"#6b7280",lineHeight:"1.7",marginBottom:"12px"}}>
-            מס הכנסה לא קבוע — הוא תלוי ב<span style={{color:"#fbbf24",fontWeight:"700"}}> נקודות זיכוי</span>. כל נקודה = ₪{POINT_VALUE} הנחה במס לחודש.<br/>
-            <span style={{color:"#22c55e"}}>הכי פשוט: תסתכל בתלוש שלך — כמה שולם בפועל ÷ ברוטו = האחוז שלך.</span>
+            {uT("tx_hint_1")}<span style={{color:"#fbbf24",fontWeight:"700"}}>{uT("tx_hint_pts")}</span>{uT("tx_hint_2")}₪{POINT_VALUE}{uT("tx_hint_3")}<br/>
+            <span style={{color:"#22c55e"}}>{uT("tx_hint_tip")}</span>
           </div>
 
-          <div style={{fontSize:"11px",color:"#fbbf24",fontWeight:"700",marginBottom:"8px"}}>נקודות זיכוי נפוצות:</div>
+          <div style={{fontSize:"11px",color:"#fbbf24",fontWeight:"700",marginBottom:"8px"}}>{uT("tx_pts_title")}</div>
           {POINTS.map((p,i)=>(
             <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid #2a1800",fontSize:"11px"}}>
               <span style={{color:"#e2e8f0"}}>{p.l}</span>
-              <span style={{color:"#fbbf24",fontWeight:"700"}}>+{p.v} נקודות</span>
+              <span style={{color:"#fbbf24",fontWeight:"700"}}>+{p.v} {uT("tx_pts_sfx")}</span>
             </div>
           ))}
 
           <div style={{marginTop:"12px",background:"#0d1117",borderRadius:"8px",padding:"10px"}}>
-            <div style={{fontSize:"11px",color:"#6b7280",marginBottom:"6px"}}>אומדן מהיר לפי שכר שלך ({fM(Math.round(gross))} ברוטו/חודש):</div>
+            <div style={{fontSize:"11px",color:"#6b7280",marginBottom:"6px"}}>{uT("tx_estimate_pfx")}{fM(Math.round(gross))}{uT("tx_estimate_sfx")}</div>
             <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"8px"}}>
-              <span style={{fontSize:"11px",color:"#9ca3af"}}>נקודות זיכוי:</span>
+              <span style={{fontSize:"11px",color:"#9ca3af"}}>{uT("tx_pts_lbl")}</span>
               <NumInput value={points} onChange={v=>setPoints(v)} step={0.25} style={{...SI,width:"80px"}}/>
             </div>
             <div style={{display:"flex",justifyContent:"space-between",background:"#111827",borderRadius:"6px",padding:"8px",marginBottom:"10px"}}>
-              <span style={{fontSize:"11px",color:"#6b7280"}}>מס הכנסה משוער</span>
+              <span style={{fontSize:"11px",color:"#6b7280"}}>{uT("tx_estimated")}</span>
               <span style={{fontSize:"14px",fontWeight:"800",color:result.pct===0?"#22c55e":"#f87171"}}>
-                {result.pct===0?"0% — פטור ✓":`${result.pct}% · ${fM(result.netTax)}/חודש`}
+                {result.pct===0?uT("tx_exempt"):`${result.pct}% · ${fM(result.netTax)}${uT("tx_per_month")}`}
               </span>
             </div>
             <button onClick={()=>{setForm(f=>({...f,taxRate:result.pct}));setShow(false);}}
               style={{width:"100%",padding:"9px",background:"#92400e",border:"none",borderRadius:"8px",color:"#fde68a",fontWeight:"800",fontSize:"13px",cursor:"pointer"}}>
-              ✓ עדכן מס הכנסה ל-{result.pct}%
+              {uT("tx_apply_pfx")}{result.pct}{uT("tx_apply_sfx")}
             </button>
           </div>
 
           <div style={{marginTop:"10px",fontSize:"10px",color:"#374151",lineHeight:"1.6"}}>
-            ⚠️ זהו <strong style={{color:"#6b7280"}}>אומדן בלבד</strong>. האחוז המדויק תלוי בנסיבות אישיות. תמיד בדוק בתלוש שלך.
+            {uT("tx_warning")}
           </div>
         </div>
       )}
