@@ -250,6 +250,7 @@ const TR={
     ob_s2_salary_lbl:"שכר ברוטו חודשי משוער (₪)",ob_s2_calc:"חשב אוטומטית",ob_s2_updated:"✓ עודכן אוטומטית",
     ob_s2_manual:"עריכה ידנית",ob_s2_tax_hint:"בדוק בתלוש שלך",
     ob_s2_enable_ded:"הפעל חישוב ניכויים",ob_s2_enable_ded_h:"הצג שכר נטו בדשבורד",
+    ob_s3_skip:"דלג על שלב זה →",ob_s3_skip_hint:"ניתן להגדיר בכל עת מהגדרות",
     ob_s3_tip_title:"💡 חשוב לדעת",
     ob_s3_tip:"פנסיה וקרן השתלמות מחושבות ",ob_s3_base_only:"רק על שכר הבסיס",ob_s3_tip_sfx:" — ללא שעות נוספות ותוספות. כך לפי חוק.",
     ob_s3_employee:"עובד (%)",ob_s3_employer:"מעסיק (%)",
@@ -438,6 +439,7 @@ const TR={
     ob_s2_salary_lbl:"Примерная месячная зарплата брутто (₪)",ob_s2_calc:"Рассчитать автоматически",ob_s2_updated:"✓ Обновлено автоматически",
     ob_s2_manual:"Ручное редактирование",ob_s2_tax_hint:"Проверьте в своём расчётном листе",
     ob_s2_enable_ded:"Включить расчёт вычетов",ob_s2_enable_ded_h:"Показать чистую зарплату в дашборде",
+    ob_s3_skip:"Пропустить этот шаг →",ob_s3_skip_hint:"Можно настроить позже в Настройках",
     ob_s3_tip_title:"💡 Важно знать",
     ob_s3_tip:"Пенсия и образовательный фонд рассчитываются ",ob_s3_base_only:"только на базовую ставку",ob_s3_tip_sfx:" — без сверхурочных и надбавок. По закону.",
     ob_s3_employee:"Работник (%)",ob_s3_employer:"Работодатель (%)",
@@ -3711,6 +3713,18 @@ function Onboarding({onDone,lang="he",setLang}){
           {/* ── Step 3: Pension & Keren ── */}
           {step===3&&(
             <div>
+              {/* Skip option */}
+              <button onClick={()=>go(1)} style={{
+                width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",
+                background:"#111827",border:"1px solid #1f2937",borderRadius:"12px",
+                padding:"12px 14px",cursor:"pointer",marginBottom:"14px",
+              }}>
+                <div style={{textAlign:"start"}}>
+                  <div style={{fontSize:"13px",fontWeight:"700",color:"#6b7280"}}>{t("ob_s3_skip")}</div>
+                  <div style={{fontSize:"11px",color:"#374151",marginTop:"2px"}}>{t("ob_s3_skip_hint")}</div>
+                </div>
+                <span style={{fontSize:"18px",color:"#374151"}}>›</span>
+              </button>
               <div style={{...CARD,marginBottom:"14px",background:"#0c1a3e",border:"1px solid #1e3a8a"}}>
                 <div style={{fontSize:"11px",color:"#93c5fd",fontWeight:"700",marginBottom:"8px"}}>{t("ob_s3_tip_title")}</div>
                 <div style={{fontSize:"11px",color:"#4b5563",lineHeight:"1.7"}}>
