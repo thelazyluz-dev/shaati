@@ -1480,9 +1480,6 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
   const t=useT();
   const[nowStr,setNowStr]=useState(nowTime());
   useEffect(()=>{const id=setInterval(()=>setNowStr(nowTime()),30000);return()=>clearInterval(id);},[]);
-  const[showNet,setShowNet]=useState(true);
-  const[flipKey,setFlipKey]=useState(0);
-  const toggleCard=()=>{setShowNet(v=>!v);setFlipKey(k=>k+1);};
   const ms=shifts.filter(s=>s.date.startsWith(selM));
   const wMap=buildWeeklyThresholdMap(shifts,cfg);
   let tG=0,tA=0,tH=0,regH=0,aftH=0,ngtH=0,ot125=0,ot150=0,tBase=0;
@@ -1557,12 +1554,10 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
       )}
 
       <div
-        onClick={ded?(()=>toggleCard()):undefined}
         style={{
           background:"linear-gradient(145deg,#041f10,#0a3a1a,#14532d)",
           border:"1px solid #166534",borderRadius:"18px",padding:"20px",
           marginBottom:"12px",textAlign:"center",position:"relative",overflow:"hidden",
-          cursor:ded?"pointer":"default",
           boxShadow:"0 4px 24px #22c55e18",
         }}>
         {/* Decorative circles */}
@@ -1577,34 +1572,12 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
           </div>
         ):ded?(
           <>
-            {/* Toggle pill */}
-            <div style={{display:"inline-flex",background:"#041f10",borderRadius:"20px",padding:"3px",marginBottom:"14px",border:"1px solid #166534"}}>
-              {[{v:true,lbl:t("d_neto")},{v:false,lbl:t("cl_gross_lbl")}].map(({v,lbl})=>(
-                <div key={String(v)} onClick={e=>{e.stopPropagation();setShowNet(v);setFlipKey(k=>k+1);}} style={{
-                  padding:"4px 14px",borderRadius:"16px",fontSize:"11px",fontWeight:"700",cursor:"pointer",
-                  background:showNet===v?"#22c55e":"none",
-                  color:showNet===v?"#000":"#4b5563",
-                  transition:"all 0.2s ease",
-                }}>{lbl}</div>
-              ))}
+            <div style={{fontSize:"11px",color:"#86efac99",letterSpacing:"1px",fontWeight:"700",marginBottom:"4px"}}>{t("d_net")}</div>
+            <div style={{fontSize:"40px",fontWeight:"900",color:"#4ade80",letterSpacing:"-2px",lineHeight:1}}>
+              {prv(net,privacyMode)}
             </div>
-            {/* Main number — animates on flip */}
-            <div key={flipKey} style={{animation:"staggerIn 0.2s ease-out"}}>
-              <div style={{fontSize:"11px",color:"#86efac99",letterSpacing:"1px",fontWeight:"700",marginBottom:"4px"}}>
-                {showNet?t("d_net"):t("d_taxable")}
-              </div>
-              <div style={{fontSize:"40px",fontWeight:"900",color:"#4ade80",letterSpacing:"-2px",lineHeight:1}}>
-                {prv(showNet?net:dedBase,privacyMode)}
-              </div>
-              {showNet?(
-                <div style={{fontSize:"11px",color:"#86efac55",marginTop:"4px"}}>
-                  {t("cl_gross_lbl")} {prv(dedBase,privacyMode)} · {t("d_deductions")} -{prv(ded.tot,privacyMode)}
-                </div>
-              ):(
-                <div style={{fontSize:"11px",color:"#86efac55",marginTop:"4px"}}>
-                  {prv(tG,privacyMode)} {t("d_salary")} + {prv(tA,privacyMode)} {t("d_allowances")}
-                </div>
-              )}
+            <div style={{fontSize:"11px",color:"#86efac55",marginTop:"4px"}}>
+              {t("cl_gross_lbl")} {prv(dedBase,privacyMode)} · {t("d_deductions")} -{prv(ded.tot,privacyMode)}
             </div>
             {cfg.monthlyGoal>0&&(()=>{
               const pct=Math.min(100,Math.round(net/cfg.monthlyGoal*100));
