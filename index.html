@@ -1572,12 +1572,25 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
           </div>
         ):ded?(
           <>
-            <div style={{fontSize:"11px",color:"#86efac99",letterSpacing:"1px",fontWeight:"700",marginBottom:"4px"}}>{t("d_net")}</div>
+            <div style={{fontSize:"11px",color:"#86efac99",letterSpacing:"1px",fontWeight:"700",marginBottom:"6px"}}>{t("d_taxable")}</div>
             <div style={{fontSize:"40px",fontWeight:"900",color:"#4ade80",letterSpacing:"-2px",lineHeight:1}}>
-              {prv(net,privacyMode)}
+              {prv(dedBase,privacyMode)}
             </div>
-            <div style={{fontSize:"11px",color:"#86efac55",marginTop:"4px"}}>
-              {t("cl_gross_lbl")} {prv(dedBase,privacyMode)} · {t("d_deductions")} -{prv(ded.tot,privacyMode)}
+            <div style={{fontSize:"11px",color:"#86efac55",marginTop:"6px",marginBottom:"14px"}}>
+              {prv(tG,privacyMode)} {t("d_salary")} + {prv(tA,privacyMode)} {t("d_allowances")}
+            </div>
+            <div style={{borderTop:"1px solid #166534",marginBottom:"14px"}}/>
+            <div style={{display:"flex",justifyContent:"space-around",textAlign:"center"}}>
+              <div>
+                <div style={{fontSize:"11px",color:"#86efac99",fontWeight:"700",marginBottom:"4px"}}>{t("d_net")}</div>
+                <div style={{fontSize:"22px",fontWeight:"900",color:"#4ade80",letterSpacing:"-1px"}}>{prv(net,privacyMode)}</div>
+              </div>
+              <div style={{width:"1px",background:"#166534"}}/>
+              <div>
+                <div style={{fontSize:"11px",color:"#f8717199",fontWeight:"700",marginBottom:"4px"}}>{t("d_deductions")}</div>
+                <div style={{fontSize:"22px",fontWeight:"900",color:"#f87171",letterSpacing:"-1px"}}>-{prv(ded.tot,privacyMode)}</div>
+                <div style={{fontSize:"10px",color:"#f8717166",marginTop:"2px"}}>{Math.round(ded.tot/dedBase*100)}{t("d_pct_income")}</div>
+              </div>
             </div>
             {cfg.monthlyGoal>0&&(()=>{
               const pct=Math.min(100,Math.round(net/cfg.monthlyGoal*100));
