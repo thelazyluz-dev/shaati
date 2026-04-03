@@ -1625,17 +1625,6 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
           </div>
         ):ded?(
           <>
-            {/* Toggle pill */}
-            <div style={{display:"inline-flex",background:"#041f10",borderRadius:"20px",padding:"3px",marginBottom:"14px",border:"1px solid #166534"}}>
-              {[{v:true,lbl:t("d_neto")},{v:false,lbl:t("cl_gross_lbl")}].map(({v,lbl})=>(
-                <div key={String(v)} onClick={e=>{e.stopPropagation();setShowNet(v);setFlipKey(k=>k+1);}} style={{
-                  padding:"4px 14px",borderRadius:"16px",fontSize:"11px",fontWeight:"700",cursor:"pointer",
-                  background:showNet===v?"#22c55e":"none",
-                  color:showNet===v?"#000":"var(--txt-dd)",
-                  transition:"all 0.2s ease",
-                }}>{lbl}</div>
-              ))}
-            </div>
             <div style={{fontSize:"11px",color:"#86efac99",letterSpacing:"1px",fontWeight:"700",marginBottom:"6px"}}>{t("d_taxable")}</div>
             <div style={{fontSize:"40px",fontWeight:"900",color:"#4ade80",letterSpacing:"-2px",lineHeight:1}}>
               {prv(dedBase,privacyMode)}
