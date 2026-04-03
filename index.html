@@ -40,7 +40,7 @@ select option{background:var(--bg2);color:var(--txt)}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
 @keyframes pulseClock{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.02);opacity:0.85}}
-@keyframes floatUp{0%{transform:translateY(0) scale(0.5);opacity:1}100%{transform:translateY(-140px) scale(1.3);opacity:0}}
+@keyframes floatUp{0%{transform:translateY(0) scale(0.5);opacity:1}100%{transform:translateY(-100px) scale(1.2);opacity:0}}
 @keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
 @keyframes growBar{from{transform:scaleY(0);transform-origin:bottom}to{transform:scaleY(1);transform-origin:bottom}}
 @keyframes glowPulse{0%,100%{box-shadow:0 0 10px #22c55e55, 0 0 20px #22c55e22}50%{box-shadow:0 0 25px #22c55e99, 0 0 50px #22c55e44}}
@@ -1223,11 +1223,6 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode}){
         {coins.map(coin=>(
           <div key={coin.id} style={{position:"absolute",bottom:0,left:`${coin.x}%`,fontSize:"18px",pointerEvents:"none",animation:"floatUp 2s ease-out forwards",zIndex:5}}>💰</div>
         ))}
-        <style>{`
-          @keyframes floatUp{0%{transform:translateY(0) scale(0.5);opacity:1}100%{transform:translateY(-100px) scale(1.2);opacity:0}}
-          @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
-        `}</style>
-
         {/* Row 1: type + start time */}
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}}>
           <div style={{display:"flex",alignItems:"center",gap:"5px"}}>
@@ -2792,7 +2787,7 @@ function Savings({shifts,cfg,privacyMode}){
                     if(!newExt.name.trim())return;
                     const u=[...savCfg.externals,{...newExt,id:Date.now(),balance:Number(newExt.balance)||0,returnPct:Number(newExt.returnPct)||0,monthlyDeposit:Number(newExt.monthlyDeposit)||0,depositDay:Number(newExt.depositDay)||0}];
                     save({...savCfg,externals:u});
-                    setNewExt({name:"",balance:"",returnPct:"",monthlyDeposit:"",type:"deposit",icon:"🏦"});
+                    setNewExt({name:"",balance:"",returnPct:"",monthlyDeposit:"",depositDay:"",type:"deposit",icon:"🏦"});
                     setShowExtForm(false);
                   }} color="#22c55e" textColor="#000" style={{fontSize:"13px"}}>{uT("sv_add")}</Btn>
                   <button onClick={()=>setShowExtForm(false)} style={{flex:1,padding:"13px",background:"var(--divider)",border:"none",borderRadius:"12px",color:"var(--txt-m)",fontWeight:"700",cursor:"pointer"}}>{uT("sl_cancel")}</button>
