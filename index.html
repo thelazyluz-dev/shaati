@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="שעות עבודה"/>
-<meta name="theme-color" content="#090c14"/>
+<meta name="theme-color" content="var(--bg)"/>
 <link rel="manifest" href="/manifest.json"/>
 <link rel="apple-touch-icon" href="/icon-192.png"/>
 <title>שעות עבודה</title>
@@ -15,11 +15,22 @@
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
-body{background:#090c14;font-family:'Heebo','Arial Hebrew',sans-serif;color:#e2e8f0;overscroll-behavior:none}
+:root{
+  --bg:#090c14;--bg2:#0d1117;--card:#111827;
+  --divider:#1f2937;--divider2:#374151;--inp-b:#2a2d3e;
+  --txt:#e2e8f0;--txt-hi:#f1f5f9;--txt-m:#9ca3af;--txt-d:#6b7280;--txt-dd:#4b5563;
+}
+[data-theme="light"]{
+  --bg:#f0f4f8;--bg2:#f8fafc;--card:#ffffff;
+  --divider:#e2e8f0;--divider2:#d1d5db;--inp-b:#d1d5db;
+  --txt:#1e293b;--txt-hi:#0f172a;--txt-m:#475569;--txt-d:#64748b;--txt-dd:#64748b;
+}
+body{background:var(--bg);font-family:'Heebo','Arial Hebrew',sans-serif;color:var(--txt);overscroll-behavior:none}
 #root{height:100%;display:flex;flex-direction:column}
 input,select,button{font-family:inherit}
 input[type=date],input[type=time]{color-scheme:dark}
-select option{background:#0d1117;color:#e2e8f0}
+[data-theme="light"] input[type=date],[data-theme="light"] input[type=time]{color-scheme:light}
+select option{background:var(--bg2);color:var(--txt)}
 ::-webkit-scrollbar{display:none}
 .app{max-width:430px;margin:0 auto;min-height:100vh}
 
@@ -80,7 +91,7 @@ const LS = {
   get: k=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch{return null;}},
   set: (k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}},
 };
-const K={shifts:"wt-shifts-v5",cfg:"wt-cfg-v5",tpls:"wt-tpls-v2",als:"wt-als-v2",clockin:"wt-clockin-v1",vac:"wt-vac-v1",onboarded:"wt-onboarded-v1",privacy:"wt-privacy-v1",lang:"wt-lang-v1"};
+const K={shifts:"wt-shifts-v5",cfg:"wt-cfg-v5",tpls:"wt-tpls-v2",als:"wt-als-v2",clockin:"wt-clockin-v1",vac:"wt-vac-v1",onboarded:"wt-onboarded-v1",privacy:"wt-privacy-v1",lang:"wt-lang-v1",theme:"wt-theme-v1"};
 const LangCtx=React.createContext("he");
 const useT=()=>{const l=React.useContext(LangCtx);return k=>TR[l]?.[k]??TR.he[k]??k;};
 const TR={
@@ -169,6 +180,8 @@ const TR={
     sg_privacy:"מצב פרטיות",sg_privacy_h:"מסתיר את כל הסכומים בכל המסכים",
     sg_reset:"🔄 הפעל מחדש את אשף ההגדרות",sg_reset_c:"לאפס את האשף הראשוני ולהגדיר מחדש?",
     sg_lang:"🌐 שפה",
+    sg_theme:"🎨 ערכת נושא",sg_theme_dark:"🌙 חשוך",sg_theme_light:"☀️ בהיר",
+    ob_theme_h:"בחר ערכת נושא",
     // Shift settings
     sg_shifts:"משמרות",sg_shift_cfg:"הגדרת סוגי משמרות",
     sg_sh_morning:"☀️ בוקר",sg_sh_afternoon:"🌤️ צהריים",sg_sh_night:"🌙 לילה",
@@ -336,6 +349,8 @@ const TR={
     sg_privacy:"Режим приватности",sg_privacy_h:"Скрывает все суммы на всех экранах",
     sg_reset:"🔄 Перезапустить мастер настроек",sg_reset_c:"Сбросить мастер и настроить заново?",
     sg_lang:"🌐 Язык",
+    sg_theme:"🎨 Тема",sg_theme_dark:"🌙 Тёмная",sg_theme_light:"☀️ Светлая",
+    ob_theme_h:"Выберите тему",
     // Shift settings
     sg_shifts:"Смены",sg_shift_cfg:"Настройка типов смен",
     sg_sh_morning:"☀️ Утро",sg_sh_afternoon:"🌤️ День",sg_sh_night:"🌙 Ночь",
@@ -447,7 +462,7 @@ const SPECIAL={
     desc:"100% שכר בסיס, ללא תוספות"},
   holiday: {label:"חג",          color:"#fcd34d",bg:"#2a1f00",icon:"✡️",
     desc:"100% שכר בסיס ליום חג, ללא תוספות"},
-  sick_1:  {label:"מחלה יום 1", color:"#6b7280",bg:"#111",icon:"🤒",
+  sick_1:  {label:"מחלה יום 1", color:"var(--txt-d)",bg:"#111",icon:"🤒",
     desc:"0% — יום ראשון ללא תשלום (לפי חוק)"},
   sick_23: {label:"מחלה ימים 2-3",color:"#f97316",bg:"#2a0f00",icon:"🤒",
     desc:"50% שכר בסיס, ללא תוספות ושעות נוספות"},
@@ -886,10 +901,10 @@ function elapsed(fromISO){
   return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
 }
 
-const SI={width:"100%",background:"#0d1117",border:"1px solid #2a2d3e",borderRadius:"10px",padding:"12px 14px",color:"#e2e8f0",fontSize:"16px",outline:"none",display:"block"};
-const CARD={background:"#111827",border:"1px solid #1f2937",borderRadius:"14px",padding:"14px"};
-const SEC={fontSize:"12px",color:"#6b7280",fontWeight:"700",letterSpacing:"0.8px",marginBottom:"12px",textTransform:"uppercase"};
-const LBL={fontSize:"11px",color:"#6b7280",marginBottom:"6px",fontWeight:"700",letterSpacing:"0.8px",textTransform:"uppercase"};
+const SI={width:"100%",background:"var(--bg2)",border:"1px solid var(--inp-b)",borderRadius:"10px",padding:"12px 14px",color:"var(--txt)",fontSize:"16px",outline:"none",display:"block"};
+const CARD={background:"var(--card)",border:"1px solid var(--divider)",borderRadius:"14px",padding:"14px"};
+const SEC={fontSize:"12px",color:"var(--txt-d)",fontWeight:"700",letterSpacing:"0.8px",marginBottom:"12px",textTransform:"uppercase"};
+const LBL={fontSize:"11px",color:"var(--txt-d)",marginBottom:"6px",fontWeight:"700",letterSpacing:"0.8px",textTransform:"uppercase"};
 
 function Btn({onClick,color="#22c55e",textColor="#000",children,style={}}){
   return <button onClick={onClick} style={{width:"100%",padding:"14px",background:color,border:"none",borderRadius:"12px",color:textColor,fontSize:"15px",fontWeight:"800",cursor:"pointer",...style}}>{children}</button>;
@@ -899,7 +914,7 @@ function Field({label,hint,children}){
     <div style={{marginBottom:"14px"}}>
       <div style={{display:"flex",justifyContent:"space-between",marginBottom:"6px"}}>
         <div style={LBL}>{label}</div>
-        {hint&&<div style={{fontSize:"10px",color:"#4b5563"}}>{hint}</div>}
+        {hint&&<div style={{fontSize:"10px",color:"var(--txt-dd)"}}>{hint}</div>}
       </div>
       {children}
     </div>
@@ -907,7 +922,7 @@ function Field({label,hint,children}){
 }
 function Toggle({on,onToggle}){
   return(
-    <button onClick={onToggle} style={{background:on?"#052e16":"#1f2937",border:`1.5px solid ${on?"#22c55e":"#374151"}`,color:on?"#22c55e":"#6b7280",borderRadius:"20px",padding:"3px 12px",cursor:"pointer",fontWeight:"700",fontSize:"12px"}}>
+    <button onClick={onToggle} style={{background:on?"#052e16":"var(--divider)",border:`1.5px solid ${on?"#22c55e":"var(--divider2)"}`,color:on?"#22c55e":"var(--txt-d)",borderRadius:"20px",padding:"3px 12px",cursor:"pointer",fontWeight:"700",fontSize:"12px"}}>
       {on?"✓ פעיל":"כבוי"}
     </button>
   );
@@ -1155,15 +1170,15 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode}){
             <span style={{fontSize:"14px"}}>{sty.icon}</span>
             <span style={{fontSize:"12px",color:sty.color,fontWeight:"700"}}>{uT("cl_shift")} {uT("st_"+curShiftType)} {uT("cl_active")}</span>
           </div>
-          <span style={{fontSize:"11px",color:"#4b5563"}}>{uT("cl_start")} {clockIn.time}</span>
+          <span style={{fontSize:"11px",color:"var(--txt-dd)"}}>{uT("cl_start")} {clockIn.time}</span>
         </div>
 
         {/* Row 2: timer (right) + net earnings (left) */}
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
-            <div style={{fontSize:"10px",color:"#6b7280",marginBottom:"2px"}}>{uT("cl_elapsed")}</div>
-            <div style={{fontSize:"26px",fontWeight:"900",color:"#f1f5f9",letterSpacing:"2px",fontVariantNumeric:"tabular-nums"}}>{elapsedStr}</div>
-            <div style={{fontSize:"10px",color:"#4b5563",marginTop:"1px"}}>{fH(hours)} {uT("hr")}</div>
+            <div style={{fontSize:"10px",color:"var(--txt-d)",marginBottom:"2px"}}>{uT("cl_elapsed")}</div>
+            <div style={{fontSize:"26px",fontWeight:"900",color:"var(--txt-hi)",letterSpacing:"2px",fontVariantNumeric:"tabular-nums"}}>{elapsedStr}</div>
+            <div style={{fontSize:"10px",color:"var(--txt-dd)",marginTop:"1px"}}>{fH(hours)} {uT("hr")}</div>
           </div>
           <div style={{textAlign:"left"}}>
             <div style={{fontSize:"10px",color:"#86efac",marginBottom:"2px"}}>{uT("cl_net")}</div>
@@ -1177,17 +1192,17 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode}){
               userSelect:privacyMode?"none":"auto",
             }}>{fM(net)}</div>
             <div style={{display:"flex",justifyContent:"flex-end",alignItems:"center",gap:"5px",marginTop:"1px"}}>
-              <span style={{fontSize:"10px",color:"#4b5563",filter:privacyMode?"blur(6px)":"none"}}>{uT("cl_gross_pfx")} {fM(gross)}</span>
-              <button onClick={()=>setShowDetails(!showDetails)} style={{width:"16px",height:"16px",borderRadius:"50%",background:"#1f2937",border:"1px solid #374151",color:"#6b7280",fontSize:"10px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>ℹ</button>
+              <span style={{fontSize:"10px",color:"var(--txt-dd)",filter:privacyMode?"blur(6px)":"none"}}>{uT("cl_gross_pfx")} {fM(gross)}</span>
+              <button onClick={()=>setShowDetails(!showDetails)} style={{width:"16px",height:"16px",borderRadius:"50%",background:"var(--divider)",border:"1px solid #374151",color:"var(--txt-d)",fontSize:"10px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>ℹ</button>
             </div>
           </div>
         </div>
 
         {/* Details panel */}
         {showDetails&&(
-          <div style={{marginTop:"10px",background:"#0d1117",borderRadius:"10px",padding:"10px",filter:privacyMode?"blur(8px)":"none",transition:"filter 0.25s ease",userSelect:privacyMode?"none":"auto"}}>
-            <div style={{fontSize:"10px",color:"#6b7280",fontWeight:"700",marginBottom:"6px",textAlign:"center"}}>{uT("cl_calc")}</div>
-            {[{l:uT("cl_gross_lbl"),v:gross,c:"#e2e8f0",neg:false},...(ded?[
+          <div style={{marginTop:"10px",background:"var(--bg2)",borderRadius:"10px",padding:"10px",filter:privacyMode?"blur(8px)":"none",transition:"filter 0.25s ease",userSelect:privacyMode?"none":"auto"}}>
+            <div style={{fontSize:"10px",color:"var(--txt-d)",fontWeight:"700",marginBottom:"6px",textAlign:"center"}}>{uT("cl_calc")}</div>
+            {[{l:uT("cl_gross_lbl"),v:gross,c:"var(--txt)",neg:false},...(ded?[
               {l:`${uT("ded_tax")} ${cfg.taxRate}%`,v:ded.tx,c:"#f87171",neg:true},
               {l:`${uT("ded_ni")} ${cfg.bituachLeumi}%`,v:ded.bl,c:"#f87171",neg:true},
               {l:`${uT("ded_health")} ${cfg.masBriut}%`,v:ded.br,c:"#f87171",neg:true},
@@ -1195,7 +1210,7 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode}){
               {l:`${uT("ded_keren_e")} ${cfg.kerenEmployee}%`,v:ded.ke,c:"#f87171",neg:true},
             ]:[])].map((r,i)=>(
               <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderBottom:"1px solid #1f293766"}}>
-                <span style={{fontSize:"11px",color:"#9ca3af"}}>{r.l}</span>
+                <span style={{fontSize:"11px",color:"var(--txt-m)"}}>{r.l}</span>
                 <span style={{fontSize:"11px",color:r.c}}>{r.neg?"-":""}{fM(r.v)}</span>
               </div>
             ))}
@@ -1344,7 +1359,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
           <div style={{fontSize:"20px",fontWeight:"900",color:"#f97316",lineHeight:"1.6",marginBottom:"16px"}}>
             {uT("cl_short_t")}<br/>{uT("cl_short_s")}
           </div>
-          <div style={{fontSize:"16px",color:"#6b7280",marginBottom:"8px"}}>{uT("cl_no_rec")}</div>
+          <div style={{fontSize:"16px",color:"var(--txt-d)",marginBottom:"8px"}}>{uT("cl_no_rec")}</div>
         </div>
       );
     }
@@ -1363,7 +1378,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
         <div style={{fontSize:"20px",fontWeight:"900",color:isIn?"#4ade80":"#fbbf24",lineHeight:"1.5",marginBottom:"16px"}}>
           {msg.text}
         </div>
-        <div style={{fontSize:"13px",color:"#4b5563"}}>
+        <div style={{fontSize:"13px",color:"var(--txt-dd)"}}>
           {isIn?uT("cl_recording"):uT("cl_saved")}
         </div>
       </div>
@@ -1382,7 +1397,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
 
       {/* Header: date + clock + badge */}
       <div style={{textAlign:"center",marginBottom:"12px",position:"relative",zIndex:5}}>
-        <div style={{fontSize:"12px",color:"#6b7280",marginBottom:"2px"}}>
+        <div style={{fontSize:"12px",color:"var(--txt-d)",marginBottom:"2px"}}>
           {new Date().toLocaleDateString(uT("locale"),{weekday:"long",day:"numeric",month:"long"})}
         </div>
         <LiveClock/>
@@ -1406,7 +1421,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
             <div style={{fontSize:"22px",fontWeight:"900",color:"#4ade80"}}>{uT("cl_in")}</div>
             <div style={{fontSize:"12px",color:"#86efac"}}>{nowTime()}</div>
           </button>
-          <div style={{marginTop:"12px",textAlign:"center",fontSize:"12px",color:"#374151"}}>
+          <div style={{marginTop:"12px",textAlign:"center",fontSize:"12px",color:"var(--divider2)"}}>
             {uT("cl_in_hint")}
           </div>
         </div>
@@ -1417,7 +1432,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
           {shiftAls.length>0&&(
             <div style={{display:"flex",flexWrap:"wrap",gap:"6px",marginBottom:"10px"}}>
               {shiftAls.map(a=>{const on=selAls.includes(a.id);return(
-                <button key={a.id} onClick={()=>toggleAl(a.id)} style={{padding:"8px 12px",borderRadius:"10px",cursor:"pointer",border:`1.5px solid ${on?"#34d399":"#2a2d3e"}`,background:on?"#022c22":"#0d1117",color:on?"#34d399":"#6b7280",fontWeight:"700",fontSize:"12px"}}>
+                <button key={a.id} onClick={()=>toggleAl(a.id)} style={{padding:"8px 12px",borderRadius:"10px",cursor:"pointer",border:`1.5px solid ${on?"#34d399":"var(--inp-b)"}`,background:on?"#022c22":"var(--bg2)",color:on?"#34d399":"var(--txt-d)",fontWeight:"700",fontSize:"12px"}}>
                   🧾 {a.name} {fM(a.amount)}
                 </button>
               );})}
@@ -1447,7 +1462,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
 function LiveClock(){
   const[time,setTime]=useState(nowTime());
   useEffect(()=>{const id=setInterval(()=>setTime(nowTime()),1000);return()=>clearInterval(id);},[]);
-  return <div style={{fontSize:"48px",fontWeight:"900",color:"#f1f5f9",letterSpacing:"2px",fontVariantNumeric:"tabular-nums"}}>{time}</div>;
+  return <div style={{fontSize:"48px",fontWeight:"900",color:"var(--txt-hi)",letterSpacing:"2px",fontVariantNumeric:"tabular-nums"}}>{time}</div>;
 }
 
 // ════════════════════════════════════════
@@ -1513,12 +1528,12 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
   return(
     <div style={{padding:"16px",paddingBottom:"20px"}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"18px"}}>
-        <button onClick={()=>nav(1)} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>‹</button>
+        <button onClick={()=>nav(1)} style={{background:"var(--divider)",border:"none",color:"var(--txt-m)",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>‹</button>
         <div style={{textAlign:"center"}}>
-          <div style={{fontSize:"18px",fontWeight:"800",color:"#f1f5f9"}}>{mLbl(selM)}</div>
+          <div style={{fontSize:"18px",fontWeight:"800",color:"var(--txt-hi)"}}>{mLbl(selM)}</div>
           {selM===tdy().substring(0,7)&&<div style={{fontSize:"11px",color:"#22c55e",marginTop:"2px"}}>{t("d_cur_month")}</div>}
         </div>
-        <button onClick={()=>nav(-1)} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>›</button>
+        <button onClick={()=>nav(-1)} style={{background:"var(--divider)",border:"none",color:"var(--txt-m)",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>›</button>
       </div>
 
       {otMsg&&(
@@ -1526,7 +1541,7 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
           <div style={{fontSize:"28px",marginBottom:"6px"}}>{otMsg.e}</div>
           <div style={{fontSize:"15px",fontWeight:"900",color:"#fed7aa",marginBottom:"4px"}}>{otMsg.t}</div>
           <div style={{fontSize:"12px",color:"#fb923c",marginBottom:"10px"}}>{otMsg.s}</div>
-          <div style={{display:"flex",justifyContent:"center",gap:"16px",fontSize:"11px",color:"#9ca3af"}}>
+          <div style={{display:"flex",justifyContent:"center",gap:"16px",fontSize:"11px",color:"var(--txt-m)"}}>
             {isDOT&&<span>{t("ot_daily")} <b style={{color:"#f97316"}}>{fH(hoursNow-dTh)}</b>{t("ot_above_th")}</span>}
             {isWOT&&<span>{t("ot_weekly")} <b style={{color:"#f97316"}}>{fH(weekHT-wTh)}</b>{t("ot_above_th")}</span>}
           </div>
@@ -1560,7 +1575,7 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
                 <div key={String(v)} onClick={e=>{e.stopPropagation();setShowNet(v);setFlipKey(k=>k+1);}} style={{
                   padding:"4px 14px",borderRadius:"16px",fontSize:"11px",fontWeight:"700",cursor:"pointer",
                   background:showNet===v?"#22c55e":"none",
-                  color:showNet===v?"#000":"#4b5563",
+                  color:showNet===v?"#000":"var(--txt-dd)",
                   transition:"all 0.2s ease",
                 }}>{lbl}</div>
               ))}
@@ -1587,13 +1602,13 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
               const pct=Math.min(100,Math.round(net/cfg.monthlyGoal*100));
               return(
                 <div style={{marginTop:"14px",width:"100%"}}>
-                  <div style={{display:"flex",justifyContent:"space-between",fontSize:"11px",color:"#6b7280",marginBottom:"5px"}}>
-                    <span>{t("d_goal_net")}</span><span style={{color:pct>=100?"#4ade80":"#6b7280",fontWeight:"700"}}>{pct}%</span>
+                  <div style={{display:"flex",justifyContent:"space-between",fontSize:"11px",color:"var(--txt-d)",marginBottom:"5px"}}>
+                    <span>{t("d_goal_net")}</span><span style={{color:pct>=100?"#4ade80":"var(--txt-d)",fontWeight:"700"}}>{pct}%</span>
                   </div>
                   <div style={{background:"#041f10",borderRadius:"6px",height:"8px",overflow:"hidden"}}>
                     <div style={{width:`${pct}%`,height:"100%",background:pct>=100?"linear-gradient(90deg,#4ade80,#22d3ee)":"linear-gradient(90deg,#16a34a,#4ade80)",borderRadius:"6px",transition:"width 0.4s ease"}}/>
                   </div>
-                  <div style={{fontSize:"10px",color:"#6b7280",marginTop:"3px"}}>{prv(net,privacyMode)} {t("d_of")} {prv(cfg.monthlyGoal,privacyMode)}</div>
+                  <div style={{fontSize:"10px",color:"var(--txt-d)",marginTop:"3px"}}>{prv(net,privacyMode)} {t("d_of")} {prv(cfg.monthlyGoal,privacyMode)}</div>
                 </div>
               );
             })()}
@@ -1604,13 +1619,13 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
             <div style={{fontSize:"40px",fontWeight:"900",color:"#4ade80",letterSpacing:"-2px",lineHeight:1}}>{prv(tG+tA,privacyMode)}</div>
             {cfg.monthlyGoal>0&&(()=>{const pct=Math.min(100,Math.round((tG+tA)/cfg.monthlyGoal*100));return(
               <div style={{marginTop:"10px",width:"100%"}}>
-                <div style={{display:"flex",justifyContent:"space-between",fontSize:"11px",color:"#6b7280",marginBottom:"4px"}}>
-                  <span>{t("d_goal")}</span><span style={{color:pct>=100?"#4ade80":"#6b7280"}}>{pct}%</span>
+                <div style={{display:"flex",justifyContent:"space-between",fontSize:"11px",color:"var(--txt-d)",marginBottom:"4px"}}>
+                  <span>{t("d_goal")}</span><span style={{color:pct>=100?"#4ade80":"var(--txt-d)"}}>{pct}%</span>
                 </div>
                 <div style={{background:"#041f10",borderRadius:"6px",height:"8px",overflow:"hidden"}}>
                   <div style={{width:`${pct}%`,height:"100%",background:pct>=100?"linear-gradient(90deg,#4ade80,#22d3ee)":"linear-gradient(90deg,#16a34a,#4ade80)",borderRadius:"6px",transition:"width 0.4s ease"}}/>
                 </div>
-                <div style={{fontSize:"10px",color:"#6b7280",marginTop:"3px"}}>{prv(tG+tA,privacyMode)} {t("d_of")} {prv(cfg.monthlyGoal,privacyMode)}</div>
+                <div style={{fontSize:"10px",color:"var(--txt-d)",marginTop:"3px"}}>{prv(tG+tA,privacyMode)} {t("d_of")} {prv(cfg.monthlyGoal,privacyMode)}</div>
               </div>
             );})()}
           </>
@@ -1627,19 +1642,19 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
             if(!cnt)return null;
             return(
               <div key={a.id} style={{display:"flex",justifyContent:"space-between",padding:"7px 0",borderBottom:"1px solid #065f46"}}>
-                <span style={{fontSize:"13px",color:"#9ca3af"}}>{a.name} <span style={{color:"#4b5563"}}>×{cnt}</span></span>
+                <span style={{fontSize:"13px",color:"var(--txt-m)"}}>{a.name} <span style={{color:"var(--txt-dd)"}}>×{cnt}</span></span>
                 <span style={{fontSize:"14px",fontWeight:"700",color:"#34d399"}}>{prv(a.amount*cnt,privacyMode)}</span>
               </div>
             );
           })}
           {als.filter(a=>a.active&&a.type==="per_month").map(a=>(
             <div key={a.id} style={{display:"flex",justifyContent:"space-between",padding:"7px 0",borderBottom:"1px solid #065f46"}}>
-              <span style={{fontSize:"13px",color:"#9ca3af"}}>{a.name} {t("d_monthly")}</span>
+              <span style={{fontSize:"13px",color:"var(--txt-m)"}}>{a.name} {t("d_monthly")}</span>
               <span style={{fontSize:"14px",fontWeight:"700",color:"#34d399"}}>{prv(a.amount,privacyMode)}</span>
             </div>
           ))}
           <div style={{display:"flex",justifyContent:"space-between",paddingTop:"8px"}}>
-            <span style={{fontSize:"13px",color:"#6b7280",fontWeight:"700"}}>{t("d_total_allow")}</span>
+            <span style={{fontSize:"13px",color:"var(--txt-d)",fontWeight:"700"}}>{t("d_total_allow")}</span>
             <span style={{fontSize:"15px",fontWeight:"900",color:"#34d399"}}>{prv(tA,privacyMode)}</span>
           </div>
         </div>
@@ -1650,7 +1665,7 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
           <div style={{...CARD,marginBottom:"10px"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:"10px"}}>
               <div style={SEC}>{t("d_deductions")}</div>
-              <div style={{fontSize:"10px",color:"#4b5563"}}>{t("d_bl_tax")} {prv(dedBase,privacyMode)} · {t("d_pen_ker")} {prv(tBase,privacyMode)}</div>
+              <div style={{fontSize:"10px",color:"var(--txt-dd)"}}>{t("d_bl_tax")} {prv(dedBase,privacyMode)} · {t("d_pen_ker")} {prv(tBase,privacyMode)}</div>
             </div>
             {[
               {l:t("ded_tax"),v:ded.tx,c:"#f87171",p:cfg.taxRate},
@@ -1662,32 +1677,32 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
               <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 0",borderBottom:i<4?"1px solid #1f2937":"none"}}>
                 <div style={{display:"flex",alignItems:"center",gap:"7px"}}>
                   <div style={{width:"3px",height:"14px",borderRadius:"2px",background:r.c}}/>
-                  <span style={{fontSize:"13px",color:"#9ca3af"}}>{r.l}</span>
-                  <span style={{fontSize:"10px",color:"#374151"}}>{r.p}%</span>
+                  <span style={{fontSize:"13px",color:"var(--txt-m)"}}>{r.l}</span>
+                  <span style={{fontSize:"10px",color:"var(--divider2)"}}>{r.p}%</span>
                   {r.capped&&<span style={{fontSize:"9px",color:"#4ade80",fontWeight:"700"}}>{t("d_ceiling")}</span>}
                 </div>
                 <span style={{fontSize:"14px",fontWeight:"700",color:r.c}}>-{prv(r.v,privacyMode)}</span>
               </div>
             ))}
             <div style={{display:"flex",justifyContent:"space-between",paddingTop:"8px"}}>
-              <span style={{fontSize:"13px",color:"#6b7280",fontWeight:"700"}}>{t("d_total_ded")}</span>
+              <span style={{fontSize:"13px",color:"var(--txt-d)",fontWeight:"700"}}>{t("d_total_ded")}</span>
               <span style={{fontSize:"15px",fontWeight:"900",color:"#f87171"}}>-{prv(ded.tot,privacyMode)}</span>
             </div>
           </div>
           <div style={{...CARD,marginBottom:"12px",background:"#0d1b2a",border:"1px solid #1e3a5f"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}}>
               <div style={{fontSize:"11px",color:"#60a5fa",fontWeight:"700"}}>{t("d_employer")}</div>
-              <div style={{fontSize:"9px",color:"#374151"}}>{t("d_employer_hint")}</div>
+              <div style={{fontSize:"9px",color:"var(--divider2)"}}>{t("d_employer_hint")}</div>
             </div>
             <div style={{display:"flex",gap:"12px"}}>
               <div style={{flex:1,textAlign:"center"}}>
-                <div style={{fontSize:"10px",color:"#4b5563"}}>{t("d_pension_emp")}</div>
+                <div style={{fontSize:"10px",color:"var(--txt-dd)"}}>{t("d_pension_emp")}</div>
                 <div style={{fontSize:"15px",fontWeight:"800",color:"#60a5fa"}}>{prv(ded.pr,privacyMode)}</div>
                 <div style={{fontSize:"9px",color:"#1e3a5f",marginTop:"1px"}}>{t("d_worker")}: {prv(ded.pe,privacyMode)} | {t("d_total")}: {prv(ded.pe+ded.pr,privacyMode)}</div>
               </div>
               <div style={{width:"1px",background:"#1e3a5f"}}/>
               <div style={{flex:1,textAlign:"center"}}>
-                <div style={{fontSize:"10px",color:"#4b5563"}}>{t("d_keren_emp")}</div>
+                <div style={{fontSize:"10px",color:"var(--txt-dd)"}}>{t("d_keren_emp")}</div>
                 <div style={{fontSize:"15px",fontWeight:"800",color:"#a78bfa"}}>{prv(ded.kr,privacyMode)}</div>
                 <div style={{fontSize:"9px",color:"#3b0764",marginTop:"1px"}}>{t("d_worker")}: {prv(ded.ke,privacyMode)} | {t("d_total")}: {prv(ded.ke+ded.kr,privacyMode)}</div>
               </div>
@@ -1704,9 +1719,9 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
           {label:t("d_ot_h"),val:fH(ot125+ot150),sub:`×125%: ${fH(ot125)} | ×150%: ${fH(ot150)}`,color:"#f87171"},
         ].map(s=>(
           <div key={s.label} style={CARD}>
-            <div style={{fontSize:"11px",color:"#6b7280",marginBottom:"4px"}}>{s.label}</div>
+            <div style={{fontSize:"11px",color:"var(--txt-d)",marginBottom:"4px"}}>{s.label}</div>
             <div style={{fontSize:"24px",fontWeight:"800",color:s.color}}>{s.val}<span style={{fontSize:"13px",marginRight:"3px"}}>{t("hr")}</span></div>
-            <div style={{fontSize:"11px",color:"#374151",marginTop:"2px"}}>{s.sub}</div>
+            <div style={{fontSize:"11px",color:"var(--divider2)",marginTop:"2px"}}>{s.sub}</div>
           </div>
         ))}
       </div>
@@ -1771,19 +1786,19 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
   const displayDate=value?new Date(value+"T12:00:00").toLocaleDateString("he-IL",{weekday:"short",day:"numeric",month:"long",year:"numeric"}):"בחר תאריך";
 
   const calBody=(
-    <div style={inline?{background:"#111827",padding:"12px 8px 8px",width:"100%",boxSizing:"border-box"}:{position:"absolute",top:"100%",right:0,left:0,zIndex:50,background:"#111827",border:"1px solid #1f2937",borderRadius:"14px",padding:"14px",marginTop:"6px",boxShadow:"0 10px 40px #000a"}}>
+    <div style={inline?{background:"var(--card)",padding:"12px 8px 8px",width:"100%",boxSizing:"border-box"}:{position:"absolute",top:"100%",right:0,left:0,zIndex:50,background:"var(--card)",border:"1px solid #1f2937",borderRadius:"14px",padding:"14px",marginTop:"6px",boxShadow:"0 10px 40px #000a"}}>
           {/* Month nav */}
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}}>
-            <button onClick={prevMonth} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"8px",width:"32px",height:"32px",fontSize:"18px",cursor:"pointer"}}>‹</button>
-            <div style={{fontWeight:"800",color:"#f1f5f9",fontSize:"15px"}}>{monthNames[m]} {y}</div>
-            <button onClick={nextMonth} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"8px",width:"32px",height:"32px",fontSize:"18px",cursor:"pointer"}}>›</button>
+            <button onClick={prevMonth} style={{background:"var(--divider)",border:"none",color:"var(--txt-m)",borderRadius:"8px",width:"32px",height:"32px",fontSize:"18px",cursor:"pointer"}}>‹</button>
+            <div style={{fontWeight:"800",color:"var(--txt-hi)",fontSize:"15px"}}>{monthNames[m]} {y}</div>
+            <button onClick={nextMonth} style={{background:"var(--divider)",border:"none",color:"var(--txt-m)",borderRadius:"8px",width:"32px",height:"32px",fontSize:"18px",cursor:"pointer"}}>›</button>
           </div>
 
           {/* Day headers */}
           <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:"2px",marginBottom:"6px"}}>
             {dayNames.map((d,i)=>(
               <div key={d} style={{textAlign:"center",fontSize:"11px",fontWeight:"700",padding:"4px 0",
-                color:i===6?"#a78bfa":i===5?"#fb923c":"#4b5563"}}>{d}</div>
+                color:i===6?"#a78bfa":i===5?"#fb923c":"var(--txt-dd)"}}>{d}</div>
             ))}
           </div>
 
@@ -1803,10 +1818,10 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
               const tColor=firstType?(isSpecialDay(firstType)?SPECIAL[firstType].color:ST[firstType].color):null;
               const dow=new Date(ds+"T12:00:00").getDay();
               const isSat=dow===6;const isFri=dow===5;
-              const weekendBase=isSat?"#1e1040":isFri?"#1c110055":"#0d1117";
-              const bg=isSelected?"#22c55e":isPanelOpen?(tColor+"33"||"#1a2a1a"):hasShift?(tColor+"22"):isToday?"#1f2937":holiday?"#fcd34d12":weekendBase;
+              const weekendBase=isSat?"#1e1040":isFri?"#1c110055":"var(--bg2)";
+              const bg=isSelected?"#22c55e":isPanelOpen?(tColor+"33"||"#1a2a1a"):hasShift?(tColor+"22"):isToday?"var(--divider)":holiday?"#fcd34d12":weekendBase;
               const border=isSelected?"2px solid #22c55e":isPanelOpen?`2px solid ${tColor||"#22c55e"}`:isToday?"2px solid #22c55e66":hasShift?`2px solid ${tColor}55`:isSat?"1px solid #3730a355":isFri?"1px solid #92400e55":"1px solid #1f2937";
-              const textColor=isSelected?"#000":isToday?"#4ade80":hasShift?tColor:isSat?"#a78bfa":isFri?"#fb923c":"#e2e8f0";
+              const textColor=isSelected?"#000":isToday?"#4ade80":hasShift?tColor:isSat?"#a78bfa":isFri?"#fb923c":"var(--txt)";
               return(
                 <button key={d} onClick={()=>handleDayClick(d)} style={{
                   padding:"4px 2px 5px",borderRadius:"10px",border,cursor:"pointer",background:bg,
@@ -1831,14 +1846,14 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
           {/* Shift detail panel */}
           {selectedDay&&(selectedShifts.length>0||IL_HOLIDAYS[selectedDay])&&(
             <div style={{marginTop:"12px",borderTop:"1px solid #1f2937",paddingTop:"12px"}}>
-              <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"8px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div style={{fontSize:"12px",color:"var(--txt-d)",fontWeight:"700",marginBottom:"8px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <span>{new Date(selectedDay+"T12:00:00").toLocaleDateString("he-IL",{weekday:"long",day:"numeric",month:"long"})}</span>
                 {IL_HOLIDAYS[selectedDay]&&<span style={{fontSize:"12px",color:"#fcd34d",fontWeight:"700"}}>{IL_HOLIDAYS[selectedDay].icon} {IL_HOLIDAYS[selectedDay].name}</span>}
               </div>
               {IL_HOLIDAYS[selectedDay]&&selectedShifts.length===0&&(
                 <div style={{background:"#2a1f00",border:"1px solid #fcd34d44",borderRadius:"10px",padding:"12px",marginBottom:"8px"}}>
                   <div style={{fontSize:"13px",color:"#fcd34d",fontWeight:"700"}}>{IL_HOLIDAYS[selectedDay].icon} {IL_HOLIDAYS[selectedDay].name}</div>
-                  <div style={{fontSize:"11px",color:"#6b7280",marginTop:"3px"}}>אין משמרת מוגדרת ליום זה</div>
+                  <div style={{fontSize:"11px",color:"var(--txt-d)",marginTop:"3px"}}>אין משמרת מוגדרת ליום זה</div>
                 </div>
               )}
               {selectedShifts.map(s=>{
@@ -1846,17 +1861,17 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
                 const isSpec=isSpecialDay(s.type);
                 const c=isSpec?SPECIAL[s.type]:(ST[s.type]||ST.regular);
                 return(
-                  <div key={s.id} style={{background:"#0d1117",border:`1px solid ${c.color}44`,borderRadius:"10px",padding:"10px",marginBottom:"8px"}}>
+                  <div key={s.id} style={{background:"var(--bg2)",border:`1px solid ${c.color}44`,borderRadius:"10px",padding:"10px",marginBottom:"8px"}}>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}}>
                       <div>
                         <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
                           <span style={{fontSize:"14px"}}>{c.icon}</span>
                           <span style={{fontSize:"13px",fontWeight:"700",color:c.color}}>{c.label}</span>
                         </div>
-                        <div style={{fontSize:"12px",color:"#6b7280",marginTop:"3px"}}>
+                        <div style={{fontSize:"12px",color:"var(--txt-d)",marginTop:"3px"}}>
                           {s.start} – {s.end} · {fH(h)} שעות
                         </div>
-                        {s.note&&<div style={{fontSize:"11px",color:"#4b5563",marginTop:"2px"}}>📝 {s.note}</div>}
+                        {s.note&&<div style={{fontSize:"11px",color:"var(--txt-dd)",marginTop:"2px"}}>📝 {s.note}</div>}
                       </div>
                       <div style={{fontSize:"14px",fontWeight:"800",color:"#4ade80"}}>{fM(getShiftTotal(s,cfg,als,wMap[s.id]))}</div>
                     </div>
@@ -1888,9 +1903,9 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
   if(inline) return calBody;
   return(
     <div style={{position:"relative"}}>
-      <button onClick={()=>{setOpen(!open);setSelectedDay(null);}} style={{...SI,textAlign:"right",cursor:"pointer",background:"#0d1117",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-        <span style={{color:value?"#e2e8f0":"#4b5563"}}>{displayDate}</span>
-        <span style={{color:"#4b5563"}}>📅</span>
+      <button onClick={()=>{setOpen(!open);setSelectedDay(null);}} style={{...SI,textAlign:"right",cursor:"pointer",background:"var(--bg2)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <span style={{color:value?"var(--txt)":"var(--txt-dd)"}}>{displayDate}</span>
+        <span style={{color:"var(--txt-dd)"}}>📅</span>
       </button>
       {open&&calBody}
     </div>
@@ -1934,17 +1949,17 @@ function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode}){
   return(
     <div style={{paddingBottom:"20px",width:"100%",boxSizing:"border-box"}}>
       {editingShift&&<EditModal shift={editingShift} cfg={cfg} als={als} onSave={s=>{onEdit(s);setEditingShift(null);}} onClose={()=>setEditingShift(null)}/>}
-      <div style={{fontSize:"15px",fontWeight:"800",marginBottom:"10px",color:"#f1f5f9",padding:"12px 16px 0"}}>{uT("as_pick_day")}</div>
+      <div style={{fontSize:"15px",fontWeight:"800",marginBottom:"10px",color:"var(--txt-hi)",padding:"12px 16px 0"}}>{uT("as_pick_day")}</div>
       <ShiftCalendar inline value={form.date} onChange={selectDate} shifts={shifts} cfg={cfg} als={als} onEditShift={s=>setEditingShift(s)} onDeleteShift={id=>onDelete(id)}/>
 
       {form.date&&(
         <div style={{marginTop:"16px",padding:"0 16px"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"14px",paddingBottom:"12px",borderTop:"1px solid #1f2937",paddingTop:"12px"}}>
             <div>
-              <div style={{fontSize:"14px",fontWeight:"800",color:"#e2e8f0"}}>{new Date(form.date+"T12:00:00").toLocaleDateString(uT("locale"),{weekday:"long",day:"numeric",month:"long"})}</div>
-              {hol&&<div style={{fontSize:"12px",color:hol.paid?"#fcd34d":"#6b7280",marginTop:"2px"}}>{hol.icon} {hol.name}{hol.paid?" · "+uT("as_auto_hol"):""}</div>}
+              <div style={{fontSize:"14px",fontWeight:"800",color:"var(--txt)"}}>{new Date(form.date+"T12:00:00").toLocaleDateString(uT("locale"),{weekday:"long",day:"numeric",month:"long"})}</div>
+              {hol&&<div style={{fontSize:"12px",color:hol.paid?"#fcd34d":"var(--txt-d)",marginTop:"2px"}}>{hol.icon} {hol.name}{hol.paid?" · "+uT("as_auto_hol"):""}</div>}
             </div>
-            <button onClick={()=>setForm(f=>({...f,date:null}))} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"8px",padding:"6px 10px",cursor:"pointer",fontSize:"12px"}}>{uT("as_change")}</button>
+            <button onClick={()=>setForm(f=>({...f,date:null}))} style={{background:"var(--divider)",border:"none",color:"var(--txt-m)",borderRadius:"8px",padding:"6px 10px",cursor:"pointer",fontSize:"12px"}}>{uT("as_change")}</button>
           </div>
 
           {tpls.length>0&&!isSpecialDay(form.type)&&(
@@ -1960,7 +1975,7 @@ function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode}){
                   const pct=t.customMult||Math.round(ST[t.type].mult*100);
                   const active=form.templateName===t.name;
                   return(
-                    <button key={t.id} onClick={()=>applyT(t)} style={{background:active?color+"22":"#0d1117",border:`1.5px solid ${active?color:"#2a2d3e"}`,borderRadius:"10px",padding:"10px 12px",cursor:"pointer",color:active?color:"#9ca3af",textAlign:"right"}}>
+                    <button key={t.id} onClick={()=>applyT(t)} style={{background:active?color+"22":"var(--bg2)",border:`1.5px solid ${active?color:"var(--inp-b)"}`,borderRadius:"10px",padding:"10px 12px",cursor:"pointer",color:active?color:"var(--txt-m)",textAlign:"right"}}>
                       <div style={{fontWeight:"800",fontSize:"13px"}}>{emoji} {t.name}</div>
                       <div style={{fontSize:"11px",opacity:0.8,marginTop:"2px"}}>{t.start}–{t.end} · {fH(ch(t.start,t.end))}{uT("hr")} · {pct}%</div>
                     </button>
@@ -1980,7 +1995,7 @@ function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode}){
           <Field label={uT("as_shift_type")}>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"8px"}}>
               {Object.entries(ST).filter(([k])=>cfg[k==="regular"?"morningEnabled":k==="afternoon"?"afternoonEnabled":"nightEnabled"]!==false).map(([k,t])=>(
-                <button key={k} onClick={()=>setForm({...form,type:k})} style={{padding:"12px 6px",borderRadius:"11px",cursor:"pointer",border:form.type===k?`2px solid ${t.color}`:"2px solid #1f2937",background:form.type===k?t.bg:"#0d1117",color:form.type===k?t.color:"#6b7280",fontWeight:"700",fontSize:"13px"}}>
+                <button key={k} onClick={()=>setForm({...form,type:k})} style={{padding:"12px 6px",borderRadius:"11px",cursor:"pointer",border:form.type===k?`2px solid ${t.color}`:"2px solid #1f2937",background:form.type===k?t.bg:"var(--bg2)",color:form.type===k?t.color:"var(--txt-d)",fontWeight:"700",fontSize:"13px"}}>
                   <div style={{fontSize:"16px",marginBottom:"3px"}}>{t.icon}</div><div>{uT("st_"+k)}</div>
                 </button>
               ))}
@@ -1990,21 +2005,21 @@ function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode}){
           <Field label={uT("as_special")}>
             <div style={{display:"flex",flexWrap:"wrap",gap:"8px"}}>
               {Object.entries(SPECIAL).map(([k,s])=>(
-                <button key={k} onClick={()=>setForm({...form,type:form.type===k?"regular":k})} style={{padding:"10px 12px",borderRadius:"10px",cursor:"pointer",border:`1.5px solid ${form.type===k?s.color:"#2a2d3e"}`,background:form.type===k?s.bg:"#0d1117",color:form.type===k?s.color:"#6b7280",fontWeight:"700",fontSize:"12px",textAlign:"right"}}>
+                <button key={k} onClick={()=>setForm({...form,type:form.type===k?"regular":k})} style={{padding:"10px 12px",borderRadius:"10px",cursor:"pointer",border:`1.5px solid ${form.type===k?s.color:"var(--inp-b)"}`,background:form.type===k?s.bg:"var(--bg2)",color:form.type===k?s.color:"var(--txt-d)",fontWeight:"700",fontSize:"12px",textAlign:"right"}}>
                   <div style={{fontSize:"16px",marginBottom:"3px"}}>{s.icon}</div>
                   <div>{s.label}</div>
                   <div style={{fontSize:"10px",opacity:0.7,marginTop:"2px"}}>{s.desc}</div>
                 </button>
               ))}
             </div>
-            {isSpecialDay(form.type)&&<div style={{marginTop:"8px",fontSize:"11px",color:"#4b5563",background:"#111827",borderRadius:"8px",padding:"8px"}}>{uT("as_no_ot")}</div>}
+            {isSpecialDay(form.type)&&<div style={{marginTop:"8px",fontSize:"11px",color:"var(--txt-dd)",background:"var(--card)",borderRadius:"8px",padding:"8px"}}>{uT("as_no_ot")}</div>}
           </Field>
 
           {sAls.length>0&&!isSpecialDay(form.type)&&(
             <Field label={uT("as_allowances")}>
               <div style={{display:"flex",flexWrap:"wrap",gap:"8px"}}>
                 {sAls.map(a=>{const on=form.allowanceIds.includes(a.id);return(
-                  <button key={a.id} onClick={()=>togA(a.id)} style={{padding:"10px 14px",borderRadius:"10px",cursor:"pointer",border:`1.5px solid ${on?"#34d399":"#2a2d3e"}`,background:on?"#022c22":"#0d1117",color:on?"#34d399":"#6b7280",fontWeight:"700",fontSize:"13px"}}>
+                  <button key={a.id} onClick={()=>togA(a.id)} style={{padding:"10px 14px",borderRadius:"10px",cursor:"pointer",border:`1.5px solid ${on?"#34d399":"var(--inp-b)"}`,background:on?"#022c22":"var(--bg2)",color:on?"#34d399":"var(--txt-d)",fontWeight:"700",fontSize:"13px"}}>
                     🧾 {a.name} {fM(a.amount)}
                   </button>
                 );})}
@@ -2012,13 +2027,13 @@ function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode}){
             </Field>
           )}
           {prev&&(
-            <div style={{background:isSpecialDay(form.type)?(SPECIAL[form.type].bg||"#111827"):"#052e16",border:`1px solid ${isSpecialDay(form.type)?SPECIAL[form.type].color+"44":"#166534"}`,borderRadius:"12px",padding:"14px",marginBottom:"14px"}}>
+            <div style={{background:isSpecialDay(form.type)?(SPECIAL[form.type].bg||"var(--card)"):"#052e16",border:`1px solid ${isSpecialDay(form.type)?SPECIAL[form.type].color+"44":"#166534"}`,borderRadius:"12px",padding:"14px",marginBottom:"14px"}}>
               <div style={{fontSize:"11px",color:isSpecialDay(form.type)?SPECIAL[form.type].color:"#86efac",marginBottom:"8px",fontWeight:"700"}}>{isSpecialDay(form.type)?SPECIAL[form.type].icon+" "+SPECIAL[form.type].label:uT("as_preview")}</div>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <div>
-                  <div style={{fontSize:"13px",color:"#6b7280"}}>{fH(hours)} {uT("hr")}</div>
+                  <div style={{fontSize:"13px",color:"var(--txt-d)"}}>{fH(hours)} {uT("hr")}</div>
                   {!isSpecialDay(form.type)&&prev.ot125H>0&&<div style={{fontSize:"12px",color:"#f87171"}}>{fH(prev.ot125H)}{uT("hr")} ×125%{prev.ot150H>0?` + ${fH(prev.ot150H)}${uT("hr")} ×150%`:""}</div>}
-                  {isSpecialDay(form.type)&&<div style={{fontSize:"12px",color:"#6b7280"}}>{SPECIAL[form.type].desc}</div>}
+                  {isSpecialDay(form.type)&&<div style={{fontSize:"12px",color:"var(--txt-d)"}}>{SPECIAL[form.type].desc}</div>}
                   {!isSpecialDay(form.type)&&aTotal>0&&<div style={{fontSize:"12px",color:"#34d399"}}>{uT("as_allowances")} {prv(aTotal,privacyMode)}</div>}
                 </div>
                 <div style={{fontSize:"24px",fontWeight:"900",color:isSpecialDay(form.type)?SPECIAL[form.type].color:"#4ade80"}}>{prv(isSpecialDay(form.type)?prev.gross:prev.gross+aTotal,privacyMode)}</div>
@@ -2056,10 +2071,10 @@ function EditModal({shift,cfg,als,onSave,onClose}){
   };
   return(
     <div style={{position:"fixed",inset:0,background:"#000000cc",zIndex:100,display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
-      <div style={{background:"#111827",border:"1px solid #1f2937",borderRadius:"20px 20px 0 0",padding:"20px 16px",paddingBottom:"40px",width:"100%",maxWidth:"430px",maxHeight:"90vh",overflowY:"auto"}}>
+      <div style={{background:"var(--card)",border:"1px solid #1f2937",borderRadius:"20px 20px 0 0",padding:"20px 16px",paddingBottom:"40px",width:"100%",maxWidth:"430px",maxHeight:"90vh",overflowY:"auto"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"20px"}}>
-          <div style={{fontSize:"18px",fontWeight:"800",color:"#f1f5f9"}}>{uT("em_title")}</div>
-          <button onClick={onClose} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"8px",width:"32px",height:"32px",fontSize:"18px",cursor:"pointer"}}>✕</button>
+          <div style={{fontSize:"18px",fontWeight:"800",color:"var(--txt-hi)"}}>{uT("em_title")}</div>
+          <button onClick={onClose} style={{background:"var(--divider)",border:"none",color:"var(--txt-m)",borderRadius:"8px",width:"32px",height:"32px",fontSize:"18px",cursor:"pointer"}}>✕</button>
         </div>
         <Field label={uT("em_date")}><input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})} style={SI}/></Field>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
@@ -2069,7 +2084,7 @@ function EditModal({shift,cfg,als,onSave,onClose}){
         <Field label={uT("as_shift_type")}>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"8px"}}>
             {Object.entries(ST).filter(([k])=>cfg[k==="regular"?"morningEnabled":k==="afternoon"?"afternoonEnabled":"nightEnabled"]!==false).map(([k,t])=>(
-              <button key={k} onClick={()=>setForm({...form,type:k})} style={{padding:"12px 4px",borderRadius:"11px",cursor:"pointer",border:form.type===k?`2px solid ${t.color}`:"2px solid #1f2937",background:form.type===k?t.bg:"#0d1117",color:form.type===k?t.color:"#6b7280",fontWeight:"700",fontSize:"13px"}}>
+              <button key={k} onClick={()=>setForm({...form,type:k})} style={{padding:"12px 4px",borderRadius:"11px",cursor:"pointer",border:form.type===k?`2px solid ${t.color}`:"2px solid #1f2937",background:form.type===k?t.bg:"var(--bg2)",color:form.type===k?t.color:"var(--txt-d)",fontWeight:"700",fontSize:"13px"}}>
                 <div style={{fontSize:"16px",marginBottom:"3px"}}>{t.icon}</div><div>{uT("st_"+k)}</div>
               </button>
             ))}
@@ -2079,7 +2094,7 @@ function EditModal({shift,cfg,als,onSave,onClose}){
           <Field label={uT("as_allowances")}>
             <div style={{display:"flex",flexWrap:"wrap",gap:"8px"}}>
               {sAls.map(a=>{const on=(form.allowanceIds||[]).includes(a.id);return(
-                <button key={a.id} onClick={()=>togA(a.id)} style={{padding:"9px 12px",borderRadius:"10px",cursor:"pointer",border:`1.5px solid ${on?"#34d399":"#2a2d3e"}`,background:on?"#022c22":"#0d1117",color:on?"#34d399":"#6b7280",fontWeight:"700",fontSize:"13px"}}>
+                <button key={a.id} onClick={()=>togA(a.id)} style={{padding:"9px 12px",borderRadius:"10px",cursor:"pointer",border:`1.5px solid ${on?"#34d399":"var(--inp-b)"}`,background:on?"#022c22":"var(--bg2)",color:on?"#34d399":"var(--txt-d)",fontWeight:"700",fontSize:"13px"}}>
                   🧾 {a.name} {fM(a.amount)}
                 </button>
               );})}
@@ -2089,7 +2104,7 @@ function EditModal({shift,cfg,als,onSave,onClose}){
         {prev&&(
           <div style={{background:"#052e16",border:"1px solid #166534",borderRadius:"12px",padding:"12px",marginBottom:"14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <div>
-              <div style={{fontSize:"13px",color:"#6b7280"}}>{fH(hours)} {uT("hr")}</div>
+              <div style={{fontSize:"13px",color:"var(--txt-d)"}}>{fH(hours)} {uT("hr")}</div>
               {prev.ot125H>0&&<div style={{fontSize:"12px",color:"#f87171"}}>{fH(prev.ot125H)}{uT("hr")} ×125%{prev.ot150H>0?` + ${fH(prev.ot150H)}${uT("hr")} ×150%`:""}</div>}
               {!isSpecialDay(form.type)&&aTotal>0&&<div style={{fontSize:"12px",color:"#34d399"}}>{uT("as_allowances")} {fM(aTotal)}</div>}
             </div>
@@ -2117,12 +2132,12 @@ function ShiftsList({shifts,cfg,als,onDelete,onEdit,privacyMode}){
   return(
     <div style={{padding:"16px",paddingBottom:"20px"}}>
       {editShift&&<EditModal shift={editShift} cfg={cfg} als={als} onSave={s=>{onEdit(s);setEditShift(null);}} onClose={()=>setEditShift(null)}/>}
-      <div style={{fontSize:"18px",fontWeight:"800",marginBottom:"20px",color:"#f1f5f9"}}>{uT("sl_title")}</div>
+      <div style={{fontSize:"18px",fontWeight:"800",marginBottom:"20px",color:"var(--txt-hi)"}}>{uT("sl_title")}</div>
       {months.length===0&&(
         <div style={{textAlign:"center",padding:"60px 20px"}}>
           <div style={{fontSize:"52px",marginBottom:"14px"}}>📭</div>
-          <div style={{fontSize:"16px",fontWeight:"800",color:"#4b5563",marginBottom:"6px"}}>{uT("sl_empty")}</div>
-          <div style={{fontSize:"12px",color:"#374151"}}>{uT("sl_empty_hint")}</div>
+          <div style={{fontSize:"16px",fontWeight:"800",color:"var(--txt-dd)",marginBottom:"6px"}}>{uT("sl_empty")}</div>
+          <div style={{fontSize:"12px",color:"var(--divider2)"}}>{uT("sl_empty_hint")}</div>
         </div>
       )}
       {months.map((ym,mi)=>(
@@ -2148,10 +2163,10 @@ function ShiftsList({shifts,cfg,als,onDelete,onEdit,privacyMode}){
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
                   <div style={{flex:1}}>
                     <div style={{display:"flex",alignItems:"center",gap:"6px",flexWrap:"wrap"}}>
-                      <div style={{fontSize:"14px",fontWeight:"700",color:"#e2e8f0"}}>{t.icon} {fD(s.date)}</div>
+                      <div style={{fontSize:"14px",fontWeight:"700",color:"var(--txt)"}}>{t.icon} {fD(s.date)}</div>
                       {holiday&&<span style={{fontSize:"10px",color:"#fcd34d",fontWeight:"700"}}>{holiday.icon} {holiday.name}</span>}
                     </div>
-                    <div style={{fontSize:"12px",color:"#6b7280",marginTop:"3px"}}>{s.start}–{s.end} · {fH(h)}{uT("hr")}</div>
+                    <div style={{fontSize:"12px",color:"var(--txt-d)",marginTop:"3px"}}>{s.start}–{s.end} · {fH(h)}{uT("hr")}</div>
                     <div style={{marginTop:"6px",display:"flex",gap:"6px",flexWrap:"wrap"}}>
                       <span style={{background:t.bg,color:t.color,fontSize:"11px",padding:"2px 8px",borderRadius:"6px",fontWeight:"700"}}>
                         {isSpec?t.label:`${ST[s.type].label} ${Math.round(ST[s.type].mult*100)}%`}
@@ -2160,7 +2175,7 @@ function ShiftsList({shifts,cfg,als,onDelete,onEdit,privacyMode}){
                       {!isSpec&&c.ot150H>0&&<span style={{background:"#2d0505",color:"#ef4444",fontSize:"11px",padding:"2px 8px",borderRadius:"6px",fontWeight:"700"}}>+{fH(c.ot150H)}{uT("hr")} ×{Math.round(ST[s.type].mult*150)}%</span>}
                       {sa>0&&<span style={{background:"#022c22",color:"#34d399",fontSize:"11px",padding:"2px 8px",borderRadius:"6px",fontWeight:"700"}}>🧾 {prv(sa,privacyMode)}</span>}
                     </div>
-                    {s.note&&<div style={{fontSize:"11px",color:"#4b5563",marginTop:"4px"}}>📝 {s.note}</div>}
+                    {s.note&&<div style={{fontSize:"11px",color:"var(--txt-dd)",marginTop:"4px"}}>📝 {s.note}</div>}
                   </div>
                   <div style={{textAlign:"left",marginRight:"6px",flexShrink:0}}>
                     <div style={{fontWeight:"800",color:isSpec?t.color:"#4ade80",fontSize:"16px"}}>{prv(c.gross+sa,privacyMode)}</div>
@@ -2169,7 +2184,7 @@ function ShiftsList({shifts,cfg,als,onDelete,onEdit,privacyMode}){
                       {cid===s.id?(
                         <>
                           <button onClick={()=>{onDelete(s.id);setCid(null);}} style={{background:"#7f1d1d",border:"none",color:"#f87171",borderRadius:"6px",padding:"3px 8px",cursor:"pointer",fontSize:"12px"}}>{uT("sl_delete")}</button>
-                          <button onClick={()=>setCid(null)} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"6px",padding:"3px 8px",cursor:"pointer",fontSize:"12px"}}>{uT("sl_cancel")}</button>
+                          <button onClick={()=>setCid(null)} style={{background:"var(--divider)",border:"none",color:"var(--txt-m)",borderRadius:"6px",padding:"3px 8px",cursor:"pointer",fontSize:"12px"}}>{uT("sl_cancel")}</button>
                         </>
                       ):(
                         <button onClick={()=>setCid(s.id)} style={{background:"#2d0505",border:"none",color:"#f87171",borderRadius:"6px",padding:"3px 8px",cursor:"pointer",fontSize:"12px",fontWeight:"700"}}>🗑</button>
@@ -2217,9 +2232,9 @@ function ReturnPresetRow({selectedId,customPct,onSelect,onCustomChange}){
           <button key={p.id} onClick={()=>onSelect(p.id)} style={{
             display:"flex",alignItems:"center",gap:"3px",
             padding:"5px 9px",borderRadius:"8px",cursor:"pointer",
-            background:selectedId===p.id?"#111827":"#0d1117",
-            border:`1.5px solid ${selectedId===p.id?p.color:"#1f2937"}`,
-            color:selectedId===p.id?p.color:"#6b7280",
+            background:selectedId===p.id?"var(--card)":"var(--bg2)",
+            border:`1.5px solid ${selectedId===p.id?p.color:"var(--divider)"}`,
+            color:selectedId===p.id?p.color:"var(--txt-d)",
             fontSize:"11px",fontWeight:"700",
           }}>
             <span style={{fontSize:"12px"}}>{p.icon}</span>
@@ -2233,7 +2248,7 @@ function ReturnPresetRow({selectedId,customPct,onSelect,onCustomChange}){
           <input type="number" step="0.1" min="0" max="50" value={customPct}
             onChange={e=>onCustomChange(parseFloat(e.target.value)||0)}
             style={{...SI,width:"80px",padding:"4px 8px",fontSize:"12px"}}/>
-          <span style={{fontSize:"11px",color:"#6b7280"}}>% שנתי</span>
+          <span style={{fontSize:"11px",color:"var(--txt-d)"}}>% שנתי</span>
         </div>
       )}
     </div>
@@ -2373,15 +2388,15 @@ function Savings({shifts,cfg,privacyMode}){
 
   return(
     <div style={{padding:"16px",paddingBottom:"20px"}}>
-      <div style={{fontSize:"18px",fontWeight:"800",marginBottom:"16px",color:"#f1f5f9"}}>{uT("sv_title")}</div>
+      <div style={{fontSize:"18px",fontWeight:"800",marginBottom:"16px",color:"var(--txt-hi)"}}>{uT("sv_title")}</div>
 
       {/* Sub tabs */}
-      <div style={{display:"flex",gap:"6px",marginBottom:"16px",background:"#0d1117",borderRadius:"12px",padding:"4px"}}>
+      <div style={{display:"flex",gap:"6px",marginBottom:"16px",background:"var(--bg2)",borderRadius:"12px",padding:"4px"}}>
         {TABS.map(t=>(
           <button key={t.id} onClick={()=>setTab(t.id)} style={{
-            flex:1,padding:"7px 4px",background:tab===t.id?"#1f2937":"none",
+            flex:1,padding:"7px 4px",background:tab===t.id?"var(--divider)":"none",
             border:"none",borderRadius:"9px",cursor:"pointer",
-            color:tab===t.id?"#4ade80":"#6b7280",fontSize:"10px",fontWeight:"800",
+            color:tab===t.id?"#4ade80":"var(--txt-d)",fontSize:"10px",fontWeight:"800",
           }}>
             <div style={{fontSize:"14px",marginBottom:"2px"}}>{t.icon}</div>
             {t.label}
@@ -2431,7 +2446,7 @@ function Savings({shifts,cfg,privacyMode}){
               </div>
               {savCfg.externals.map(e=>(
                 <div key={e.id} style={{display:"flex",justifyContent:"space-between",padding:"5px 0",borderTop:"1px solid #14532d",marginTop:"6px"}}>
-                  <span style={{fontSize:"12px",color:"#9ca3af"}}>{e.icon} {e.name}</span>
+                  <span style={{fontSize:"12px",color:"var(--txt-m)"}}>{e.icon} {e.name}</span>
                   <span style={{fontSize:"12px",fontWeight:"700",color:"#34d399"}}>{fM(e.balance)}</span>
                 </div>
               ))}
@@ -2440,15 +2455,15 @@ function Savings({shifts,cfg,privacyMode}){
 
           {/* יתרה היסטורית */}
           <div style={{...CARD,marginBottom:"10px"}}>
-            <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"12px"}}>{uT("sv_hist_bal")}</div>
+            <div style={{fontSize:"12px",color:"var(--txt-d)",fontWeight:"700",marginBottom:"12px"}}>{uT("sv_hist_bal")}</div>
             {!editingBalance?(
               <>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"12px"}}>
-                  <div style={{background:"#0d1117",borderRadius:"10px",padding:"10px",textAlign:"center"}}>
+                  <div style={{background:"var(--bg2)",borderRadius:"10px",padding:"10px",textAlign:"center"}}>
                     <div style={{fontSize:"10px",color:"#60a5fa",marginBottom:"4px"}}>{uT("sv_pension")}</div>
                     <div style={{fontSize:"18px",fontWeight:"900",color:"#4ade80"}}>₪{(savCfg.pensionHistoric||0).toLocaleString()}</div>
                   </div>
-                  <div style={{background:"#0d1117",borderRadius:"10px",padding:"10px",textAlign:"center"}}>
+                  <div style={{background:"var(--bg2)",borderRadius:"10px",padding:"10px",textAlign:"center"}}>
                     <div style={{fontSize:"10px",color:"#a78bfa",marginBottom:"4px"}}>{uT("sv_keren")}</div>
                     <div style={{fontSize:"18px",fontWeight:"900",color:"#4ade80"}}>₪{(savCfg.kerenHistoric||0).toLocaleString()}</div>
                   </div>
@@ -2467,7 +2482,7 @@ function Savings({shifts,cfg,privacyMode}){
                     <NumInput value={savCfg.kerenHistoric} onChange={v=>setSavCfg(c=>({...c,kerenHistoric:v}))} step={100}/>
                   </Field>
                 </div>
-                <Btn onClick={()=>{save(savCfg);setEditingBalance(false);}} color={savedMsg?"#15803d":"#22c55e"} textColor={savedMsg?"#dcfce7":"#000"} style={{fontSize:"13px"}}>
+                <Btn onClick={()=>{save(savCfg);setTimeout(()=>setEditingBalance(false),1500);}} color={savedMsg?"#15803d":"#22c55e"} textColor={savedMsg?"#dcfce7":"#000"} style={{fontSize:"13px"}}>
                   {savedMsg?uT("sv_saved"):uT("sv_save_hist")}
                 </Btn>
               </>
@@ -2483,12 +2498,12 @@ function Savings({shifts,cfg,privacyMode}){
           {/* כרטיס סטטוס עדכון */}
           <div style={{...CARD,marginBottom:"12px"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}}>
-              <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700"}}>{uT("sv_ret_update")}</div>
+              <div style={{fontSize:"12px",color:"var(--txt-d)",fontWeight:"700"}}>{uT("sv_ret_update")}</div>
               <Btn onClick={handleApplyReturns} color={savedMsg?"#15803d":"#22c55e"} textColor={savedMsg?"#dcfce7":"#000"} style={{fontSize:"11px",padding:"6px 14px"}}>
                 {savedMsg?uT("sv_updated"):uT("sv_update_now")}
               </Btn>
             </div>
-            <div style={{fontSize:"11px",color:"#4b5563"}}>
+            <div style={{fontSize:"11px",color:"var(--txt-dd)"}}>
               {uT("sv_auto_calc")}{" "}
               <span style={{color:"#4ade80",fontWeight:"700"}}>{savCfg.lastReturnApplied||uT("sv_never_upd")}</span>
             </div>
@@ -2555,7 +2570,7 @@ function Savings({shifts,cfg,privacyMode}){
           ))}
 
           {savCfg.externals.length===0&&(
-            <div style={{textAlign:"center",padding:"16px 0",color:"#374151",fontSize:"12px"}}>
+            <div style={{textAlign:"center",padding:"16px 0",color:"var(--divider2)",fontSize:"12px"}}>
               {uT("sv_no_ext_ret")}
             </div>
           )}
@@ -2567,23 +2582,23 @@ function Savings({shifts,cfg,privacyMode}){
         <>
           <div style={{...CARD,marginBottom:"14px",background:"#0d1f12",border:"1px solid #14532d"}}>
             <div style={{fontSize:"13px",color:"#4ade80",fontWeight:"700",marginBottom:"4px"}}>{uT("sv_ext_savings")}</div>
-            <div style={{fontSize:"11px",color:"#4b5563",marginBottom:"14px"}}>{uT("sv_ext_desc")}</div>
+            <div style={{fontSize:"11px",color:"var(--txt-dd)",marginBottom:"14px"}}>{uT("sv_ext_desc")}</div>
 
             {savCfg.externals.length===0&&!showExtForm&&(
-              <div style={{textAlign:"center",padding:"20px 0",color:"#374151"}}>
+              <div style={{textAlign:"center",padding:"20px 0",color:"var(--divider2)"}}>
                 <div style={{fontSize:"32px",marginBottom:"8px"}}>🏦</div>
                 <div style={{fontSize:"12px"}}>{uT("sv_no_ext")}</div>
               </div>
             )}
 
             {savCfg.externals.map(e=>(
-              <div key={e.id} style={{background:"#111827",borderRadius:"10px",padding:"12px",marginBottom:"8px",border:"1px solid #1f2937"}}>
+              <div key={e.id} style={{background:"var(--card)",borderRadius:"10px",padding:"12px",marginBottom:"8px",border:"1px solid #1f2937"}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                   <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
                     <span style={{fontSize:"20px"}}>{e.icon}</span>
                     <div>
-                      <div style={{fontSize:"13px",fontWeight:"700",color:"#e2e8f0"}}>{e.name}</div>
-                      <div style={{fontSize:"11px",color:"#6b7280"}}>{EXT_TYPES.find(t=>t.id===e.type)?.label||e.type} · {uT("sv_return_sfx")} {e.returnPct}%{e.monthlyDeposit>0?` · ${uT("sv_dep_pfx")} ${fM(e.monthlyDeposit)}${uT("sv_per_month_s")}`:""}{ e.depositDay>0?` · ${uT("sv_dep_on")}${e.depositDay} ${uT("sv_of_month")}`:""}</div>
+                      <div style={{fontSize:"13px",fontWeight:"700",color:"var(--txt)"}}>{e.name}</div>
+                      <div style={{fontSize:"11px",color:"var(--txt-d)"}}>{EXT_TYPES.find(t=>t.id===e.type)?.label||e.type} · {uT("sv_return_sfx")} {e.returnPct}%{e.monthlyDeposit>0?` · ${uT("sv_dep_pfx")} ${fM(e.monthlyDeposit)}${uT("sv_per_month_s")}`:""}{ e.depositDay>0?` · ${uT("sv_dep_on")}${e.depositDay} ${uT("sv_of_month")}`:""}</div>
                     </div>
                   </div>
                   <div style={{textAlign:"left",display:"flex",flexDirection:"column",alignItems:"flex-end",gap:"4px"}}>
@@ -2600,12 +2615,12 @@ function Savings({shifts,cfg,privacyMode}){
             ))}
 
             {editExt&&(
-              <div style={{background:"#111827",borderRadius:"12px",padding:"14px",border:"1px solid #60a5fa44",marginTop:"8px"}}>
+              <div style={{background:"var(--card)",borderRadius:"12px",padding:"14px",border:"1px solid #60a5fa44",marginTop:"8px"}}>
                 <div style={{fontSize:"12px",color:"#60a5fa",fontWeight:"700",marginBottom:"12px"}}>{uT("sv_edit_sav")}</div>
                 <div style={{display:"flex",gap:"6px",flexWrap:"wrap",marginBottom:"12px"}}>
                   {EXT_ICONS.map(ic=>(
                     <button key={ic} onClick={()=>setEditExt(e=>({...e,icon:ic}))}
-                      style={{width:"36px",height:"36px",borderRadius:"8px",border:`2px solid ${editExt.icon===ic?"#60a5fa":"#1f2937"}`,background:editExt.icon===ic?"#0c1a3e":"#0d1117",fontSize:"18px",cursor:"pointer"}}>
+                      style={{width:"36px",height:"36px",borderRadius:"8px",border:`2px solid ${editExt.icon===ic?"#60a5fa":"var(--divider)"}`,background:editExt.icon===ic?"#0c1a3e":"var(--bg2)",fontSize:"18px",cursor:"pointer"}}>
                       {ic}
                     </button>
                   ))}
@@ -2637,19 +2652,19 @@ function Savings({shifts,cfg,privacyMode}){
                     save({...savCfg,externals:u});
                     setEditExt(null);
                   }} color="#1e3a5f" textColor="#60a5fa" style={{border:"1px solid #1e3a5f",fontSize:"13px"}}>{uT("sv_save_ch")}</Btn>
-                  <button onClick={()=>setEditExt(null)} style={{flex:1,padding:"13px",background:"#1f2937",border:"none",borderRadius:"12px",color:"#9ca3af",fontWeight:"700",cursor:"pointer"}}>{uT("sl_cancel")}</button>
+                  <button onClick={()=>setEditExt(null)} style={{flex:1,padding:"13px",background:"var(--divider)",border:"none",borderRadius:"12px",color:"var(--txt-m)",fontWeight:"700",cursor:"pointer"}}>{uT("sl_cancel")}</button>
                 </div>
               </div>
             )}
 
             {showExtForm?(
-              <div style={{background:"#111827",borderRadius:"12px",padding:"14px",border:"1px solid #1f2937",marginTop:"8px"}}>
-                <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"12px"}}>{uT("sv_add_ext_hdr")}</div>
+              <div style={{background:"var(--card)",borderRadius:"12px",padding:"14px",border:"1px solid #1f2937",marginTop:"8px"}}>
+                <div style={{fontSize:"12px",color:"var(--txt-d)",fontWeight:"700",marginBottom:"12px"}}>{uT("sv_add_ext_hdr")}</div>
                 {/* Icon picker */}
                 <div style={{display:"flex",gap:"6px",flexWrap:"wrap",marginBottom:"12px"}}>
                   {EXT_ICONS.map(ic=>(
                     <button key={ic} onClick={()=>setNewExt(e=>({...e,icon:ic}))}
-                      style={{width:"36px",height:"36px",borderRadius:"8px",border:`2px solid ${newExt.icon===ic?"#22c55e":"#1f2937"}`,background:newExt.icon===ic?"#052e16":"#0d1117",fontSize:"18px",cursor:"pointer"}}>
+                      style={{width:"36px",height:"36px",borderRadius:"8px",border:`2px solid ${newExt.icon===ic?"#22c55e":"var(--divider)"}`,background:newExt.icon===ic?"#052e16":"var(--bg2)",fontSize:"18px",cursor:"pointer"}}>
                       {ic}
                     </button>
                   ))}
@@ -2682,7 +2697,7 @@ function Savings({shifts,cfg,privacyMode}){
                     setNewExt({name:"",balance:"",returnPct:"",monthlyDeposit:"",type:"deposit",icon:"🏦"});
                     setShowExtForm(false);
                   }} color="#22c55e" textColor="#000" style={{fontSize:"13px"}}>{uT("sv_add")}</Btn>
-                  <button onClick={()=>setShowExtForm(false)} style={{flex:1,padding:"13px",background:"#1f2937",border:"none",borderRadius:"12px",color:"#9ca3af",fontWeight:"700",cursor:"pointer"}}>{uT("sl_cancel")}</button>
+                  <button onClick={()=>setShowExtForm(false)} style={{flex:1,padding:"13px",background:"var(--divider)",border:"none",borderRadius:"12px",color:"var(--txt-m)",fontWeight:"700",cursor:"pointer"}}>{uT("sl_cancel")}</button>
                 </div>
               </div>
             ):(
@@ -2701,8 +2716,8 @@ function Savings({shifts,cfg,privacyMode}){
           {rows.length>0?[...rows].reverse().map(r=>(
             <div key={r.ym} style={{...CARD,marginBottom:"8px"}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:"8px"}}>
-                <span style={{fontWeight:"700",color:"#e2e8f0"}}>{mLbl(r.ym)}</span>
-                <span style={{fontSize:"12px",color:"#6b7280"}}>{uT("sv_base")} {fM(Math.round(r.base))}</span>
+                <span style={{fontWeight:"700",color:"var(--txt)"}}>{mLbl(r.ym)}</span>
+                <span style={{fontSize:"12px",color:"var(--txt-d)"}}>{uT("sv_base")} {fM(Math.round(r.base))}</span>
               </div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
                 <div style={{background:"#0c1a3e55",borderRadius:"8px",padding:"8px"}}>
@@ -2717,12 +2732,12 @@ function Savings({shifts,cfg,privacyMode}){
                 </div>
               </div>
               <div style={{display:"flex",justifyContent:"space-between",marginTop:"8px"}}>
-                <span style={{fontSize:"11px",color:"#4b5563"}}>{uT("sv_cumul")}</span>
+                <span style={{fontSize:"11px",color:"var(--txt-dd)"}}>{uT("sv_cumul")}</span>
                 <span style={{fontSize:"12px",fontWeight:"700",color:"#38bdf8"}}>{fM(Math.round(r.cP+r.cK))}</span>
               </div>
             </div>
           )):(
-            <div style={{textAlign:"center",color:"#374151",padding:"40px 0"}}>
+            <div style={{textAlign:"center",color:"var(--divider2)",padding:"40px 0"}}>
               <div style={{fontSize:"36px"}}>📊</div>
               <div style={{marginTop:"12px"}}>{uT("sv_no_hist")}</div>
             </div>
@@ -2780,11 +2795,11 @@ function Graph({shifts,cfg,als,privacyMode}){
     return(
       <div style={{padding:"16px",paddingBottom:"20px"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"20px"}}>
-          <button onClick={()=>setViewYear(y=>y-1)} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>‹</button>
-          <div style={{fontSize:"18px",fontWeight:"800",color:"#f1f5f9"}}>📈 {viewYear}</div>
-          <button onClick={()=>setViewYear(y=>y+1)} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>›</button>
+          <button onClick={()=>setViewYear(y=>y-1)} style={{background:"var(--divider)",border:"none",color:"var(--txt-m)",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>‹</button>
+          <div style={{fontSize:"18px",fontWeight:"800",color:"var(--txt-hi)"}}>📈 {viewYear}</div>
+          <button onClick={()=>setViewYear(y=>y+1)} style={{background:"var(--divider)",border:"none",color:"var(--txt-m)",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>›</button>
         </div>
-        <div style={{textAlign:"center",color:"#374151",padding:"60px 0"}}>
+        <div style={{textAlign:"center",color:"var(--divider2)",padding:"60px 0"}}>
           <div style={{fontSize:"40px",marginBottom:"12px"}}>📊</div>
           <div>{uT("gr_no_data")}</div>
         </div>
@@ -2798,12 +2813,12 @@ function Graph({shifts,cfg,als,privacyMode}){
     <div style={{padding:"16px",paddingBottom:"20px"}}>
       {/* Year nav */}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"20px"}}>
-        <button onClick={()=>{setViewYear(y=>y-1);setSelBar(null);}} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>‹</button>
+        <button onClick={()=>{setViewYear(y=>y-1);setSelBar(null);}} style={{background:"var(--divider)",border:"none",color:"var(--txt-m)",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>‹</button>
         <div style={{textAlign:"center"}}>
-          <div style={{fontSize:"18px",fontWeight:"800",color:"#f1f5f9"}}>📈 {viewYear}</div>
+          <div style={{fontSize:"18px",fontWeight:"800",color:"var(--txt-hi)"}}>📈 {viewYear}</div>
           {viewYear===curYear&&<div style={{fontSize:"11px",color:"#22c55e",marginTop:"2px"}}>{uT("gr_cur_year")}</div>}
         </div>
-        <button onClick={()=>{setViewYear(y=>y+1);setSelBar(null);}} style={{background:"#1f2937",border:"none",color:"#9ca3af",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>›</button>
+        <button onClick={()=>{setViewYear(y=>y+1);setSelBar(null);}} style={{background:"var(--divider)",border:"none",color:"var(--txt-m)",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>›</button>
       </div>
 
       <div style={{filter:privacyMode?"blur(10px)":"none",transition:"filter 0.25s ease",userSelect:privacyMode?"none":"auto"}}>
@@ -2811,14 +2826,14 @@ function Graph({shifts,cfg,als,privacyMode}){
       {/* Summary cards */}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"16px"}}>
         <div style={{...CARD,textAlign:"center"}}>
-          <div style={{fontSize:"11px",color:"#6b7280",marginBottom:"4px"}}>{uT("gr_total_year")}</div>
+          <div style={{fontSize:"11px",color:"var(--txt-d)",marginBottom:"4px"}}>{uT("gr_total_year")}</div>
           <div style={{fontSize:"19px",fontWeight:"900",color:"#4ade80"}}>{fM(totalYear)}</div>
-          <div style={{fontSize:"10px",color:"#374151",marginTop:"2px"}}>{fH(totalHours)} {uT("gr_hours_sfx")}</div>
+          <div style={{fontSize:"10px",color:"var(--divider2)",marginTop:"2px"}}>{fH(totalHours)} {uT("gr_hours_sfx")}</div>
         </div>
         <div style={{...CARD,textAlign:"center"}}>
-          <div style={{fontSize:"11px",color:"#6b7280",marginBottom:"4px"}}>{uT("gr_avg_month")}</div>
+          <div style={{fontSize:"11px",color:"var(--txt-d)",marginBottom:"4px"}}>{uT("gr_avg_month")}</div>
           <div style={{fontSize:"19px",fontWeight:"900",color:"#60a5fa"}}>{fM(avgNet)}</div>
-          <div style={{fontSize:"10px",color:"#374151",marginTop:"2px"}}>{withData.length} {uT("gr_active_months")}</div>
+          <div style={{fontSize:"10px",color:"var(--divider2)",marginTop:"2px"}}>{withData.length} {uT("gr_active_months")}</div>
         </div>
       </div>
 
@@ -2840,7 +2855,7 @@ function Graph({shifts,cfg,als,privacyMode}){
       <div style={{...CARD,marginBottom:"16px",padding:"16px 8px",position:"relative"}}>
         {/* Avg line */}
         <div style={{position:"absolute",left:"8px",right:"8px",top:`${16+(1-avgNet/maxNet)*140}px`,borderTop:"1px dashed #374151",zIndex:1,pointerEvents:"none"}}>
-          <span style={{fontSize:"9px",color:"#374151",background:"#111827",padding:"0 3px"}}>{fM(avgNet)}</span>
+          <span style={{fontSize:"9px",color:"var(--divider2)",background:"var(--card)",padding:"0 3px"}}>{fM(avgNet)}</span>
         </div>
         {/* Bars */}
         <div style={{display:"flex",alignItems:"flex-end",gap:"3px",height:"156px",position:"relative",zIndex:2}}>
@@ -2864,7 +2879,7 @@ function Graph({shifts,cfg,als,privacyMode}){
                   minHeight:"4px",
                   animation:`growBar 0.5s ${i*0.04}s cubic-bezier(0.34,1.56,0.64,1) both`,
                 }}/>
-                <div style={{fontSize:"8px",color:isSel?"#4ade80":isCur?"#60a5fa":hasData?"#6b7280":"#374151",fontWeight:isSel||isCur?"800":"400"}}>
+                <div style={{fontSize:"8px",color:isSel?"#4ade80":isCur?"#60a5fa":hasData?"var(--txt-d)":"var(--divider2)",fontWeight:isSel||isCur?"800":"400"}}>
                   {m.label}
                 </div>
               </div>
@@ -2878,28 +2893,28 @@ function Graph({shifts,cfg,als,privacyMode}){
         <div style={{...CARD,marginBottom:"12px",background:"#0d1f0a",border:"1px solid #166534"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}}>
             <div style={{fontSize:"15px",fontWeight:"800",color:"#4ade80"}}>{selData.labelFull} {viewYear}</div>
-            <button onClick={()=>setSelBar(null)} style={{background:"none",border:"none",color:"#4b5563",cursor:"pointer",fontSize:"16px"}}>✕</button>
+            <button onClick={()=>setSelBar(null)} style={{background:"none",border:"none",color:"var(--txt-dd)",cursor:"pointer",fontSize:"16px"}}>✕</button>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"8px"}}>
             {[
-              {l:uT("d_shifts"),v:selData.workCount,c:"#9ca3af"},
-              {l:uT("d_hours"),v:fH(selData.hours),c:"#9ca3af"},
+              {l:uT("d_shifts"),v:selData.workCount,c:"var(--txt-m)"},
+              {l:uT("d_hours"),v:fH(selData.hours),c:"var(--txt-m)"},
               {l:uT("gr_gross"),v:fM(selData.gross),c:"#fbbf24"},
               {l:uT("d_allowances"),v:fM(selData.allow),c:"#34d399"},
               {l:uT("d_deductions"),v:fM(selData.gross+selData.allow-selData.net),c:"#f87171"},
               {l:uT("gr_net"),v:fM(selData.net),c:"#4ade80"},
             ].map((r,i)=>(
-              <div key={i} style={{background:"#0d1117",borderRadius:"8px",padding:"8px",textAlign:"center"}}>
-                <div style={{fontSize:"10px",color:"#4b5563",marginBottom:"3px"}}>{r.l}</div>
+              <div key={i} style={{background:"var(--bg2)",borderRadius:"8px",padding:"8px",textAlign:"center"}}>
+                <div style={{fontSize:"10px",color:"var(--txt-dd)",marginBottom:"3px"}}>{r.l}</div>
                 <div style={{fontSize:"13px",fontWeight:"800",color:r.c}}>{r.v}</div>
               </div>
             ))}
           </div>
           {/* Mini bar vs avg */}
           <div style={{marginTop:"10px"}}>
-            <div style={{fontSize:"10px",color:"#4b5563",marginBottom:"4px"}}>{uT("gr_vs_avg")}</div>
+            <div style={{fontSize:"10px",color:"var(--txt-dd)",marginBottom:"4px"}}>{uT("gr_vs_avg")}</div>
             <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
-              <div style={{flex:1,height:"6px",background:"#1f2937",borderRadius:"3px",overflow:"hidden"}}>
+              <div style={{flex:1,height:"6px",background:"var(--divider)",borderRadius:"3px",overflow:"hidden"}}>
                 <div style={{height:"100%",width:`${Math.min(100,(selData.net/avgNet)*100)}%`,background:selData.net>=avgNet?"#4ade80":"#f87171",borderRadius:"3px",transition:"width 0.4s"}}/>
               </div>
               <span style={{fontSize:"11px",fontWeight:"700",color:selData.net>=avgNet?"#4ade80":"#f87171",minWidth:"40px"}}>
@@ -2916,12 +2931,12 @@ function Graph({shifts,cfg,als,privacyMode}){
         <div key={m.ym} onClick={()=>setSelBar(selBar===m.i?null:m.i)}
           style={{...CARD,marginBottom:"6px",cursor:"pointer",border:selBar===m.i?"1px solid #4ade80":"1px solid #1f2937",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
-            <div style={{fontSize:"13px",fontWeight:"700",color:"#e2e8f0"}}>{m.labelFull}</div>
-            <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>{m.workCount} {uT("d_shifts")} · {fH(m.hours)}{uT("hr")}</div>
+            <div style={{fontSize:"13px",fontWeight:"700",color:"var(--txt)"}}>{m.labelFull}</div>
+            <div style={{fontSize:"11px",color:"var(--txt-d)",marginTop:"2px"}}>{m.workCount} {uT("d_shifts")} · {fH(m.hours)}{uT("hr")}</div>
           </div>
           <div style={{textAlign:"left"}}>
-            <div style={{fontSize:"15px",fontWeight:"800",color:m.i===peakIdx?"#4ade80":m.i===lowIdx?"#f87171":"#e2e8f0"}}>{fM(m.net)}</div>
-            <div style={{fontSize:"10px",color:"#374151",marginTop:"2px"}}>{m.i===peakIdx?uT("gr_peak_lbl"):m.i===lowIdx?uT("gr_low_lbl"):""}</div>
+            <div style={{fontSize:"15px",fontWeight:"800",color:m.i===peakIdx?"#4ade80":m.i===lowIdx?"#f87171":"var(--txt)"}}>{fM(m.net)}</div>
+            <div style={{fontSize:"10px",color:"var(--divider2)",marginTop:"2px"}}>{m.i===peakIdx?uT("gr_peak_lbl"):m.i===lowIdx?uT("gr_low_lbl"):""}</div>
           </div>
         </div>
       ))}
@@ -2985,10 +3000,10 @@ function VacationBalance({shifts,vacCfg,onSaveVacCfg}){
         <div style={SEC}>{uT("vac_settings")}</div>
 
         {/* Info box */}
-        <div style={{background:"#0d1117",border:"1px solid #1f2937",borderRadius:"10px",padding:"12px",marginBottom:"16px"}}>
+        <div style={{background:"var(--bg2)",border:"1px solid #1f2937",borderRadius:"10px",padding:"12px",marginBottom:"16px"}}>
           <div style={{fontSize:"12px",color:"#60a5fa",fontWeight:"700",marginBottom:"6px"}}>{uT("vac_how")}</div>
-          <div style={{fontSize:"11px",color:"#6b7280",lineHeight:"1.7"}}>
-            {uT("vac_how_desc_1")} <span style={{color:"#e2e8f0",fontWeight:"700"}}>{uT("vac_how_desc_2")}</span> {uT("vac_how_desc_3")} <span style={{color:"#e2e8f0",fontWeight:"700"}}>{uT("vac_how_desc_4")}</span>.<br/>
+          <div style={{fontSize:"11px",color:"var(--txt-d)",lineHeight:"1.7"}}>
+            {uT("vac_how_desc_1")} <span style={{color:"var(--txt)",fontWeight:"700"}}>{uT("vac_how_desc_2")}</span> {uT("vac_how_desc_3")} <span style={{color:"var(--txt)",fontWeight:"700"}}>{uT("vac_how_desc_4")}</span>.<br/>
             {uT("vac_how_desc_5")}
           </div>
         </div>
@@ -3016,7 +3031,7 @@ function VacationBalance({shifts,vacCfg,onSaveVacCfg}){
           <Field label={uT("vac_bal_label")}>
             <NumInput value={form.sickBalance||0} onChange={v=>setForm({...form,sickBalance:v})} step={0.5}/>
           </Field>
-          <div style={{fontSize:"11px",color:"#6b7280",marginTop:"4px"}}>{uT("vac_sick_fixed")}</div>
+          <div style={{fontSize:"11px",color:"var(--txt-d)",marginTop:"4px"}}>{uT("vac_sick_fixed")}</div>
           {monthsSincePayslip>0&&<div style={{fontSize:"11px",color:"#7c3aed",marginTop:"4px"}}>+{sickAccrued.toFixed(1)} {uT("vac_days_since")}</div>}
         </div>
 
@@ -3072,7 +3087,7 @@ function AutoCalcNI({form,setForm}){
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div>
           <div style={{fontSize:"13px",fontWeight:"700",color:"#60a5fa"}}>{uT("ni_title")}</div>
-          <div style={{fontSize:"11px",color:"#4b5563",marginTop:"2px"}}>{uT("ni_desc")}</div>
+          <div style={{fontSize:"11px",color:"var(--txt-dd)",marginTop:"2px"}}>{uT("ni_desc")}</div>
         </div>
         <button onClick={()=>setShow(!show)} style={{background:"#1e3a5f",border:"none",color:"#93c5fd",borderRadius:"8px",padding:"6px 12px",cursor:"pointer",fontWeight:"700",fontSize:"12px"}}>
           {show?uT("ni_close"):uT("ni_open")}
@@ -3081,7 +3096,7 @@ function AutoCalcNI({form,setForm}){
 
       {show&&(
         <div style={{marginTop:"14px"}}>
-          <div style={{fontSize:"11px",color:"#6b7280",marginBottom:"6px",lineHeight:"1.6"}}>
+          <div style={{fontSize:"11px",color:"var(--txt-d)",marginBottom:"6px",lineHeight:"1.6"}}>
             {uT("ni_hint")}
           </div>
           <Field label={uT("ni_salary")}>
@@ -3092,21 +3107,21 @@ function AutoCalcNI({form,setForm}){
           </button>
 
           {result&&(
-            <div style={{background:"#0d1117",borderRadius:"10px",padding:"12px",marginBottom:"12px"}}>
-              <div style={{fontSize:"11px",color:"#6b7280",marginBottom:"10px"}}>{uT("ni_result_pfx")} {fM(salary)}:</div>
+            <div style={{background:"var(--bg2)",borderRadius:"10px",padding:"12px",marginBottom:"12px"}}>
+              <div style={{fontSize:"11px",color:"var(--txt-d)",marginBottom:"10px"}}>{uT("ni_result_pfx")} {fM(salary)}:</div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px",marginBottom:"10px"}}>
                 <div style={{background:"#0c1a3e",borderRadius:"8px",padding:"10px",textAlign:"center"}}>
                   <div style={{fontSize:"10px",color:"#93c5fd",marginBottom:"4px"}}>{uT("ni_ni")}</div>
                   <div style={{fontSize:"20px",fontWeight:"900",color:"#60a5fa"}}>{result.niPct}%</div>
-                  <div style={{fontSize:"10px",color:"#374151",marginTop:"2px"}}>{fM(result.niTotal)}{uT("ni_per_month")}</div>
+                  <div style={{fontSize:"10px",color:"var(--divider2)",marginTop:"2px"}}>{fM(result.niTotal)}{uT("ni_per_month")}</div>
                 </div>
                 <div style={{background:"#1a0c3e",borderRadius:"8px",padding:"10px",textAlign:"center"}}>
                   <div style={{fontSize:"10px",color:"#c4b5fd",marginBottom:"4px"}}>{uT("ni_health")}</div>
                   <div style={{fontSize:"20px",fontWeight:"900",color:"#a78bfa"}}>{result.healthPct}%</div>
-                  <div style={{fontSize:"10px",color:"#374151",marginTop:"2px"}}>{fM(result.healthTotal)}{uT("ni_per_month")}</div>
+                  <div style={{fontSize:"10px",color:"var(--divider2)",marginTop:"2px"}}>{fM(result.healthTotal)}{uT("ni_per_month")}</div>
                 </div>
               </div>
-              <div style={{fontSize:"10px",color:"#4b5563",marginBottom:"10px",lineHeight:"1.5"}}>
+              <div style={{fontSize:"10px",color:"var(--txt-dd)",marginBottom:"10px",lineHeight:"1.5"}}>
                 {uT("ni_footnote")}
               </div>
               <button onClick={apply} style={{width:"100%",padding:"11px",background:"#22c55e",border:"none",borderRadius:"10px",color:"#000",fontWeight:"800",fontSize:"14px",cursor:"pointer"}}>
@@ -3116,17 +3131,17 @@ function AutoCalcNI({form,setForm}){
           )}
 
           {/* Reference table */}
-          <div style={{fontSize:"11px",color:"#4b5563",marginBottom:"6px",fontWeight:"700"}}>{uT("ni_ref_table")}</div>
+          <div style={{fontSize:"11px",color:"var(--txt-dd)",marginBottom:"6px",fontWeight:"700"}}>{uT("ni_ref_table")}</div>
           <div style={{borderRadius:"8px",overflow:"hidden",border:"1px solid #1f2937"}}>
             {[6000,8000,10000,12000,15000].map((s,i)=>{
               const r=calcNIRates(s);
               return(
               <div key={i} onClick={()=>{setSalary(s);setResult(calcNIRates(s));}}
-                style={{display:"flex",justifyContent:"space-between",padding:"7px 10px",background:i%2===0?"#0d1117":"#111827",cursor:"pointer",fontSize:"11px"}}>
-                <span style={{color:"#9ca3af"}}>{fM(s)}</span>
+                style={{display:"flex",justifyContent:"space-between",padding:"7px 10px",background:i%2===0?"var(--bg2)":"var(--card)",cursor:"pointer",fontSize:"11px"}}>
+                <span style={{color:"var(--txt-m)"}}>{fM(s)}</span>
                 <span style={{color:"#60a5fa"}}>{uT("ni_bl")} {r.niPct}%</span>
                 <span style={{color:"#a78bfa"}}>{uT("ni_briut")} {r.healthPct}%</span>
-                <span style={{color:"#374151"}}>{uT("ni_click")}</span>
+                <span style={{color:"var(--divider2)"}}>{uT("ni_click")}</span>
               </div>
               );
             })}
@@ -3181,7 +3196,7 @@ function IncomeTaxHelper({form,setForm}){
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div>
           <div style={{fontSize:"12px",fontWeight:"700",color:"#fbbf24"}}>{uT("tx_title")}</div>
-          <div style={{fontSize:"11px",color:"#4b5563",marginTop:"2px"}}>{uT("tx_desc")}</div>
+          <div style={{fontSize:"11px",color:"var(--txt-dd)",marginTop:"2px"}}>{uT("tx_desc")}</div>
         </div>
         <button onClick={()=>setShow(!show)} style={{background:"#2a1800",border:"none",color:"#fbbf24",borderRadius:"8px",padding:"5px 10px",cursor:"pointer",fontSize:"12px",fontWeight:"700"}}>
           {show?uT("tx_close"):uT("tx_open")}
@@ -3190,7 +3205,7 @@ function IncomeTaxHelper({form,setForm}){
 
       {show&&(
         <div style={{marginTop:"12px"}}>
-          <div style={{fontSize:"11px",color:"#6b7280",lineHeight:"1.7",marginBottom:"12px"}}>
+          <div style={{fontSize:"11px",color:"var(--txt-d)",lineHeight:"1.7",marginBottom:"12px"}}>
             {uT("tx_hint_1")}<span style={{color:"#fbbf24",fontWeight:"700"}}>{uT("tx_hint_pts")}</span>{uT("tx_hint_2")}₪{POINT_VALUE}{uT("tx_hint_3")}<br/>
             <span style={{color:"#22c55e"}}>{uT("tx_hint_tip")}</span>
           </div>
@@ -3198,19 +3213,19 @@ function IncomeTaxHelper({form,setForm}){
           <div style={{fontSize:"11px",color:"#fbbf24",fontWeight:"700",marginBottom:"8px"}}>{uT("tx_pts_title")}</div>
           {POINTS.map((p,i)=>(
             <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid #2a1800",fontSize:"11px"}}>
-              <span style={{color:"#e2e8f0"}}>{p.l}</span>
+              <span style={{color:"var(--txt)"}}>{p.l}</span>
               <span style={{color:"#fbbf24",fontWeight:"700"}}>+{p.v} {uT("tx_pts_sfx")}</span>
             </div>
           ))}
 
-          <div style={{marginTop:"12px",background:"#0d1117",borderRadius:"8px",padding:"10px"}}>
-            <div style={{fontSize:"11px",color:"#6b7280",marginBottom:"6px"}}>{uT("tx_estimate_pfx")}{fM(Math.round(gross))}{uT("tx_estimate_sfx")}</div>
+          <div style={{marginTop:"12px",background:"var(--bg2)",borderRadius:"8px",padding:"10px"}}>
+            <div style={{fontSize:"11px",color:"var(--txt-d)",marginBottom:"6px"}}>{uT("tx_estimate_pfx")}{fM(Math.round(gross))}{uT("tx_estimate_sfx")}</div>
             <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"8px"}}>
-              <span style={{fontSize:"11px",color:"#9ca3af"}}>{uT("tx_pts_lbl")}</span>
+              <span style={{fontSize:"11px",color:"var(--txt-m)"}}>{uT("tx_pts_lbl")}</span>
               <NumInput value={points} onChange={v=>setPoints(v)} step={0.25} style={{...SI,width:"80px"}}/>
             </div>
-            <div style={{display:"flex",justifyContent:"space-between",background:"#111827",borderRadius:"6px",padding:"8px",marginBottom:"10px"}}>
-              <span style={{fontSize:"11px",color:"#6b7280"}}>{uT("tx_estimated")}</span>
+            <div style={{display:"flex",justifyContent:"space-between",background:"var(--card)",borderRadius:"6px",padding:"8px",marginBottom:"10px"}}>
+              <span style={{fontSize:"11px",color:"var(--txt-d)"}}>{uT("tx_estimated")}</span>
               <span style={{fontSize:"14px",fontWeight:"800",color:result.pct===0?"#22c55e":"#f87171"}}>
                 {result.pct===0?uT("tx_exempt"):`${result.pct}% · ${fM(result.netTax)}${uT("tx_per_month")}`}
               </span>
@@ -3221,7 +3236,7 @@ function IncomeTaxHelper({form,setForm}){
             </button>
           </div>
 
-          <div style={{marginTop:"10px",fontSize:"10px",color:"#374151",lineHeight:"1.6"}}>
+          <div style={{marginTop:"10px",fontSize:"10px",color:"var(--divider2)",lineHeight:"1.6"}}>
             {uT("tx_warning")}
           </div>
         </div>
@@ -3233,7 +3248,7 @@ function IncomeTaxHelper({form,setForm}){
 // ════════════════════════════════════════
 // SETTINGS
 // ════════════════════════════════════════
-function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onSaveVacCfg,privacyMode,togglePrivacy,onReset,lang,onSaveLang}){
+function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onSaveVacCfg,privacyMode,togglePrivacy,onReset,lang,onSaveLang,theme,onSaveTheme}){
   const uT=useT();
   const[form,setForm]=useState({...cfg});
   const[tList,setTList]=useState([...tpls]);
@@ -3256,22 +3271,22 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
   return(
     <div style={{padding:"16px",paddingBottom:"20px"}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"16px"}}>
-        <div style={{fontSize:"18px",fontWeight:"800",color:"#f1f5f9"}}>{uT("sg_title")}</div>
+        <div style={{fontSize:"18px",fontWeight:"800",color:"var(--txt-hi)"}}>{uT("sg_title")}</div>
         {onSaveLang&&(
           <div style={{display:"flex",gap:"6px"}}>
             {[{v:"he",label:"🇮🇱 עברית"},{v:"ru",label:"🇷🇺 RU"}].map(opt=>(
               <button key={opt.v} onClick={()=>onSaveLang(opt.v)}
                 style={{padding:"5px 12px",borderRadius:"8px",cursor:"pointer",fontWeight:"700",fontSize:"12px",
-                  background:lang===opt.v?"#1e3a5f":"#1f2937",
-                  color:lang===opt.v?"#60a5fa":"#9ca3af",
-                  border:`1.5px solid ${lang===opt.v?"#60a5fa":"#374151"}`}}>
+                  background:lang===opt.v?"#1e3a5f":"var(--divider)",
+                  color:lang===opt.v?"#60a5fa":"var(--txt-m)",
+                  border:`1.5px solid ${lang===opt.v?"#60a5fa":"var(--divider2)"}`}}>
                 {opt.label}
               </button>
             ))}
           </div>
         )}
       </div>
-      <div style={{display:"flex",gap:"6px",marginBottom:"20px"}}>{subs.map(t=><button key={t.id} onClick={()=>setSub(t.id)} style={{flex:1,padding:"9px 2px",borderRadius:"10px",border:"none",cursor:"pointer",fontWeight:"700",fontSize:"12px",background:sub===t.id?"#22c55e":"#1f2937",color:sub===t.id?"#000":"#6b7280"}}>{t.l}</button>)}</div>
+      <div style={{display:"flex",gap:"6px",marginBottom:"20px"}}>{subs.map(t=><button key={t.id} onClick={()=>setSub(t.id)} style={{flex:1,padding:"9px 2px",borderRadius:"10px",border:"none",cursor:"pointer",fontWeight:"700",fontSize:"12px",background:sub===t.id?"#22c55e":"var(--divider)",color:sub===t.id?"#000":"var(--txt-d)"}}>{t.l}</button>)}</div>
 
       {sub==="pay"&&(
         <div style={{...CARD,marginBottom:"14px"}}>
@@ -3280,7 +3295,7 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
             <div style={{filter:privacyMode?"blur(8px)":"none",transition:"filter 0.25s",userSelect:privacyMode?"none":"auto",pointerEvents:privacyMode?"none":"auto"}}>
               <NumInput value={form.baseRate} onChange={v=>setForm({...form,baseRate:v})} step={0.5}/>
             </div>
-            <div style={{fontSize:"11px",color:"#4b5563",marginTop:"6px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div style={{fontSize:"11px",color:"var(--txt-dd)",marginTop:"6px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
               <span>{uT("sg_min_wage")}</span>
               {form.baseRate===34.32&&<span style={{color:"#22c55e",fontSize:"10px"}}>{uT("sg_min_lbl")}</span>}
             </div>
@@ -3288,18 +3303,18 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
           <Field label={uT("sg_daily_h")} hint={uT("sg_daily_h_h")}><NumInput value={form.overtimeThreshold} onChange={v=>setForm({...form,overtimeThreshold:v})} step={0.1}/></Field>
           <Field label={uT("sg_ot125")} hint={uT("sg_ot125_h")}><NumInput value={form.overtime125Hours} onChange={v=>setForm({...form,overtime125Hours:v})} step={1}/></Field>
           <Field label={uT("sg_wot")} hint={uT("sg_wot_h")}><NumInput value={form.weeklyOTThreshold??42} onChange={v=>setForm({...form,weeklyOTThreshold:v})} step={1}/></Field>
-          <div style={{fontSize:"11px",color:"#4b5563",marginTop:"-4px",marginBottom:"8px"}}>{uT("sg_wot_hint")}</div>
+          <div style={{fontSize:"11px",color:"var(--txt-dd)",marginTop:"-4px",marginBottom:"8px"}}>{uT("sg_wot_hint")}</div>
           <Field label={uT("sg_goal")} hint={uT("sg_goal_h")}><NumInput value={form.monthlyGoal??0} onChange={v=>setForm({...form,monthlyGoal:v})} step={100} min={0}/></Field>
-          <div style={{...CARD,background:"#0d1117",marginTop:"4px"}}>
-            <div style={{fontSize:"11px",color:"#6b7280",marginBottom:"4px"}}>{uT("sg_cur_rate")}</div>
-            <div style={{fontSize:"26px",fontWeight:"900",color:"#4ade80",filter:privacyMode?"blur(8px)":"none",transition:"filter 0.25s",userSelect:privacyMode?"none":"auto"}}>₪{form.baseRate}<span style={{fontSize:"13px",color:"#6b7280"}}>{uT("sg_per_h")}</span></div>
+          <div style={{...CARD,background:"var(--bg2)",marginTop:"4px"}}>
+            <div style={{fontSize:"11px",color:"var(--txt-d)",marginBottom:"4px"}}>{uT("sg_cur_rate")}</div>
+            <div style={{fontSize:"26px",fontWeight:"900",color:"#4ade80",filter:privacyMode?"blur(8px)":"none",transition:"filter 0.25s",userSelect:privacyMode?"none":"auto"}}>₪{form.baseRate}<span style={{fontSize:"13px",color:"var(--txt-d)"}}>{uT("sg_per_h")}</span></div>
           </div>
         </div>
       )}
 
       {sub==="shifts"&&(
         <>
-          <div style={{fontSize:"11px",color:"#4b5563",marginBottom:"14px"}}>{uT("sg_sh_times_hint")}</div>
+          <div style={{fontSize:"11px",color:"var(--txt-dd)",marginBottom:"14px"}}>{uT("sg_sh_times_hint")}</div>
           {[
             {key:"morning",  labelKey:"sg_sh_morning",  enabledK:"morningEnabled",  startK:"morningStart",  multK:"morningMult",  knownK:"morningMultKnown",  defMult:100},
             {key:"afternoon",labelKey:"sg_sh_afternoon",enabledK:"afternoonEnabled",startK:"afternoonStart",multK:"afternoonMult",knownK:"afternoonMultKnown",defMult:117},
@@ -3307,31 +3322,31 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
           ].map(s=>(
             <div key={s.key} style={{...CARD,marginBottom:"12px",opacity:form[s.enabledK]===false?0.5:1}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}}>
-                <div style={{fontSize:"14px",fontWeight:"800",color:"#e2e8f0"}}>{uT(s.labelKey)}</div>
+                <div style={{fontSize:"14px",fontWeight:"800",color:"var(--txt)"}}>{uT(s.labelKey)}</div>
                 <Toggle on={form[s.enabledK]!==false} onToggle={()=>setForm(f=>({...f,[s.enabledK]:f[s.enabledK]===false}))}/>
               </div>
               {form[s.enabledK]!==false&&(
                 <>
-                  <div style={{fontSize:"11px",color:"#6b7280",fontWeight:"700",marginBottom:"6px"}}>{uT("sg_sh_from")}</div>
+                  <div style={{fontSize:"11px",color:"var(--txt-d)",fontWeight:"700",marginBottom:"6px"}}>{uT("sg_sh_from")}</div>
                   <input type="time" value={form[s.startK]||"06:00"} onChange={e=>setForm(f=>({...f,[s.startK]:e.target.value}))} style={{...SI,marginBottom:"12px"}}/>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"6px"}}>
-                    <div style={{fontSize:"11px",color:"#6b7280",fontWeight:"700"}}>{uT("sg_sh_pct")}</div>
+                    <div style={{fontSize:"11px",color:"var(--txt-d)",fontWeight:"700"}}>{uT("sg_sh_pct")}</div>
                     <button onClick={()=>setForm(f=>({...f,[s.knownK]:!f[s.knownK]}))}
-                      style={{background:form[s.knownK]===false?"#052e16":"#1f2937",border:`1.5px solid ${form[s.knownK]===false?"#22c55e":"#374151"}`,color:form[s.knownK]===false?"#22c55e":"#6b7280",borderRadius:"16px",padding:"3px 10px",cursor:"pointer",fontWeight:"700",fontSize:"11px"}}>
+                      style={{background:form[s.knownK]===false?"#052e16":"var(--divider)",border:`1.5px solid ${form[s.knownK]===false?"#22c55e":"var(--divider2)"}`,color:form[s.knownK]===false?"#22c55e":"var(--txt-d)",borderRadius:"16px",padding:"3px 10px",cursor:"pointer",fontWeight:"700",fontSize:"11px"}}>
                       {form[s.knownK]===false?uT("sg_sh_legal"):uT("sg_sh_known")}
                     </button>
                   </div>
                   {form[s.knownK]===false?(
-                    <div style={{fontSize:"12px",color:"#4b5563",background:"#0d1117",borderRadius:"8px",padding:"8px"}}>
+                    <div style={{fontSize:"12px",color:"var(--txt-dd)",background:"var(--bg2)",borderRadius:"8px",padding:"8px"}}>
                       {uT("sg_sh_unknown")} ({s.defMult}%)
                     </div>
                   ):(
                     <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
                       <NumInput value={form[s.multK]??s.defMult} onChange={v=>setForm(f=>({...f,[s.multK]:v}))} step={1} min={100} max={300}/>
-                      <span style={{color:"#e2e8f0",fontWeight:"800",fontSize:"16px"}}>%</span>
+                      <span style={{color:"var(--txt)",fontWeight:"800",fontSize:"16px"}}>%</span>
                     </div>
                   )}
-                  <div style={{fontSize:"10px",color:"#4b5563",marginTop:"4px"}}>{uT("sg_sh_pct_hint")}</div>
+                  <div style={{fontSize:"10px",color:"var(--txt-dd)",marginTop:"4px"}}>{uT("sg_sh_pct_hint")}</div>
                 </>
               )}
             </div>
@@ -3394,9 +3409,9 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}}>
                     <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
                       <Toggle on={a.active} onToggle={()=>updA(a.id,"active",!a.active)}/>
-                      <span style={{fontWeight:"700",color:a.active?"#e2e8f0":"#4b5563",fontSize:"14px"}}>🧾 {a.name}</span>
+                      <span style={{fontWeight:"700",color:a.active?"var(--txt)":"var(--txt-dd)",fontSize:"14px"}}>🧾 {a.name}</span>
                     </div>
-                    <button onClick={()=>delA(a.id)} style={{background:"none",border:"none",color:"#374151",cursor:"pointer",fontSize:"16px"}}>🗑</button>
+                    <button onClick={()=>delA(a.id)} style={{background:"none",border:"none",color:"var(--divider2)",cursor:"pointer",fontSize:"16px"}}>🗑</button>
                   </div>
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
                     <div>
@@ -3441,12 +3456,12 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
                   <div key={t.id} style={{...CARD,marginBottom:"8px",display:"flex",justifyContent:"space-between",alignItems:"center",borderRight:`3px solid ${color}`}}>
                     <div>
                       <div style={{fontWeight:"700",color:color,fontSize:"14px"}}>{emoji} {t.name}</div>
-                      <div style={{fontSize:"12px",color:"#6b7280",marginTop:"2px"}}>
+                      <div style={{fontSize:"12px",color:"var(--txt-d)",marginTop:"2px"}}>
                         {t.start}–{t.end} · {fH(ch(t.start,t.end))}{uT("hr")} · <span style={{color:color}}>{pct}%</span>
                         {t.customMult&&<span style={{fontSize:"10px",color:"#60a5fa",marginRight:"4px"}}> · {uT("sg_custom_b")}</span>}
                       </div>
                     </div>
-                    <button onClick={()=>delT(t.id)} style={{background:"none",border:"none",color:"#374151",cursor:"pointer",fontSize:"18px"}}>🗑</button>
+                    <button onClick={()=>delT(t.id)} style={{background:"none",border:"none",color:"var(--divider2)",cursor:"pointer",fontSize:"18px"}}>🗑</button>
                   </div>
                 );
               })}
@@ -3460,27 +3475,27 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
               <Field label={uT("as_end")}><input type="time" value={newT.end} onChange={e=>setNewT({...newT,end:e.target.value})} style={SI}/></Field>
             </div>
             {newT.start&&newT.end&&ch(newT.start,newT.end)>0&&(
-              <div style={{fontSize:"12px",color:"#6b7280",marginBottom:"12px",textAlign:"center"}}>⏱ {fH(ch(newT.start,newT.end))} {uT("hr")}</div>
+              <div style={{fontSize:"12px",color:"var(--txt-d)",marginBottom:"12px",textAlign:"center"}}>⏱ {fH(ch(newT.start,newT.end))} {uT("hr")}</div>
             )}
             <Field label={uT("as_shift_type")}>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"8px"}}>
                 {Object.entries(ST).filter(([k])=>form[k==="regular"?"morningEnabled":k==="afternoon"?"afternoonEnabled":"nightEnabled"]!==false).map(([k,t])=>(
-                  <button key={k} onClick={()=>setNewT({...newT,type:k,customMult:null})} style={{padding:"10px 4px",borderRadius:"10px",cursor:"pointer",border:newT.type===k?`2px solid ${t.color}`:"2px solid #1f2937",background:newT.type===k?t.bg:"#0d1117",color:newT.type===k?t.color:"#6b7280",fontWeight:"700",fontSize:"12px"}}>{t.icon} {uT("st_"+k)}</button>
+                  <button key={k} onClick={()=>setNewT({...newT,type:k,customMult:null})} style={{padding:"10px 4px",borderRadius:"10px",cursor:"pointer",border:newT.type===k?`2px solid ${t.color}`:"2px solid #1f2937",background:newT.type===k?t.bg:"var(--bg2)",color:newT.type===k?t.color:"var(--txt-d)",fontWeight:"700",fontSize:"12px"}}>{t.icon} {uT("st_"+k)}</button>
                 ))}
               </div>
             </Field>
 
             {/* Custom percentage override */}
-            <div style={{...CARD,marginBottom:"14px",background:"#0d1117"}}>
+            <div style={{...CARD,marginBottom:"14px",background:"var(--bg2)"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}}>
                 <div style={LBL}>{uT("sg_custom_pct")}</div>
                 <button onClick={()=>setNewT({...newT,customMult:newT.customMult===null?ST[newT.type].mult*100:null})}
-                  style={{background:newT.customMult!==null?"#052e16":"#1f2937",border:`1.5px solid ${newT.customMult!==null?"#22c55e":"#374151"}`,color:newT.customMult!==null?"#22c55e":"#6b7280",borderRadius:"20px",padding:"3px 12px",cursor:"pointer",fontWeight:"700",fontSize:"12px"}}>
+                  style={{background:newT.customMult!==null?"#052e16":"var(--divider)",border:`1.5px solid ${newT.customMult!==null?"#22c55e":"var(--divider2)"}`,color:newT.customMult!==null?"#22c55e":"var(--txt-d)",borderRadius:"20px",padding:"3px 12px",cursor:"pointer",fontWeight:"700",fontSize:"12px"}}>
                   {newT.customMult!==null?uT("sg_custom_on"):uT("sg_default")}
                 </button>
               </div>
               {newT.customMult===null?(
-                <div style={{fontSize:"12px",color:"#4b5563"}}>
+                <div style={{fontSize:"12px",color:"var(--txt-dd)"}}>
                   {uT("sg_using_pct")}&nbsp;
                   <span style={{color:ST[newT.type].color,fontWeight:"700"}}>{Math.round(ST[newT.type].mult*100)}%</span>
                 </div>
@@ -3491,18 +3506,18 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
                       onChange={e=>setNewT({...newT,customMult:parseFloat(e.target.value)||100})}
                       style={{...SI,flex:1}}
                     />
-                    <span style={{color:"#e2e8f0",fontWeight:"800",fontSize:"18px"}}>%</span>
+                    <span style={{color:"var(--txt)",fontWeight:"800",fontSize:"18px"}}>%</span>
                   </div>
-                  <div style={{fontSize:"11px",color:"#4b5563",marginTop:"6px"}}>
+                  <div style={{fontSize:"11px",color:"var(--txt-dd)",marginTop:"6px"}}>
                     {uT("sg_pct_hint")}
                   </div>
                   <div style={{marginTop:"8px",display:"flex",gap:"6px",flexWrap:"wrap"}}>
                     {[{l:"100%",v:100},{l:"117%",v:117},{l:"125%",v:125},{l:"133%",v:133},{l:"140%",v:140},{l:"150%",v:150},{l:"175%",v:175}].map(p=>(
                       <button key={p.v} onClick={()=>setNewT({...newT,customMult:p.v})}
                         style={{padding:"5px 10px",borderRadius:"8px",cursor:"pointer",fontWeight:"700",fontSize:"12px",
-                          background:newT.customMult===p.v?"#1e3a5f":"#0d1117",
-                          color:newT.customMult===p.v?"#60a5fa":"#6b7280",
-                          border:`1px solid ${newT.customMult===p.v?"#60a5fa":"#1f2937"}`}}>
+                          background:newT.customMult===p.v?"#1e3a5f":"var(--bg2)",
+                          color:newT.customMult===p.v?"#60a5fa":"var(--txt-d)",
+                          border:`1px solid ${newT.customMult===p.v?"#60a5fa":"var(--divider)"}`}}>
                         {p.l}
                       </button>
                     ))}
@@ -3513,7 +3528,7 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
             <Field label={uT("sg_emoji")}>
               <div style={{display:"flex",flexWrap:"wrap",gap:"8px"}}>
                 {["⭐","🔵","🟡","🔴","🟢","💜","🏃","🌟","⚡","🎯","💼","🔥","🌙","☀️","🌤️"].map(e=>(
-                  <button key={e} onClick={()=>setNewT({...newT,emoji:e})} style={{padding:"8px",borderRadius:"8px",cursor:"pointer",border:newT.emoji===e?"2px solid #22c55e":"2px solid #1f2937",background:newT.emoji===e?"#052e16":"#0d1117",fontSize:"18px"}}>
+                  <button key={e} onClick={()=>setNewT({...newT,emoji:e})} style={{padding:"8px",borderRadius:"8px",cursor:"pointer",border:newT.emoji===e?"2px solid #22c55e":"2px solid #1f2937",background:newT.emoji===e?"#052e16":"var(--bg2)",fontSize:"18px"}}>
                     {e}
                   </button>
                 ))}
@@ -3533,7 +3548,7 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
                 <span style={{fontSize:"18px"}}>{newT.emoji}</span>
                 <div>
                   <div style={{fontWeight:"800",color:newT.color,fontSize:"13px"}}>{newT.name}</div>
-                  {newT.start&&newT.end&&<div style={{fontSize:"11px",color:"#6b7280"}}>{newT.start}–{newT.end}</div>}
+                  {newT.start&&newT.end&&<div style={{fontSize:"11px",color:"var(--txt-d)"}}>{newT.start}–{newT.end}</div>}
                 </div>
               </div>
             )}
@@ -3547,14 +3562,32 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
 
       {sub==="pay"&&onReset&&(
         <>
+          {/* Theme selector */}
+          {onSaveTheme&&(
+            <div style={{...CARD,marginTop:"16px",background:"var(--bg2)",border:"1px solid #1f2937"}}>
+              <div style={{fontSize:"12px",color:"var(--txt-d)",fontWeight:"700",marginBottom:"10px"}}>{uT("sg_theme")}</div>
+              <div style={{display:"flex",gap:"8px"}}>
+                {[{v:"dark",label:uT("sg_theme_dark")},{v:"light",label:uT("sg_theme_light")}].map(opt=>(
+                  <button key={opt.v} onClick={()=>onSaveTheme(opt.v)}
+                    style={{flex:1,padding:"10px",borderRadius:"12px",cursor:"pointer",fontWeight:"800",fontSize:"14px",
+                      background:theme===opt.v?"#1e3a5f":"var(--card)",
+                      color:theme===opt.v?"#60a5fa":"var(--txt-dd)",
+                      border:`2px solid ${theme===opt.v?"#3b82f6":"var(--divider)"}`,
+                      transition:"all 0.2s ease"}}>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           {/* Privacy mode setting */}
-          <div style={{...CARD,marginTop:"16px",background:"#0d1117",border:"1px solid #1f2937"}}>
+          <div style={{...CARD,marginTop:"16px",background:"var(--bg2)",border:"1px solid #1f2937"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
               <div>
-                <div style={{fontSize:"13px",fontWeight:"700",color:"#e2e8f0"}}>
+                <div style={{fontSize:"13px",fontWeight:"700",color:"var(--txt)"}}>
                   {privacyMode?"🙈":"👁"} {uT("sg_privacy")}
                 </div>
-                <div style={{fontSize:"11px",color:"#4b5563",marginTop:"2px"}}>
+                <div style={{fontSize:"11px",color:"var(--txt-dd)",marginTop:"2px"}}>
                   {uT("sg_privacy_h")}
                 </div>
               </div>
@@ -3562,7 +3595,7 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
             </div>
           </div>
           <button onClick={()=>{if(window.confirm(uT("sg_reset_c")))onReset();}}
-            style={{width:"100%",padding:"12px",background:"none",border:"1px solid #1f2937",borderRadius:"12px",color:"#4b5563",fontSize:"13px",fontWeight:"700",cursor:"pointer",marginTop:"10px"}}>
+            style={{width:"100%",padding:"12px",background:"none",border:"1px solid #1f2937",borderRadius:"12px",color:"var(--txt-dd)",fontSize:"13px",fontWeight:"700",cursor:"pointer",marginTop:"10px"}}>
             {uT("sg_reset")}
           </button>
         </>
@@ -3576,7 +3609,7 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
 // ════════════════════════════════════════
 // ONBOARDING WIZARD
 // ════════════════════════════════════════
-function Onboarding({onDone,lang="he",setLang}){
+function Onboarding({onDone,lang="he",setLang,theme="dark",setTheme}){
   const t=useT();
   const[step,setStep]=useState(0);
   const[form,setForm]=useState({...DEF_CFG});
@@ -3586,6 +3619,7 @@ function Onboarding({onDone,lang="he",setLang}){
   const[als,setAls]=useState([]);
   const[newAl,setNewAl]=useState({name:"",type:"per_shift",amount:""});
   const[alErr,setAlErr]=useState("");
+  const contentRef=useRef(null);
 
   const STEPS=[
     {title:t("ob_s0t"),subtitle:t("ob_s0s")},
@@ -3600,6 +3634,7 @@ function Onboarding({onDone,lang="he",setLang}){
   const go=(dir)=>{
     setAnimDir(dir>0?"right":"left");
     setStep(s=>s+dir);
+    setTimeout(()=>{if(contentRef.current)contentRef.current.scrollTop=0;},30);
   };
 
   const calcNI=()=>{
@@ -3630,39 +3665,39 @@ function Onboarding({onDone,lang="he",setLang}){
   return(
     <div dir={lang==="ru"?"ltr":"rtl"} style={{
       fontFamily:"'Heebo','Arial Hebrew',Arial,sans-serif",
-      height:"100%",background:"#090c14",color:"#e2e8f0",
+      height:"100%",background:"var(--bg)",color:"var(--txt)",
       display:"flex",flexDirection:"column",maxWidth:"430px",margin:"0 auto",
     }}>
       {/* Header */}
-      <div style={{padding:"env(safe-area-inset-top,28px) 20px 0",background:"#090c14"}}>
+      <div style={{padding:"env(safe-area-inset-top,28px) 20px 0",background:"var(--bg)"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"16px"}}>
-          <div style={{fontSize:"17px",fontWeight:"900",color:"#f1f5f9"}}>שעתי ⏱</div>
+          <div style={{fontSize:"17px",fontWeight:"900",color:"var(--txt-hi)"}}>שעתי ⏱</div>
           <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
             {step>0&&step<STEPS.length-1&&(
-            <button onClick={finish} style={{background:"none",border:"none",color:"#4b5563",fontSize:"12px",cursor:"pointer",fontWeight:"700"}}>
+            <button onClick={finish} style={{background:"none",border:"none",color:"var(--txt-dd)",fontSize:"12px",cursor:"pointer",fontWeight:"700"}}>
               {t("ob_skip")}
             </button>
             )}
           </div>
         </div>
         {/* Progress bar */}
-        <div style={{height:"4px",background:"#1f2937",borderRadius:"2px",marginBottom:"20px"}}>
+        <div style={{height:"4px",background:"var(--divider)",borderRadius:"2px",marginBottom:"20px"}}>
           <div style={{height:"100%",width:`${progress*100}%`,background:"linear-gradient(90deg,#22c55e,#4ade80)",borderRadius:"2px",transition:"width 0.4s ease"}}/>
         </div>
         {/* Steps dots */}
         <div style={{display:"flex",justifyContent:"center",gap:"8px",marginBottom:"24px"}}>
           {STEPS.map((_,i)=>(
-            <div key={i} style={{width:i===step?20:8,height:"8px",borderRadius:"4px",background:i<=step?"#22c55e":"#1f2937",transition:"all 0.3s ease"}}/>
+            <div key={i} style={{width:i===step?20:8,height:"8px",borderRadius:"4px",background:i<=step?"#22c55e":"var(--divider)",transition:"all 0.3s ease"}}/>
           ))}
         </div>
       </div>
 
       {/* Content */}
-      <div style={{flex:1,padding:"0 20px",overflowY:"auto"}}>
+      <div ref={contentRef} style={{flex:1,padding:"0 20px",overflowY:"auto"}}>
         <div style={{animation:`${animDir==="right"?"slideInRight":"slideInLeft"} 0.25s ease-out`}}>
           <div style={{marginBottom:"24px"}}>
-            <div style={{fontSize:"22px",fontWeight:"900",color:"#f1f5f9",marginBottom:"6px"}}>{STEPS[step].title}</div>
-            <div style={{fontSize:"13px",color:"#6b7280"}}>{STEPS[step].subtitle}</div>
+            <div style={{fontSize:"22px",fontWeight:"900",color:"var(--txt-hi)",marginBottom:"6px"}}>{STEPS[step].title}</div>
+            <div style={{fontSize:"13px",color:"var(--txt-d)"}}>{STEPS[step].subtitle}</div>
           </div>
 
           {/* ── Step 0: Welcome ── */}
@@ -3670,13 +3705,28 @@ function Onboarding({onDone,lang="he",setLang}){
             <div>
               {/* Language selector */}
               {setLang&&(
-                <div style={{display:"flex",gap:"8px",marginBottom:"20px"}}>
+                <div style={{display:"flex",gap:"8px",marginBottom:"12px"}}>
                   {[{v:"he",label:"🇮🇱 עברית"},{v:"ru",label:"🇷🇺 Русский"}].map(opt=>(
                     <button key={opt.v} onClick={()=>setLang(opt.v)}
                       style={{flex:1,padding:"10px",borderRadius:"12px",cursor:"pointer",fontWeight:"800",fontSize:"14px",
-                        background:lang===opt.v?"#052e16":"#111827",
-                        color:lang===opt.v?"#4ade80":"#4b5563",
-                        border:`2px solid ${lang===opt.v?"#22c55e":"#1f2937"}`,
+                        background:lang===opt.v?"#052e16":"var(--card)",
+                        color:lang===opt.v?"#4ade80":"var(--txt-dd)",
+                        border:`2px solid ${lang===opt.v?"#22c55e":"var(--divider)"}`,
+                        transition:"all 0.2s ease"}}>
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {/* Theme selector */}
+              {setTheme&&(
+                <div style={{display:"flex",gap:"8px",marginBottom:"20px"}}>
+                  {[{v:"dark",label:t("sg_theme_dark")},{v:"light",label:t("sg_theme_light")}].map(opt=>(
+                    <button key={opt.v} onClick={()=>setTheme(opt.v)}
+                      style={{flex:1,padding:"10px",borderRadius:"12px",cursor:"pointer",fontWeight:"800",fontSize:"14px",
+                        background:theme===opt.v?"#1e3a5f":"var(--card)",
+                        color:theme===opt.v?"#60a5fa":"var(--txt-dd)",
+                        border:`2px solid ${theme===opt.v?"#3b82f6":"var(--divider)"}`,
                         transition:"all 0.2s ease"}}>
                       {opt.label}
                     </button>
@@ -3693,9 +3743,9 @@ function Onboarding({onDone,lang="he",setLang}){
                 {icon:"📊",t:t("ob_f1t"),s:t("ob_f1s")},
                 {icon:"🏦",t:t("ob_f2t"),s:t("ob_f2s")},
               ].map((f,i)=>(
-                <div key={i} style={{display:"flex",gap:"14px",alignItems:"center",padding:"14px",background:"#111827",borderRadius:"14px",marginBottom:"10px",border:"1px solid #1f2937"}}>
+                <div key={i} style={{display:"flex",gap:"14px",alignItems:"center",padding:"14px",background:"var(--card)",borderRadius:"14px",marginBottom:"10px",border:"1px solid #1f2937"}}>
                   <div style={{fontSize:"28px",flexShrink:0}}>{f.icon}</div>
-                  <div><div style={{fontWeight:"700",color:"#e2e8f0",fontSize:"14px"}}>{f.t}</div><div style={{fontSize:"12px",color:"#6b7280",marginTop:"2px"}}>{f.s}</div></div>
+                  <div><div style={{fontWeight:"700",color:"var(--txt)",fontSize:"14px"}}>{f.t}</div><div style={{fontSize:"12px",color:"var(--txt-d)",marginTop:"2px"}}>{f.s}</div></div>
                 </div>
               ))}
             </div>
@@ -3705,19 +3755,19 @@ function Onboarding({onDone,lang="he",setLang}){
           {step===1&&(
             <div>
               <div style={{...CARD,marginBottom:"16px"}}>
-                <div style={{fontSize:"12px",color:"#6b7280",marginBottom:"16px",lineHeight:"1.6",background:"#0d1117",borderRadius:"10px",padding:"12px",border:"1px solid #1f2937"}}>
+                <div style={{fontSize:"12px",color:"var(--txt-d)",marginBottom:"16px",lineHeight:"1.6",background:"var(--bg2)",borderRadius:"10px",padding:"12px",border:"1px solid #1f2937"}}>
                   💡 את/ה יכול/ה למצוא את הנתונים האלה בתלוש השכר שלך או בחוזה העבודה. אם לא בטוח/ה — השאר את ברירת המחדל ותוכל לשנות מאוחר יותר.
                 </div>
                 <Field label="שכר בסיס לשעה (₪)" hint="לפי חוזה/תלוש">
                   <NumInput value={form.baseRate} onChange={v=>setForm(f=>({...f,baseRate:v}))} step={0.01} min={0}/>
                 </Field>
-                <div style={{fontSize:"11px",color:"#4b5563",marginBottom:"16px",marginTop:"-8px"}}>
+                <div style={{fontSize:"11px",color:"var(--txt-dd)",marginBottom:"16px",marginTop:"-8px"}}>
                   שכר מינימום 2025: ₪32.30/שעה
                 </div>
                 <Field label="שעות עבודה ביום רגיל" hint="ברירת מחדל: 8.6 שעות (לפי חוק)">
                   <NumInput value={form.overtimeThreshold} onChange={v=>setForm(f=>({...f,overtimeThreshold:v}))} step={0.1} min={1}/>
                 </Field>
-                <div style={{fontSize:"11px",color:"#4b5563",marginBottom:"16px",marginTop:"-8px"}}>
+                <div style={{fontSize:"11px",color:"var(--txt-dd)",marginBottom:"16px",marginTop:"-8px"}}>
                   שעות מעל מספר זה יחושבו כשעות נוספות
                 </div>
                 <div style={{background:"#0c1a3e",border:"1px solid #1e3a8a",borderRadius:"10px",padding:"12px",marginTop:"4px"}}>
@@ -3746,7 +3796,7 @@ function Onboarding({onDone,lang="he",setLang}){
           {/* ── Step 2: Shifts ── */}
           {step===2&&(
             <div>
-              <div style={{fontSize:"11px",color:"#4b5563",marginBottom:"14px"}}>{t("sg_sh_times_hint")}</div>
+              <div style={{fontSize:"11px",color:"var(--txt-dd)",marginBottom:"14px"}}>{t("sg_sh_times_hint")}</div>
               {[
                 {key:"morning",  labelKey:"sg_sh_morning",  enabledK:"morningEnabled",  startK:"morningStart",  multK:"morningMult",  knownK:"morningMultKnown",  defMult:100},
                 {key:"afternoon",labelKey:"sg_sh_afternoon",enabledK:"afternoonEnabled",startK:"afternoonStart",multK:"afternoonMult",knownK:"afternoonMultKnown",defMult:117},
@@ -3754,31 +3804,31 @@ function Onboarding({onDone,lang="he",setLang}){
               ].map(s=>(
                 <div key={s.key} style={{...CARD,marginBottom:"12px",opacity:form[s.enabledK]===false?0.5:1}}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}}>
-                    <div style={{fontSize:"14px",fontWeight:"800",color:"#e2e8f0"}}>{t(s.labelKey)}</div>
+                    <div style={{fontSize:"14px",fontWeight:"800",color:"var(--txt)"}}>{t(s.labelKey)}</div>
                     <Toggle on={form[s.enabledK]!==false} onToggle={()=>setForm(f=>({...f,[s.enabledK]:f[s.enabledK]===false}))}/>
                   </div>
                   {form[s.enabledK]!==false&&(
                     <>
-                      <div style={{fontSize:"11px",color:"#6b7280",fontWeight:"700",marginBottom:"6px"}}>{t("sg_sh_from")}</div>
+                      <div style={{fontSize:"11px",color:"var(--txt-d)",fontWeight:"700",marginBottom:"6px"}}>{t("sg_sh_from")}</div>
                       <input type="time" value={form[s.startK]||"06:00"} onChange={e=>setForm(f=>({...f,[s.startK]:e.target.value}))} style={{...SI,marginBottom:"12px"}}/>
                       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"6px"}}>
-                        <div style={{fontSize:"11px",color:"#6b7280",fontWeight:"700"}}>{t("sg_sh_pct")}</div>
+                        <div style={{fontSize:"11px",color:"var(--txt-d)",fontWeight:"700"}}>{t("sg_sh_pct")}</div>
                         <button onClick={()=>setForm(f=>({...f,[s.knownK]:f[s.knownK]===false?true:false}))}
-                          style={{background:form[s.knownK]===false?"#052e16":"#1f2937",border:`1.5px solid ${form[s.knownK]===false?"#22c55e":"#374151"}`,color:form[s.knownK]===false?"#22c55e":"#6b7280",borderRadius:"16px",padding:"3px 10px",cursor:"pointer",fontWeight:"700",fontSize:"11px"}}>
+                          style={{background:form[s.knownK]===false?"#052e16":"var(--divider)",border:`1.5px solid ${form[s.knownK]===false?"#22c55e":"var(--divider2)"}`,color:form[s.knownK]===false?"#22c55e":"var(--txt-d)",borderRadius:"16px",padding:"3px 10px",cursor:"pointer",fontWeight:"700",fontSize:"11px"}}>
                           {form[s.knownK]===false?t("sg_sh_legal"):t("sg_sh_known")}
                         </button>
                       </div>
                       {form[s.knownK]===false?(
-                        <div style={{fontSize:"12px",color:"#4b5563",background:"#0d1117",borderRadius:"8px",padding:"8px"}}>
+                        <div style={{fontSize:"12px",color:"var(--txt-dd)",background:"var(--bg2)",borderRadius:"8px",padding:"8px"}}>
                           {t("sg_sh_unknown")} ({s.defMult}%)
                         </div>
                       ):(
                         <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
                           <NumInput value={form[s.multK]??s.defMult} onChange={v=>setForm(f=>({...f,[s.multK]:v}))} step={1} min={100} max={300}/>
-                          <span style={{color:"#e2e8f0",fontWeight:"800",fontSize:"16px"}}>%</span>
+                          <span style={{color:"var(--txt)",fontWeight:"800",fontSize:"16px"}}>%</span>
                         </div>
                       )}
-                      <div style={{fontSize:"10px",color:"#4b5563",marginTop:"4px"}}>{t("sg_sh_pct_hint")}</div>
+                      <div style={{fontSize:"10px",color:"var(--txt-dd)",marginTop:"4px"}}>{t("sg_sh_pct_hint")}</div>
                     </>
                   )}
                 </div>
@@ -3792,7 +3842,7 @@ function Onboarding({onDone,lang="he",setLang}){
               {/* Auto NI calculator */}
               <div style={{...CARD,background:"#0a1628",border:"1px solid #1e3a5f",marginBottom:"14px"}}>
                 <div style={{fontSize:"13px",fontWeight:"700",color:"#60a5fa",marginBottom:"4px"}}>🧮 חשב לי ביטוח לאומי ומס בריאות</div>
-                <div style={{fontSize:"11px",color:"#4b5563",marginBottom:"12px"}}>הזן שכר ברוטו חודשי ממוצע — האחוז משתנה לפי גובה השכר</div>
+                <div style={{fontSize:"11px",color:"var(--txt-dd)",marginBottom:"12px"}}>הזן שכר ברוטו חודשי ממוצע — האחוז משתנה לפי גובה השכר</div>
                 <Field label="שכר ברוטו חודשי משוער (₪)">
                   <NumInput value={salary} onChange={v=>setSalary(v>0?v:0)} step={100}/>
                 </Field>
@@ -3800,7 +3850,7 @@ function Onboarding({onDone,lang="he",setLang}){
                   חשב אוטומטית
                 </button>
                 {niResult&&(
-                  <div style={{background:"#0d1117",borderRadius:"10px",padding:"12px",marginTop:"4px"}}>
+                  <div style={{background:"var(--bg2)",borderRadius:"10px",padding:"12px",marginTop:"4px"}}>
                     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
                       <div style={{background:"#0c1a3e",borderRadius:"8px",padding:"10px",textAlign:"center"}}>
                         <div style={{fontSize:"10px",color:"#93c5fd",marginBottom:"4px"}}>ביטוח לאומי</div>
@@ -3817,7 +3867,7 @@ function Onboarding({onDone,lang="he",setLang}){
               </div>
 
               <div style={CARD}>
-                <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"12px"}}>עריכה ידנית</div>
+                <div style={{fontSize:"12px",color:"var(--txt-d)",fontWeight:"700",marginBottom:"12px"}}>עריכה ידנית</div>
                 <Field label="מס הכנסה (%)" hint="בדוק בתלוש שלך">
                   <NumInput value={form.taxRate} onChange={v=>setForm(f=>({...f,taxRate:v}))} step={0.1} min={0} max={50}/>
                 </Field>
@@ -3827,10 +3877,10 @@ function Onboarding({onDone,lang="he",setLang}){
                 <Field label="מס בריאות (%)">
                   <NumInput value={form.masBriut} onChange={v=>setForm(f=>({...f,masBriut:v}))} step={0.1} min={0}/>
                 </Field>
-                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"#0d1117",borderRadius:"10px",padding:"12px",marginTop:"4px"}}>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"var(--bg2)",borderRadius:"10px",padding:"12px",marginTop:"4px"}}>
                   <div>
-                    <div style={{fontSize:"13px",fontWeight:"700",color:"#e2e8f0"}}>הפעל חישוב ניכויים</div>
-                    <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>הצג שכר נטו בדשבורד</div>
+                    <div style={{fontSize:"13px",fontWeight:"700",color:"var(--txt)"}}>הפעל חישוב ניכויים</div>
+                    <div style={{fontSize:"11px",color:"var(--txt-d)",marginTop:"2px"}}>הצג שכר נטו בדשבורד</div>
                   </div>
                   <Toggle on={form.enableDeductions} onToggle={()=>setForm(f=>({...f,enableDeductions:!f.enableDeductions}))}/>
                 </div>
@@ -3843,13 +3893,13 @@ function Onboarding({onDone,lang="he",setLang}){
             <div>
               <div style={{...CARD,marginBottom:"14px",background:"#0c1a3e",border:"1px solid #1e3a8a"}}>
                 <div style={{fontSize:"11px",color:"#93c5fd",fontWeight:"700",marginBottom:"8px"}}>💡 חשוב לדעת</div>
-                <div style={{fontSize:"11px",color:"#4b5563",lineHeight:"1.7"}}>
+                <div style={{fontSize:"11px",color:"var(--txt-dd)",lineHeight:"1.7"}}>
                   פנסיה וקרן השתלמות מחושבות <span style={{color:"#93c5fd",fontWeight:"700"}}>רק על שכר הבסיס</span> — ללא שעות נוספות ותוספות. כך לפי חוק.
                 </div>
               </div>
 
               <div style={CARD}>
-                <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"14px"}}>🏦 פנסיה</div>
+                <div style={{fontSize:"12px",color:"var(--txt-d)",fontWeight:"700",marginBottom:"14px"}}>🏦 פנסיה</div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"14px"}}>
                   <Field label="עובד (%)">
                     <NumInput value={form.pensionEmployee} onChange={v=>setForm(f=>({...f,pensionEmployee:v}))} step={0.5} min={0}/>
@@ -3858,8 +3908,8 @@ function Onboarding({onDone,lang="he",setLang}){
                     <NumInput value={form.pensionEmployer} onChange={v=>setForm(f=>({...f,pensionEmployer:v}))} step={0.5} min={0}/>
                   </Field>
                 </div>
-                <div style={{height:"1px",background:"#1f2937",margin:"4px 0 14px"}}/>
-                <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"14px"}}>📈 קרן השתלמות</div>
+                <div style={{height:"1px",background:"var(--divider)",margin:"4px 0 14px"}}/>
+                <div style={{fontSize:"12px",color:"var(--txt-d)",fontWeight:"700",marginBottom:"14px"}}>📈 קרן השתלמות</div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
                   <Field label="עובד (%)">
                     <NumInput value={form.kerenEmployee} onChange={v=>setForm(f=>({...f,kerenEmployee:v}))} step={0.5} min={0}/>
@@ -3868,8 +3918,8 @@ function Onboarding({onDone,lang="he",setLang}){
                     <NumInput value={form.kerenEmployer} onChange={v=>setForm(f=>({...f,kerenEmployer:v}))} step={0.5} min={0}/>
                   </Field>
                 </div>
-                <div style={{background:"#0d1117",borderRadius:"10px",padding:"10px",marginTop:"12px"}}>
-                  <div style={{fontSize:"11px",color:"#6b7280",lineHeight:"1.6"}}>
+                <div style={{background:"var(--bg2)",borderRadius:"10px",padding:"10px",marginTop:"12px"}}>
+                  <div style={{fontSize:"11px",color:"var(--txt-d)",lineHeight:"1.6"}}>
                     📋 מינימום חוקי לפנסיה: עובד 6%, מעסיק 6.5%<br/>
                     📋 קרן השתלמות: עובד 2.5%, מעסיק 7.5%
                   </div>
@@ -3883,7 +3933,7 @@ function Onboarding({onDone,lang="he",setLang}){
             <div>
               <div style={{...CARD,marginBottom:"12px",background:"#0d1f12",border:"1px solid #14532d"}}>
                 <div style={{fontSize:"11px",color:"#4ade80",fontWeight:"700",marginBottom:"6px"}}>💡 מה זה תוספות?</div>
-                <div style={{fontSize:"11px",color:"#4b5563",lineHeight:"1.7"}}>
+                <div style={{fontSize:"11px",color:"var(--txt-dd)",lineHeight:"1.7"}}>
                   סכומים קבועים שמתווספים לכל משמרת — למשל דמי נסיעות או כלכלה. אם אין לך — לחץ הבא.
                 </div>
               </div>
@@ -3894,8 +3944,8 @@ function Onboarding({onDone,lang="he",setLang}){
                   {als.map(a=>(
                     <div key={a.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",...CARD,marginBottom:"8px"}}>
                       <div>
-                        <div style={{fontSize:"13px",fontWeight:"700",color:"#e2e8f0"}}>{a.name}</div>
-                        <div style={{fontSize:"11px",color:"#6b7280"}}>{a.type==="per_shift"?"לכל משמרת":"חודשי"} · ₪{a.amount}</div>
+                        <div style={{fontSize:"13px",fontWeight:"700",color:"var(--txt)"}}>{a.name}</div>
+                        <div style={{fontSize:"11px",color:"var(--txt-d)"}}>{a.type==="per_shift"?"לכל משמרת":"חודשי"} · ₪{a.amount}</div>
                       </div>
                       <button onClick={()=>setAls(x=>x.filter(x=>x.id!==a.id))} style={{background:"#2d0505",border:"none",color:"#f87171",borderRadius:"8px",padding:"6px 10px",cursor:"pointer",fontSize:"12px"}}>הסר</button>
                     </div>
@@ -3905,7 +3955,7 @@ function Onboarding({onDone,lang="he",setLang}){
 
               {/* Add new allowance */}
               <div style={CARD}>
-                <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"12px"}}>➕ הוסף תוספת</div>
+                <div style={{fontSize:"12px",color:"var(--txt-d)",fontWeight:"700",marginBottom:"12px"}}>➕ הוסף תוספת</div>
                 <Field label="שם התוספת">
                   <input type="text" value={newAl.name} onChange={e=>setNewAl(a=>({...a,name:e.target.value}))} placeholder="נסיעות, כלכלה, אחר..." style={SI}/>
                 </Field>
@@ -3930,11 +3980,11 @@ function Onboarding({onDone,lang="he",setLang}){
               <div style={{textAlign:"center",marginBottom:"28px"}}>
                 <div style={{fontSize:"64px",marginBottom:"12px"}}>🎉</div>
                 <div style={{fontSize:"18px",fontWeight:"900",color:"#4ade80",marginBottom:"8px"}}>{t("ob_ready")}</div>
-                <div style={{fontSize:"13px",color:"#6b7280"}}>{t("ob_saved")}</div>
+                <div style={{fontSize:"13px",color:"var(--txt-d)"}}>{t("ob_saved")}</div>
               </div>
 
               <div style={{...CARD,marginBottom:"14px"}}>
-                <div style={{fontSize:"12px",color:"#6b7280",fontWeight:"700",marginBottom:"12px"}}>{t("ob_summary")}</div>
+                <div style={{fontSize:"12px",color:"var(--txt-d)",fontWeight:"700",marginBottom:"12px"}}>{t("ob_summary")}</div>
                 {[
                   {l:"שכר בסיס",v:`₪${form.baseRate}/שעה`},
                   {l:"שעות עבודה ביום רגיל",v:`${form.overtimeThreshold} שעות`},
@@ -3946,13 +3996,13 @@ function Onboarding({onDone,lang="he",setLang}){
                   {l:"תוספות",v:als.length>0?als.map(a=>a.name).join(", "):"ללא"},
                 ].map((r,i)=>(
                   <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"7px 0",borderBottom:i<7?"1px solid #1f2937":"none"}}>
-                    <span style={{fontSize:"12px",color:"#9ca3af"}}>{r.l}</span>
-                    <span style={{fontSize:"12px",fontWeight:"700",color:i===7&&als.length>0?"#4ade80":"#e2e8f0"}}>{r.v}</span>
+                    <span style={{fontSize:"12px",color:"var(--txt-m)"}}>{r.l}</span>
+                    <span style={{fontSize:"12px",fontWeight:"700",color:i===7&&als.length>0?"#4ade80":"var(--txt)"}}>{r.v}</span>
                   </div>
                 ))}
               </div>
 
-              <div style={{fontSize:"11px",color:"#4b5563",textAlign:"center",marginBottom:"20px"}}>
+              <div style={{fontSize:"11px",color:"var(--txt-dd)",textAlign:"center",marginBottom:"20px"}}>
                 {t("ob_settings_hint")}
               </div>
             </div>
@@ -3961,9 +4011,9 @@ function Onboarding({onDone,lang="he",setLang}){
       </div>
 
       {/* Footer buttons */}
-      <div style={{padding:"16px 20px",paddingBottom:"env(safe-area-inset-bottom,20px)",background:"#090c14",borderTop:"1px solid #1f2937",display:"flex",gap:"10px"}}>
+      <div style={{padding:"16px 20px",paddingBottom:"env(safe-area-inset-bottom,20px)",background:"var(--bg)",borderTop:"1px solid #1f2937",display:"flex",gap:"10px"}}>
         {step>0&&step<STEPS.length-1&&(
-          <button onClick={()=>go(-1)} style={{flex:"0 0 auto",padding:"14px 18px",background:"#1f2937",border:"none",borderRadius:"12px",color:"#9ca3af",fontSize:"15px",fontWeight:"800",cursor:"pointer"}}>
+          <button onClick={()=>go(-1)} style={{flex:"0 0 auto",padding:"14px 18px",background:"var(--divider)",border:"none",borderRadius:"12px",color:"var(--txt-m)",fontSize:"15px",fontWeight:"800",cursor:"pointer"}}>
             {t("ob_back")}
           </button>
         )}
@@ -4017,6 +4067,7 @@ function App(){
   const[onboarded,setOnboarded]=useState(false);
   const[privacyMode,setPrivacyMode]=useState(false);
   const[lang,setLang]=useState("he");
+  const[theme,setTheme]=useState("dark");
   const[selM,setSelM]=useState(()=>tdy().substring(0,7));
 
   useEffect(()=>{
@@ -4029,9 +4080,11 @@ function App(){
     const ob=LS.get(K.onboarded);if(ob)setOnboarded(true);
     const pr=LS.get(K.privacy);if(pr)setPrivacyMode(true);
     const ln=LS.get(K.lang);if(ln)setLang(ln);
+    const th=LS.get(K.theme);if(th){setTheme(th);document.documentElement.dataset.theme=th;}
     setLoaded(true);
   },[]);
 
+  const saveTheme=t=>{setTheme(t);LS.set(K.theme,t);document.documentElement.dataset.theme=t;};
   const saveLang=l=>{setLang(l);LS.set(K.lang,l);};
   const togglePrivacy=()=>{
     const next=!privacyMode;
@@ -4073,17 +4126,17 @@ function App(){
   ];
 
   if(!loaded)return(
-    <div style={{minHeight:"100vh",background:"#090c14",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"16px"}}>
+    <div style={{minHeight:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"16px"}}>
       <div style={{fontSize:"52px",animation:"spinShekel 1.2s linear infinite",display:"inline-block"}}>₪</div>
       <div style={{color:"#4ade80",fontSize:"16px",fontWeight:"700",animation:"blink 1.2s ease-in-out infinite"}}>שעתי טוען...</div>
     </div>
   );
 
-  if(!onboarded)return <LangCtx.Provider value={lang}><Onboarding onDone={finishOnboarding} lang={lang} setLang={saveLang}/></LangCtx.Provider>;
+  if(!onboarded)return <LangCtx.Provider value={lang}><Onboarding onDone={finishOnboarding} lang={lang} setLang={saveLang} theme={theme} setTheme={saveTheme}/></LangCtx.Provider>;
 
   return(
   <LangCtx.Provider value={lang}>
-    <div dir="rtl" style={{fontFamily:"'Heebo','Arial Hebrew',sans-serif",minWidth:"100%",maxWidth:"430px",margin:"0 auto",height:"100%",display:"flex",flexDirection:"column",background:"#090c14",color:"#e2e8f0",filter:nightMode?"brightness(0.82) saturate(0.9)":"none",transition:"filter 1s ease",position:"relative"}}>
+    <div dir="rtl" style={{fontFamily:"'Heebo','Arial Hebrew',sans-serif",minWidth:"100%",maxWidth:"430px",margin:"0 auto",height:"100%",display:"flex",flexDirection:"column",background:"var(--bg)",color:"var(--txt)",filter:nightMode?"brightness(0.82) saturate(0.9)":"none",transition:"filter 1s ease",position:"relative"}}>
 
       {/* Toast notification */}
       {toast&&(
@@ -4097,9 +4150,9 @@ function App(){
       )}
 
       {/* Header - sticky at top */}
-      <div style={{paddingTop:"env(safe-area-inset-top, 28px)",background:"#090c14",borderBottom:"1px solid #1f2937",flexShrink:0,zIndex:10,position:"relative"}}>
+      <div style={{paddingTop:"env(safe-area-inset-top, 28px)",background:"var(--bg)",borderBottom:"1px solid #1f2937",flexShrink:0,zIndex:10,position:"relative"}}>
         <div style={{padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-        <div style={{fontSize:"17px",fontWeight:"900",color:"#f1f5f9"}}>שעתי ⏱</div>
+        <div style={{fontSize:"17px",fontWeight:"900",color:"var(--txt-hi)"}}>שעתי ⏱</div>
         <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
           {/* Language toggle */}
           <button onClick={()=>saveLang(lang==="he"?"ru":"he")} style={{
@@ -4111,8 +4164,8 @@ function App(){
           </button>
           {/* Privacy toggle */}
           <button onClick={togglePrivacy} style={{
-            background:privacyMode?"#2d1f00":"#1f2937",
-            border:`1px solid ${privacyMode?"#f59e0b":"#374151"}`,
+            background:privacyMode?"#2d1f00":"var(--divider)",
+            border:`1px solid ${privacyMode?"#f59e0b":"var(--divider2)"}`,
             borderRadius:"8px",padding:"3px 10px",
             fontSize:"14px",cursor:"pointer",
             transition:"all 0.2s ease",
@@ -4155,16 +4208,16 @@ function App(){
           {tab==="shifts"   &&<ShiftsList shifts={shifts} cfg={cfg} als={als} onDelete={delSh} onEdit={editSh} privacyMode={privacyMode}/>}
           {tab==="savings"  &&<Savings shifts={shifts} cfg={cfg} privacyMode={privacyMode}/>}
           {tab==="graph"    &&<Graph shifts={shifts} cfg={cfg} als={als} privacyMode={privacyMode}/>}
-          {tab==="settings" &&<Settings cfg={cfg} tpls={tpls} als={als} shifts={shifts} vacCfg={vacCfg} onSaveCfg={saveCfg} onSaveTpls={saveTpls} onSaveAls={saveAls} onSaveVacCfg={saveVacCfg} privacyMode={privacyMode} togglePrivacy={togglePrivacy} onReset={()=>{LS.set(K.onboarded,false);setOnboarded(false);}} lang={lang} onSaveLang={saveLang}/>}
+          {tab==="settings" &&<Settings cfg={cfg} tpls={tpls} als={als} shifts={shifts} vacCfg={vacCfg} onSaveCfg={saveCfg} onSaveTpls={saveTpls} onSaveAls={saveAls} onSaveVacCfg={saveVacCfg} privacyMode={privacyMode} togglePrivacy={togglePrivacy} onReset={()=>{LS.set(K.onboarded,false);setOnboarded(false);}} lang={lang} onSaveLang={saveLang} theme={theme} onSaveTheme={saveTheme}/>}
         </div>
         {/* Watermark — inside scroll, above nav padding */}
-        <div style={{textAlign:"center",padding:"12px 0 4px",fontSize:"10px",color:"#1f2937",letterSpacing:"0.5px"}}>
+        <div style={{textAlign:"center",padding:"12px 0 4px",fontSize:"10px",color:"var(--divider)",letterSpacing:"0.5px"}}>
           made by illouzman
         </div>
       </div>
 
       {/* Bottom nav — sliding pill indicator */}
-      <div style={{flexShrink:0,background:"#0d1117",borderTop:"1px solid #1f2937",zIndex:20,paddingBottom:"env(safe-area-inset-bottom, 4px)"}}>
+      <div style={{flexShrink:0,background:"var(--bg2)",borderTop:"1px solid #1f2937",zIndex:20,paddingBottom:"env(safe-area-inset-bottom, 4px)"}}>
         <div style={{display:"flex",width:"100%",position:"relative",padding:"4px"}}>
           {/* Sliding pill */}
           <div style={{
@@ -4182,7 +4235,7 @@ function App(){
           {tabs.map(t=>(
             <button key={t.id} onClick={()=>switchTab(t.id)} style={{
               flex:1,padding:"7px 2px 9px",background:"none",border:"none",
-              cursor:"pointer",color:tab===t.id?"#4ade80":"#4b5563",
+              cursor:"pointer",color:tab===t.id?"#4ade80":"var(--txt-dd)",
               position:"relative",zIndex:1,
               transition:"color 0.2s ease",
             }}>
