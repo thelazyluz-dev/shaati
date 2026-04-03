@@ -1535,6 +1535,8 @@ function LiveClock(){
 function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
   const t=useT();
   const[nowStr,setNowStr]=useState(nowTime());
+  const[showNet,setShowNet]=useState(true);
+  const[flipKey,setFlipKey]=useState(0);
   useEffect(()=>{const id=setInterval(()=>setNowStr(nowTime()),30000);return()=>clearInterval(id);},[]);
   const ms=shifts.filter(s=>s.date.startsWith(selM));
   const wMap=buildWeeklyThresholdMap(shifts,cfg);
