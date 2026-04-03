@@ -3368,7 +3368,7 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
           </div>
         )}
       </div>
-      <div style={{display:"flex",gap:"6px",marginBottom:"20px"}}>{subs.map(t=><button key={t.id} onClick={()=>setSub(t.id)} style={{flex:1,padding:"9px 2px",borderRadius:"10px",border:"none",cursor:"pointer",fontWeight:"700",fontSize:"12px",background:sub===t.id?"#22c55e":"var(--divider)",color:sub===t.id?"#000":"var(--txt-d)"}}>{t.l}</button>)}</div>
+      <div style={{display:"flex",gap:"6px",marginBottom:"20px",overflowX:"auto",WebkitOverflowScrolling:"touch",paddingBottom:"2px"}}>{subs.map(t=><button key={t.id} onClick={()=>setSub(t.id)} style={{flexShrink:0,padding:"9px 10px",borderRadius:"10px",border:"none",cursor:"pointer",fontWeight:"700",fontSize:"12px",background:sub===t.id?"#22c55e":"var(--divider)",color:sub===t.id?"#000":"var(--txt-d)",whiteSpace:"nowrap"}}>{t.l}</button>)}</div>
 
       {sub==="pay"&&(
         <div style={{...CARD,marginBottom:"14px"}}>
