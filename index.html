@@ -823,12 +823,6 @@ function ch(s,e){let d=pt(e)-pt(s);if(d<0)d+=1440;return Math.max(0,d/60);}
 // מחזיר key של השבוע (יום ראשון) לפי תאריך
 function getWeekKey(dateStr,startTime){
   const d=new Date(dateStr+"T12:00:00");
-  // מוצאי שבת מ-20:00 — נחשב כבר שבוע חדש (ראשון)
-  if(d.getDay()===6&&startTime&&startTime>="20:00"){
-    const nd=new Date(d);nd.setDate(d.getDate()+1);
-    const sun=new Date(nd);sun.setDate(nd.getDate()-nd.getDay());
-    return sun.toISOString().split("T")[0];
-  }
   const sun=new Date(d);sun.setDate(d.getDate()-d.getDay());
   return sun.toISOString().split("T")[0];
 }
