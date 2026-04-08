@@ -588,7 +588,7 @@ const TR={
     sl_week:"أسبوع",sl_month:"شهر",
     // Vacation / sick
     vac_title:"رصيد الإجازة",vac_cur:"الرصيد الحالي (أيام)",vac_acc:"استحقاق شهري (أيام)",
-    vac_start:"تاريخ البدء",vac_save:"حفظ",vac_saved:"✓ تم الحفظ",
+    vac_start:"تاريخ البدء",
     vac_sick:"رصيد المرض",vac_days:"أيام",
     // Savings
     sv_title:"المدخرات والمعاش",sv_pension:"معاش تقاعدي",sv_keren:"صندوق تعليم",
@@ -615,6 +615,140 @@ const TR={
     // App
     app_loading:"Shaati يُحمَّل...",app_privacy_show:"عرض المبالغ",app_privacy_hide:"إخفاء المبالغ",
     pwa_install:"تثبيت التطبيق",pwa_install_btn:"تثبيت",
+    // Header
+    hdr_active:"وردية نشطة",hdr_month_shifts:"ورديات الشهر",
+    hdr_privacy_on:"وضع الخصوصية — المبالغ مخفية",hdr_show:"عرض",
+    // Tabs
+    tab_clock:"دخول",tab_active:"في الوردية",tab_dash:"ملخص",tab_add:"يدوي",
+    tab_shifts:"الورديات",tab_save:"مدخرات",tab_graph:"رسم بياني",tab_cfg:"إعدادات",
+    // AddShift extras
+    as_shift_type:"نوع الوردية",as_special:"يوم خاص (إجازة / مرض / عطلة)",
+    as_no_ot:"⚠️ البدلات والساعات الإضافية لن تُحسب لهذا اليوم",
+    as_note_ph:"عطلة، ساعات خاصة...",as_preview:"معاينة",
+    as_err_date:"يرجى تحديد تاريخ",as_err_times:"يرجى تحديد وقت البداية والنهاية",as_err_hours:"وقت غير صحيح",
+    as_save:"حفظ الوردية",as_allowances:"بدلات",
+    // EditModal
+    em_title:"✏️ تعديل الوردية",em_date:"التاريخ",em_save:"حفظ التغييرات",
+    em_err:"يرجى تحديد التاريخ والوقت",em_err_h:"وقت غير صحيح",
+    // ShiftsList
+    sl_title:"📋 جميع الورديات",sl_empty:"لا توجد ورديات بعد",
+    sl_empty_hint:"اضغط ➕ لإضافة أول وردية",
+    sl_delete:"حذف",
+    // Deductions labels
+    ded_tax:"ضريبة الدخل",ded_ni:"تأمين وطني",ded_health:"تأمين صحي",
+    ded_pension_e:"معاش (موظف)",ded_keren_e:"صندوق تعليم",
+    // Settings extras
+    sg_daily_h:"ساعات العمل اليومية",sg_daily_h_h:"وفق القانون: 8.6 ساعات",
+    sg_ot125:"ساعات 125% قبل 150%",sg_ot125_h:"وفق القانون: ساعتان",
+    sg_wot_h:"أمر توسيع 2018: 42 ساعة",
+    sg_wot_hint:"فوق الحد الأسبوعي — ساعات إضافية تلقائية (حتى لو لم تتجاوز الحد اليومي)",
+    sg_goal:"هدف الراتب الشهري (₪)",sg_goal_h:"0 = معطّل",sg_cur_rate:"الراتب الأساسي الحالي",sg_per_h:"/ساعة",
+    sg_show_ded:"عرض الاستقطاعات",sg_worker_ded:"استقطاعات الموظف (%)",
+    sg_tax_pct:"ضريبة الدخل %",sg_tax_h:"حسب نقاط الائتمان",sg_ni_pct:"تأمين وطني %",sg_ni_h:"نسبة موزونة",
+    sg_health_pct:"تأمين صحي %",sg_pension_e:"معاش الموظف %",sg_keren_e:"صندوق التعليم (موظف %)",
+    sg_employer_ded:"مخصصات صاحب العمل (%)",sg_pension_r:"معاش (صاحب عمل %)",sg_keren_r:"صندوق التعليم (صاحب عمل %)",
+    sg_exist_allow:"البدلات الحالية",sg_amount:"المبلغ (₪)",sg_type:"النوع",
+    sg_per_shift:"لكل وردية",sg_per_month:"شهري ثابت",sg_new_allow:"➕ بدل جديد",sg_name:"الاسم",
+    sg_allow_ph:"بدل طعام، مواصلات...",sg_add_allow:"+ إضافة بدل",
+    sg_exist_tpl:"القوالب الحالية",sg_custom_b:"مخصص",sg_new_tpl:"➕ قالب جديد",
+    sg_tpl_ph:"مثال: \"وردية 12 ساعة\"",sg_custom_pct:"نسبة راتب مخصصة",sg_custom_on:"✓ مخصص",sg_default:"افتراضي",
+    sg_using_pct:"يستخدم نسبة نوع الوردية المختار:",
+    sg_pct_hint:"مثال: 100% = صباحية، 117% = ظهيرة، 125% = سبت، 140% = ليلية، 150% = سبت+ليل",
+    sg_emoji:"إيموجي القالب",sg_color:"لون القالب",sg_add_tpl:"+ إضافة قالب",
+    sg_sh_morning:"☀️ صباح",sg_sh_afternoon:"🌤️ ظهر",sg_sh_night:"🌙 ليل",
+    sg_sh_from:"وقت البداية",sg_sh_to:"وقت النهاية",
+    // Savings extras
+    sv_tab_ov:"نظرة عامة",sv_tab_ret:"عوائد",sv_tab_ext:"خارجي",sv_tab_hist:"تاريخ",
+    sv_no_future:"* بدون عوائد مستقبلية",
+    sv_ext_savings:"💎 مدخرات خارجية",
+    sv_incl:"شاملاً",sv_hist_sfx:"تاريخي",sv_return_pfx:"عائد +",
+    sv_per_month_e:"/شهر (موظف+صاحب عمل)",sv_emp:"موظف",sv_er:"صاحب عمل",
+    sv_ret_update:"🔄 تحديث العائد الشهري",sv_updated:"✓ تم التحديث!",sv_update_now:"تحديث الآن",
+    sv_auto_calc:"تلقائياً في الأول من كل شهر ·",sv_never_upd:"لم يُحدَّث بعد",
+    sv_return_acc:"العائد المتراكم",sv_annual_int:"العائد السنوي",
+    sv_no_ext_ret:"لا توجد مدخرات خارجية — أضف في علامة \"خارجي\"",
+    sv_ext_desc:"ودائع، صناديق ادخار، عقارات وأي مدخرات خارج كشف الراتب",sv_no_ext:"لا توجد مدخرات خارجية بعد",
+    sv_edit_sav:"✏️ تعديل المدخر",sv_sav_name:"اسم المدخر",
+    sv_return_rate:"العائد / الفائدة السنوية (%)",
+    sv_hint_unk:"0 إذا لم يكن معروفاً",sv_monthly_dep:"الإيداع الشهري (₪)",sv_hint_none:"0 إذا لا يوجد",
+    sv_hint_no_dep:"0 إذا لا يوجد إيداع منتظم",
+    sv_save_ch:"حفظ التغييرات",sv_add_ext_hdr:"➕ إضافة مدخر خارجي",sv_add_ext_btn:"+ إضافة مدخر خارجي",
+    sv_edit_btn:"✏️ تعديل",sv_delete_btn:"حذف",
+    sv_pen_both:"المعاش (موظف+صاحب عمل)",sv_ker_both:"صندوق التعليم (موظف+صاحب عمل)",
+    sv_cumul:"متراكم (بدون تاريخي)",sv_no_hist:"أضف ورديات لرؤية التاريخ",
+    sv_type_dep:"وديعة بنكية",sv_type_gem:"صندوق ادخار",sv_type_re:"عقارات",sv_type_stk:"أسهم/ETF",sv_type_oth:"أخرى",
+    sv_return_sfx:"عائد",sv_dep_pfx:"إيداع",sv_per_month_s:"/شهر",sv_dep_on:"يودَع في",sv_of_month:"للشهر",
+    sv_ret_sp500:"S&P 500",sv_ret_equity:"أسهم",sv_ret_gen:"عام",sv_ret_bonds:"سندات",sv_ret_custom:"يدوي",sv_ret_annual:"% سنوي",
+    // Graph extras
+    gr_cur_year:"● السنة الحالية",
+    gr_total_year:"إجمالي السنة صافي",gr_hours_sfx:"ساعات",gr_avg_month:"متوسط شهري",gr_active_months:"أشهر نشطة",
+    gr_peak:"🏆 أفضل شهر",gr_low:"📉 أدنى شهر",gr_vs_avg:"مقارنة بالمتوسط السنوي",
+    gr_monthly_dtl:"تفصيل شهري",gr_peak_lbl:"🏆 ذروة",gr_low_lbl:"📉 أدنى",
+    // Vacation extras
+    vac_days_vac:"🏖️ أيام الإجازة",vac_used:"مستخدمة",vac_accrued:"مستحقة",vac_days_sick:"🤒 أيام المرض",
+    vac_settings:"إعدادات الرصيد",vac_how:"💡 كيف يعمل هذا؟",
+    vac_how_desc_1:"أدخل أرصدتك",vac_how_desc_2:"من كشف الراتب الأخير",vac_how_desc_3:"و",vac_how_desc_4:"تاريخ ذلك الكشف",
+    vac_how_desc_5:"سيحسب التطبيق الاستحقاق تلقائياً من ذلك التاريخ.",
+    vac_payslip_date:"📅 تاريخ آخر كشف راتب",vac_annual_vac:"🏖️ الإجازة السنوية",
+    vac_bal_label:"الرصيد في الكشف (أيام)",vac_accrual:"استحقاق شهري",vac_accrual_h:"الافتراضي: 1.5 يوم",
+    vac_months_ago:"أشهر منذ الكشف · +",vac_days_accr:"أيام مستحقة",
+    vac_sick_title:"🤒 أيام المرض",vac_sick_fixed:"استحقاق: 1.5 يوم/شهر (ثابت وفق القانون)",
+    vac_sick_since:"+",vac_days_since:"أيام استُحقت منذ الكشف",
+    vac_saved:"✓ تم الحفظ!",vac_save:"حفظ الرصيد",
+    // NI calc helper
+    ni_title:"🧮 احسب التأمين الوطني والصحي",ni_desc:"النسبة تتغير حسب الراتب",
+    ni_close:"إغلاق ▲",ni_open:"فتح ▼",
+    ni_hint:"أدخل متوسط راتبك الإجمالي الشهري — سيحسب التطبيق النسب الفعلية وفق قانون 2026.",
+    ni_salary:"متوسط الراتب الإجمالي الشهري (₪)",ni_calc:"احسب",
+    ni_result_pfx:"نتيجة الحساب للراتب",ni_ni:"تأمين وطني",ni_health:"تأمين صحي",ni_per_month:"/شهر",
+    ni_footnote:"* محسوب وفق تأمين وطني 2026: حتى ₪7,703 — 1.04%+3.23%، فوق ذلك — 7%+5.17%",
+    ni_apply:"✓ تحديث الإعدادات تلقائياً",ni_ref_table:"جدول النسب حسب الراتب:",
+    ni_click:"← اضغط",ni_bl:"ت.و.",ni_briut:"صحي",
+    // Income tax helper
+    tx_title:"💡 ضريبة الدخل — كيف تُحسب؟",tx_desc:"اضغط للشرح وحساب تقديري",
+    tx_close:"إغلاق ▲",tx_open:"فتح ▼",
+    tx_hint_1:"ضريبة الدخل غير ثابتة — تعتمد على",tx_hint_pts:" نقاط الائتمان",tx_hint_2:". كل نقطة = ₪",tx_hint_3:" خصم في الشهر.",
+    tx_hint_tip:"الأسهل: انظر في كشف راتبك — كم خُصم ÷ الإجمالي = نسبتك.",
+    tx_pts_title:"نقاط ائتمان شائعة:",tx_pts_sfx:"نقاط",
+    tx_estimate_pfx:"تقدير سريع حسب راتبك (",tx_estimate_sfx:"إجمالي/شهر):",
+    tx_pts_lbl:"نقاط الائتمان:",tx_estimated:"ضريبة دخل تقديرية",tx_exempt:"0% — معفى ✓",tx_per_month:"/شهر",
+    tx_apply_pfx:"✓ تحديث ضريبة الدخل إلى ",tx_apply_sfx:"%",
+    tx_warning:"⚠️ هذا تقدير فقط. النسبة الدقيقة تعتمد على ظروف شخصية. تحقق دائماً من كشف راتبك.",
+    tx_pt0:"إسرائيلي/ة",tx_pt0d:"للجميع",
+    tx_pt1:"أنثى",tx_pt1d:"نقطة إضافية للنساء",
+    tx_pt2:"طفل حتى 18 (طفل 1)",tx_pt2d:"لكل طفل حتى 5 سنوات: 2.5 نقاط",
+    tx_pt3:"طفل 6–17 سنة",tx_pt3d:"لكل طفل 6–17 سنة",
+    tx_pt4:"والد/ة وحيد/ة",tx_pt4d:"نقطة إضافية",
+    tx_pt5:"درجة بكالوريوس",tx_pt5d:"في سنة التخرج",
+    // Onboarding extras
+    ob_tagline:"تتبع ذكي للراتب للعمال بالساعة",
+    ob_feat_desc:"ساعات إضافية · استقطاعات دقيقة\nمعاش · صندوق تعليم · إجازة ومرض",
+    ob_f0t:"تتبع الورديات في الوقت الفعلي",ob_f0s:"دخول/خروج مع حساب تلقائي",
+    ob_f1t:"لوحة تحكم شهرية",ob_f1s:"إجمالي، صافي، استقطاعات وملخصات",
+    ob_f2t:"تتبع المدخرات",ob_f2s:"معاش، صندوق تعليم والمزيد",
+    ob_ready:"جاهز للبدء!",ob_saved:"تم حفظ إعداداتك بنجاح",ob_summary:"ملخص الإعدادات",
+    ob_settings_hint:"يمكنك تغيير أي إعداد في أي وقت من قائمة ⚙️",
+    ob_start:"لنبدأ →",ob_enter:"🚀 دخول التطبيق",
+    ob_s1_tip:"💡 يمكنك إيجاد هذه البيانات في كشف راتبك أو عقد العمل. إذا لم تكن متأكداً — اترك الافتراضي وغيّر لاحقاً.",
+    ob_s1_from_contract:"حسب العقد/الكشف",ob_s1_min_wage:"الحد الأدنى 2025: ₪32.30/ساعة",
+    ob_s1_daily_hint:"الافتراضي: 8.6 ساعات (وفق القانون)",ob_s1_ot_hint:"الساعات فوق هذا الرقم تُحسب كساعات إضافية",
+    ob_s1_ot_title:"📋 نسب الساعات الإضافية (وفق القانون)",ob_s1_ot_first:"أول ساعتين",ob_s1_ot_from3:"من الساعة 3 فصاعداً",
+    ob_s2_ni_hint:"أدخل متوسط الراتب الإجمالي — النسبة تتغير حسب المبلغ",
+    ob_s2_salary_lbl:"الراتب الإجمالي الشهري التقديري (₪)",ob_s2_calc:"احسب تلقائياً",ob_s2_updated:"✓ تم التحديث تلقائياً",
+    ob_s2_manual:"تحرير يدوي",ob_s2_tax_hint:"تحقق من كشف راتبك",
+    ob_s2_enable_ded:"تفعيل حساب الاستقطاعات",ob_s2_enable_ded_h:"عرض الراتب الصافي في لوحة التحكم",
+    ob_s3_skip:"تخطي هذه الخطوة →",ob_s3_skip_hint:"يمكن الإعداد في أي وقت من الإعدادات",
+    ob_s3_tip_title:"💡 مهم للمعرفة",
+    ob_s3_tip:"المعاش وصندوق التعليم يُحسبان ",ob_s3_base_only:"على الراتب الأساسي فقط",ob_s3_tip_sfx:" — بدون ساعات إضافية وبدلات. هكذا القانون.",
+    ob_s3_employee:"موظف (%)",ob_s3_employer:"صاحب عمل (%)",
+    ob_s3_legal:"📋 الحد الأدنى القانوني للمعاش: موظف 6%، صاحب عمل 6.5%\n📋 صندوق التعليم: موظف 2.5%، صاحب عمل 7.5%",
+    ob_s4_tip_title:"💡 ما هي البدلات؟",
+    ob_s4_tip:"مبالغ ثابتة تُضاف لكل وردية — مثل بدل مواصلات أو طعام. إذا لم يكن لديك — اضغط التالي.",
+    ob_s4_monthly_short:"شهري",ob_s4_remove:"إزالة",ob_s4_add_hdr:"➕ إضافة بدل",ob_s4_name:"اسم البدل",
+    ob_s4_placeholder:"مواصلات، طعام، أخرى...",ob_s4_fixed_monthly:"شهري (ثابت)",ob_s4_add_btn:"+ إضافة بدل",
+    ob_s5_base_rate:"الراتب الأساسي",ob_s5_per_h:"/ساعة",ob_s5_hours_unit:"ساعات",
+    ob_s5_pension:"المعاش موظف/صاحب عمل",ob_s5_keren:"صندوق التعليم موظف/صاحب عمل",
+    ob_s5_allowances:"بدلات",ob_s5_none:"لا يوجد",
   },
 };
 const DEF_VAC={currentBalance:0,sickBalance:0,accrualPerMonth:1.5,startDate:""};
@@ -1106,19 +1240,25 @@ function Toggle({on,onToggle}){
 }
 function InstallBanner(){
   const t=useT();
-  const[show,setShow]=useState(()=>{
-    if(!window.__installPrompt)return false;
+  const[prompt,setPrompt]=useState(()=>window.__installPrompt||null);
+  const[dismissed,setDismissed]=useState(()=>{
     const d=LS.get(K.installDismissed);
-    return!(d&&Date.now()-d<30*24*60*60*1000);
+    return !!(d&&Date.now()-d<30*24*60*60*1000);
   });
+  useEffect(()=>{
+    const handler=e=>{e.preventDefault();window.__installPrompt=e;setPrompt(e);};
+    window.addEventListener('beforeinstallprompt',handler);
+    return()=>window.removeEventListener('beforeinstallprompt',handler);
+  },[]);
+  const show=prompt&&!dismissed;
   if(!show)return null;
-  const dismiss=()=>{LS.set(K.installDismissed,Date.now());setShow(false);};
+  const dismiss=()=>{LS.set(K.installDismissed,Date.now());setDismissed(true);};
   const install=async()=>{
-    if(!window.__installPrompt)return;
-    window.__installPrompt.prompt();
-    await window.__installPrompt.userChoice;
+    if(!prompt)return;
+    prompt.prompt();
+    await prompt.userChoice;
     window.__installPrompt=null;
-    setShow(false);
+    setPrompt(null);
   };
   return(
     <div style={{position:"fixed",bottom:"68px",left:"50%",transform:"translateX(-50%)",
