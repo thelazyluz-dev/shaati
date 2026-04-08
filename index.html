@@ -1406,7 +1406,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
   const toggleAl=(id)=>setSelAls(s=>s.includes(id)?s.filter(x=>x!==id):[...s,id]);
 
   const now=new Date();
-  const curType=clockIn?clockIn.type:detectShiftType(now.getHours(),cfg);
+  const curType=detectShiftType(now.getHours(),cfg);
   const sty=ST[curType]||ST.regular;
 
   // Funny message overlay
@@ -1558,6 +1558,8 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
   const autoHolDays=Object.entries(IL_HOLIDAYS).filter(([d,h])=>d.startsWith(selM)&&h.paid&&!recordedDates.has(d));
   const holPay=autoHolDays.length*(cfg.baseRate||34.32)*(cfg.overtimeThreshold||8.6);
   tG+=holPay;tBase+=holPay;
+  // חגים שהוזנו ידנית (type==="holiday") — לספירת ימי חג
+  const manualHolDays=ms.filter(s=>s.type==="holiday");
   const dedBase=tG+tA; // ברוטו כולל תוספות — בסיס לביטוח לאומי ומס הכנסה
   const ded=cfg.enableDeductions?cd(dedBase,cfg,tBase):null;
   const net=ded?dedBase-ded.tot:dedBase;
@@ -1677,8 +1679,8 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
             );})()}
           </>
         )}
-        {(ms.length>0||holPay>0)&&<div style={{color:"#4ade8066",fontSize:"11px",marginTop:"12px"}}>{fH(tH)} {t("d_hours")} · {ms.filter(s=>!isSpecialDay(s.type)).length} {t("d_shifts")}{autoHolDays.length>0?` + ${autoHolDays.length} ${t("d_hol_days")}`:""}</div>}
-        {holPay>0&&<div style={{fontSize:"11px",color:"#fcd34d",marginTop:"4px"}}>✡️ {autoHolDays.length} {t("d_paid_hol")} · {prv(holPay,privacyMode)}</div>}
+        {(ms.length>0||holPay>0)&&<div style={{color:"#4ade8066",fontSize:"11px",marginTop:"12px"}}>{fH(tH)} {t("d_hours")} · {ms.filter(s=>!isSpecialDay(s.type)).length} {t("d_shifts")}{(autoHolDays.length+manualHolDays.length)>0?` + ${autoHolDays.length+manualHolDays.length} ${t("d_hol_days")}`:""}</div>}
+        {(holPay>0||manualHolDays.length>0)&&<div style={{fontSize:"11px",color:"#fcd34d",marginTop:"4px"}}>✡️ {autoHolDays.length+manualHolDays.length} {t("d_paid_hol")}{holPay>0?` · ${prv(holPay,privacyMode)}`:""}</div>}
       </div>
 
       {tA>0&&(
