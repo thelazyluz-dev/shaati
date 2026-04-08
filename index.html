@@ -12,6 +12,7 @@
 <link rel="apple-touch-icon" href="/icon-192.png"/>
 <title>שעות עבודה</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;900&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
@@ -25,7 +26,7 @@ html,body{height:100%;overflow:hidden}
   --divider:#ddd8d0;--divider2:#ccc7be;--inp-b:#ccc7be;
   --txt:#1c1917;--txt-hi:#0c0a09;--txt-m:#57534e;--txt-d:#78716c;--txt-dd:#a8a29e;
 }
-body{background:var(--bg);font-family:'Heebo','Arial Hebrew',sans-serif;color:var(--txt);overscroll-behavior:none}
+body{background:var(--bg);font-family:'Heebo','Noto Sans Arabic','Arial Hebrew',sans-serif;color:var(--txt);overscroll-behavior:none}
 #root{height:100%;display:flex;flex-direction:column}
 input,select,button{font-family:inherit}
 input[type=date],input[type=time]{color-scheme:dark}
@@ -69,7 +70,7 @@ select option{background:var(--bg2);color:var(--txt)}
 </head>
 <body>
 <div id="root"></div>
-<script>if("serviceWorker"in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script>if("serviceWorker"in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}window.__installPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();window.__installPrompt=e;});</script>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -91,7 +92,7 @@ const LS = {
   get: k=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch{return null;}},
   set: (k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}},
 };
-const K={shifts:"wt-shifts-v5",cfg:"wt-cfg-v5",tpls:"wt-tpls-v2",als:"wt-als-v2",clockin:"wt-clockin-v1",vac:"wt-vac-v1",onboarded:"wt-onboarded-v1",privacy:"wt-privacy-v1",lang:"wt-lang-v1",theme:"wt-theme-v1"};
+const K={shifts:"wt-shifts-v5",cfg:"wt-cfg-v5",tpls:"wt-tpls-v2",als:"wt-als-v2",clockin:"wt-clockin-v1",vac:"wt-vac-v1",onboarded:"wt-onboarded-v1",privacy:"wt-privacy-v1",lang:"wt-lang-v1",theme:"wt-theme-v1",installDismissed:"wt-install-dismissed-v1"};
 const LangCtx=React.createContext("he");
 const useT=()=>{const l=React.useContext(LangCtx);return k=>TR[l]?.[k]??TR.he[k]??k;};
 const TR={
@@ -182,6 +183,7 @@ const TR={
     sg_lang:"🌐 שפה",
     sg_theme:"🎨 ערכת נושא",sg_theme_dark:"🌙 חשוך",sg_theme_light:"☀️ בהיר",
     ob_theme_h:"בחר ערכת נושא",
+    pwa_install:"התקן כאפליקציה",pwa_install_btn:"התקן",
     // Shift settings
     sg_shifts:"משמרות",sg_shift_cfg:"הגדרת סוגי משמרות",
     sg_sh_morning:"☀️ בוקר",sg_sh_afternoon:"🌤️ צהריים",sg_sh_night:"🌙 לילה",
@@ -383,6 +385,7 @@ const TR={
     sg_lang:"🌐 Язык",
     sg_theme:"🎨 Тема",sg_theme_dark:"🌙 Тёмная",sg_theme_light:"☀️ Светлая",
     ob_theme_h:"Выберите тему",
+    pwa_install:"Установить приложение",pwa_install_btn:"Установить",
     // Shift settings
     sg_shifts:"Смены",sg_shift_cfg:"Настройка типов смен",
     sg_sh_morning:"☀️ Утро",sg_sh_afternoon:"🌤️ День",sg_sh_night:"🌙 Ночь",
@@ -496,6 +499,122 @@ const TR={
     cal_no_shift:"Смена на этот день не определена",cal_edit:"✏️ Изменить",cal_holiday:"Праздник",cal_paid_hol:"Оплач. праздник",
     // App
     app_loading:"Shaati загружается...",app_privacy_show:"Показать суммы",app_privacy_hide:"Скрыть суммы",
+    pwa_install:"Установить приложение",pwa_install_btn:"Установить",
+  },
+  ar:{
+    locale:"ar-IL",
+    // Onboarding
+    ob_s0t:"👋 مرحباً بك في شعاتي",ob_s0s:"تتبع ورديات العمل والرواتب",
+    ob_s1t:"💰 الراتب الأساسي",ob_s1s:"أدخل الراتب الأساسي في الساعة",
+    ob_s2_shifts_t:"⏰ إعداد الورديات",ob_s2_shifts_s:"متى تبدأ كل وردية وما هي نسبة الراتب",
+    ob_s2t:"🧾 الضرائب والتأمين الوطني",ob_s2s:"احسب استقطاعاتك بدقة",
+    ob_s3t:"🏦 معاش تقاعدي وصندوق تعليم",ob_s3s:"المخصصات المتراكمة لصالحك",
+    ob_s4t:"🧾 بدلات الراتب",ob_s4s:"هل تحصل على بدلات ثابتة؟ طعام، مواصلات، أخرى",
+    ob_s5t:"✅ كل شيء جاهز!",ob_s5s:"تم حفظ الإعدادات — يمكنك تغييرها في أي وقت من 'الإعدادات'",
+    ob_lang:"اللغة",ob_next:"التالي →",ob_back:"→ رجوع",ob_done:"ابدأ!",
+    ob_theme_h:"اختر السمة",
+    ob_base_rate_hint:"الحد الأدنى للأجر 2025: ₪34.32 | 2026: ₪35.40",
+    ob_salary_est:"الراتب المقدر لشهر 190 ساعة",
+    ob_ni_calc:"احسب استقطاعاتي",ob_ni_result:"نتيجة التأمين الوطني",
+    ob_tax:"ضريبة الدخل",ob_ni:"تأمين وطني",ob_health:"تأمين صحي",
+    ob_pension_e:"معاش (موظف)",ob_keren_e:"صندوق تعليم (موظف)",
+    ob_gross:"إجمالي الراتب",ob_net:"صافي الراتب",ob_ded:"إجمالي الاستقطاعات",
+    ob_skip:"تخطي",
+    // Settings
+    sg_title:"⚙️ الإعدادات",sg_pay:"راتب",sg_ded:"استقطاعات",sg_allow:"بدلات",sg_tpl:"قوالب",sg_vac:"إجازة",sg_shifts:"ورديات",
+    sg_pay_s:"الراتب والساعات",sg_base_rate:"الراتب الأساسي في الساعة (₪)",
+    sg_min_wage:"الحد الأدنى 2025: ₪34.32 | 2026: ₪35.40",sg_min_lbl:"✓ الحد الأدنى",
+    sg_ot_thresh:"ساعات عمل يومية",sg_ot_125:"ساعات 125% قبل 150%",
+    sg_wot:"الحد الأسبوعي للعمل الإضافي",sg_tax_rate:"معدل ضريبة الدخل (%)",
+    sg_ni_rate:"التأمين الوطني (%)",sg_health_rate:"التأمين الصحي (%)",
+    sg_enable_ded:"تفعيل الاستقطاعات",sg_monthly_goal:"هدف شهري (₪)",
+    sg_pen_e:"معاش (موظف %)",sg_pen_er:"معاش (صاحب عمل %)",
+    sg_ker_e:"صندوق تعليم (موظف %)",sg_ker_er:"صندوق تعليم (صاحب عمل %)",
+    sg_saved:"✓ تم حفظ الإعدادات!",sg_save:"حفظ الإعدادات",
+    sg_al_name:"اسم البدل",sg_al_type:"النوع",sg_al_amt:"المبلغ (₪)",
+    sg_al_per_shift:"لكل وردية",sg_al_monthly:"شهرياً",sg_al_add:"+ إضافة بدل",
+    sg_al_err_n:"يرجى إدخال اسم",sg_al_err_a:"مبلغ غير صحيح",sg_al_active:"نشط",
+    sg_tpl_name:"اسم القالب",sg_tpl_add:"+ إضافة قالب",sg_tpl_saved:"✓ تم حفظ القوالب",
+    sg_tpl_save:"حفظ القوالب",sg_tpl_err_n:"يرجى إدخال اسم",sg_tpl_err_h:"ساعات غير صحيحة",
+    sg_privacy:"وضع الخصوصية",sg_privacy_h:"إخفاء جميع المبالغ في كل الشاشات",
+    sg_reset:"🔄 إعادة تشغيل معالج الإعداد",sg_reset_c:"إعادة تعيين المعالج والإعداد من جديد؟",
+    sg_lang:"🌐 اللغة",sg_theme:"🎨 السمة",sg_theme_dark:"🌙 داكن",sg_theme_light:"☀️ فاتح",
+    sg_shift_cfg:"إعداد أنواع الورديات",sg_sh_enabled:"مفعّل",sg_sh_start:"وقت البداية",
+    sg_sh_pct:"نسبة الراتب (%)",sg_sh_unknown:"لا أعرف — حدد وفق الحد القانوني",
+    sg_sh_known:"يدوي",sg_sh_legal:"الحد القانوني",
+    sg_sh_times_hint:"أوقات الورديات تحدد حساب الراتب التلقائي",
+    sg_sh_pct_hint:"100% = الراتب الأساسي العادي",
+    // Dashboard
+    d_cur_month:"● الشهر الحالي",d_no_shifts:"لا توجد ورديات هذا الشهر",d_add_hint:"أضف وردية في علامة ➕",
+    d_taxable:"إجمالي الدخل الخاضع للضريبة",d_salary:"راتب",d_allowances:"بدلات",
+    d_deductions:"استقطاعات",d_pct_income:"% من الدخل",d_net:"صافي الراتب",
+    d_goal_net:"هدف شهري (صافي)",d_of:"من",d_neto:"صافي",
+    d_est_salary:"الراتب التقديري للشهر",d_goal:"هدف شهري",
+    hr:"س",d_hours:"ساعات",d_shifts:"ورديات",d_hol_days:"أيام عطل",d_paid_hol:"عطلة مدفوعة",
+    d_monthly_allow:"🧾 بدلات الشهر",d_monthly:"(شهري)",d_total_allow:"إجمالي البدلات",
+    d_total_ded:"إجمالي الاستقطاعات",d_ceiling:"سقف ✓",
+    d_employer:"مخصصات صاحب العمل",d_employer_hint:"تُضاف إلى مخصصات الموظف في المدخرات",
+    d_pension_emp:"معاش (صاحب عمل)",d_keren_emp:"صندوق تعليم (صاحب عمل)",
+    d_worker:"موظف",d_total:"الإجمالي",d_bl_tax:"ت.و/ضريبة على",d_pen_ker:"معاش/صندوق على",
+    d_reg_h:"ساعات عادية",d_aft_h:"ساعات ظهيرة",d_ngt_h:"ساعات ليلية",d_ot_h:"ساعات إضافية",
+    // OT messages
+    ot_d0t:"ساعات إضافية يومية!",ot_d0s:"أنت تعمل بجد اليوم 💪",
+    ot_d1t:"تجاوزت الحد اليومي!",ot_d1s:"كل ساعة تساوي أكثر الآن ⚡",
+    ot_d2t:"ساعات إضافية يومية!",ot_d2s:"كل ساعة تستحق أكثر الآن 🎉",
+    ot_w0t:"تجاوزت 42 ساعة أسبوعية!",ot_w0s:"150% على الساعات الإضافية ⚡",
+    ot_w1t:"ساعات إضافية أسبوعية!",ot_w1s:"أنت تعمل كالآلة 🏆",
+    ot_b0t:"يومي + أسبوعي معاً!",ot_b0s:"محفظتك تشكرك 💸🔥",
+    ot_b1t:"ساعات إضافية مضاعفة!",ot_b1s:"أنت مجتهد جداً اليوم 🔥",
+    ot_daily:"⏱ يومي:",ot_weekly:"📅 أسبوعي:",ot_above_th:"س فوق الحد",
+    // Clock screen
+    cl_shift:"وردية",cl_active:"نشطة",cl_start:"البداية",cl_elapsed:"وقت العمل",
+    cl_net:"صافي الراتب",cl_gross_pfx:"إجمالي",cl_calc:"تفاصيل الحساب",cl_gross_lbl:"إجمالي",cl_net_lbl:"صافي",
+    cl_in:"بدء الوردية",cl_in_hint:"اضغط البداية عند بدء الوردية · سيُسجَّل الوقت تلقائياً",
+    cl_note_ph:"ملاحظة اختيارية (عطلة، ساعات خاصة...)",cl_out:"إنهاء الوردية",
+    cl_short_t:"انتهيت من الوردية بالفعل؟",cl_short_s:"على من تعمل؟",cl_no_rec:"لا أسجل",
+    cl_recording:"جارٍ التسجيل...",cl_saved:"تم حفظ الوردية ✓",
+    st_regular:"صباحية",st_afternoon:"ظهيرة",st_night:"ليلية",
+    // AddShift
+    as_pick_day:"📅 اختر يوماً",as_auto_hol:"مسجل تلقائياً كعطلة ✓",as_change:"تغيير",
+    as_template:"قالب سريع",as_hide:"إخفاء ▲",as_show:"عرض ▼",
+    as_type:"نوع الوردية",as_start:"البداية",as_end:"النهاية",as_note:"ملاحظة",
+    as_add:"إضافة وردية",as_update:"تحديث الوردية",as_saved:"✓ تم الحفظ!",
+    as_delete:"حذف",as_cancel:"إلغاء",as_edit:"تعديل",as_gross:"الإجمالي",as_net:"الصافي",
+    as_hours:"ساعات",as_ot:"إضافي",as_allowance:"بدل",
+    as_custom_mult:"معامل مخصص",as_custom_mult_hint:"اترك فارغاً للحساب التلقائي",
+    // ShiftsList
+    sl_no_shifts:"لا توجد ورديات بعد",sl_add_first:"أضف وردية بالضغط على ➕",
+    sl_cancel:"إلغاء",sl_confirm_del:"حذف هذه الوردية؟",sl_total:"الإجمالي",
+    sl_week:"أسبوع",sl_month:"شهر",
+    // Vacation / sick
+    vac_title:"رصيد الإجازة",vac_cur:"الرصيد الحالي (أيام)",vac_acc:"استحقاق شهري (أيام)",
+    vac_start:"تاريخ البدء",vac_save:"حفظ",vac_saved:"✓ تم الحفظ",
+    vac_sick:"رصيد المرض",vac_days:"أيام",
+    // Savings
+    sv_title:"المدخرات والمعاش",sv_pension:"معاش تقاعدي",sv_keren:"صندوق تعليم",
+    sv_hist_bal:"الرصيد التاريخي",sv_hist_btn:"تحديث الرصيد الحالي",sv_hist_cur:"الرصيد الحالي",
+    sv_pen_hist_f:"رصيد المعاش",sv_ker_hist_f:"رصيد الصندوق",
+    sv_save_hist:"حفظ الرصيد",sv_saved:"✓ تم الحفظ!",
+    sv_base:"أساس",sv_total:"الإجمالي",sv_monthly:"شهري",sv_annual:"سنوي",
+    sv_forecast:"توقعات",sv_external:"مدخرات خارجية",sv_history:"التاريخ",sv_overview:"نظرة عامة",
+    sv_add:"إضافة",sv_edit:"تعديل",sv_name:"الاسم",sv_balance:"الرصيد",sv_return:"عائد %",
+    sv_dep_day:"يوم الإيداع",sv_hint_unk0:"0 = غير معروف",
+    sv_deposit:"إيداع",sv_savings:"مدخرات",sv_investment:"استثمار",
+    sv_icon:"أيقونة",sv_type:"النوع",
+    // Graph
+    gr_monthly:"شهري",gr_weekly:"أسبوعي",gr_no_data:"لا توجد بيانات",
+    gr_net:"صافي",gr_gross:"إجمالي",
+    // Special shift types
+    sp_vacation_lbl:"إجازة",sp_vacation_desc:"يوم إجازة — يخصم من الرصيد",
+    sp_holiday_lbl:"عطلة",sp_holiday_desc:"يوم عطلة رسمية — 100% راتب أساسي بدون نوافل",
+    sp_sick_1_lbl:"مرض اليوم 1",sp_sick_1_desc:"0% — اليوم الأول بدون أجر (وفق القانون)",
+    sp_sick_23_lbl:"مرض اليوم 2-3",sp_sick_23_desc:"50% من الراتب الأساسي، بدون بدلات وساعات إضافية",
+    sp_sick_4p_lbl:"مرض اليوم 4+",sp_sick_4p_desc:"100% من الراتب الأساسي، بدون بدلات وساعات إضافية",
+    // Calendar
+    cal_no_shift:"لم تُحدد وردية لهذا اليوم",cal_edit:"✏️ تعديل",cal_holiday:"عطلة",cal_paid_hol:"عطلة مدفوعة",
+    // App
+    app_loading:"Shaati يُحمَّل...",app_privacy_show:"عرض المبالغ",app_privacy_hide:"إخفاء المبالغ",
+    pwa_install:"تثبيت التطبيق",pwa_install_btn:"تثبيت",
   },
 };
 const DEF_VAC={currentBalance:0,sickBalance:0,accrualPerMonth:1.5,startDate:""};
@@ -983,6 +1102,35 @@ function Toggle({on,onToggle}){
     <button onClick={onToggle} style={{background:on?"#052e16":"var(--divider)",border:`1.5px solid ${on?"#22c55e":"var(--divider2)"}`,color:on?"#22c55e":"var(--txt-d)",borderRadius:"20px",padding:"3px 12px",cursor:"pointer",fontWeight:"700",fontSize:"12px"}}>
       {on?"✓ פעיל":"כבוי"}
     </button>
+  );
+}
+function InstallBanner(){
+  const t=useT();
+  const[show,setShow]=useState(()=>{
+    if(!window.__installPrompt)return false;
+    const d=LS.get(K.installDismissed);
+    return!(d&&Date.now()-d<30*24*60*60*1000);
+  });
+  if(!show)return null;
+  const dismiss=()=>{LS.set(K.installDismissed,Date.now());setShow(false);};
+  const install=async()=>{
+    if(!window.__installPrompt)return;
+    window.__installPrompt.prompt();
+    await window.__installPrompt.userChoice;
+    window.__installPrompt=null;
+    setShow(false);
+  };
+  return(
+    <div style={{position:"fixed",bottom:"68px",left:"50%",transform:"translateX(-50%)",
+      width:"calc(100% - 32px)",maxWidth:"398px",zIndex:1000,
+      background:"var(--card)",border:"1px solid var(--divider)",borderRadius:"14px",
+      padding:"12px 14px",display:"flex",alignItems:"center",gap:"10px",
+      boxShadow:"0 4px 20px #00000044"}}>
+      <span style={{fontSize:"22px"}}>📲</span>
+      <span style={{flex:1,fontSize:"13px",fontWeight:"700",color:"var(--txt)"}}>{t("pwa_install")}</span>
+      <button onClick={install} style={{padding:"7px 14px",borderRadius:"10px",background:"#22c55e",border:"none",color:"#000",fontWeight:"800",fontSize:"13px",cursor:"pointer",whiteSpace:"nowrap"}}>{t("pwa_install_btn")}</button>
+      <button onClick={dismiss} style={{padding:"6px 10px",borderRadius:"10px",background:"var(--divider)",border:"none",color:"var(--txt-d)",fontWeight:"700",fontSize:"15px",cursor:"pointer",lineHeight:1}}>✕</button>
+    </div>
   );
 }
 // Fixed number input — allows free editing, shows 0 only after blur if empty
@@ -3352,7 +3500,7 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
         <div style={{fontSize:"18px",fontWeight:"800",color:"var(--txt-hi)"}}>{uT("sg_title")}</div>
         {onSaveLang&&(
           <div style={{display:"flex",gap:"6px"}}>
-            {[{v:"he",label:"🇮🇱 עברית"},{v:"ru",label:"🇷🇺 RU"}].map(opt=>(
+            {[{v:"he",label:"🇮🇱 עברית"},{v:"ru",label:"🇷🇺 RU"},{v:"ar",label:"🇸🇦 عربي"}].map(opt=>(
               <button key={opt.v} onClick={()=>onSaveLang(opt.v)}
                 style={{padding:"5px 12px",borderRadius:"8px",cursor:"pointer",fontWeight:"700",fontSize:"12px",
                   background:lang===opt.v?"#1e3a5f":"var(--divider)",
@@ -3784,7 +3932,7 @@ function Onboarding({onDone,lang="he",setLang,theme="dark",setTheme}){
               {/* Language selector */}
               {setLang&&(
                 <div style={{display:"flex",gap:"8px",marginBottom:"12px"}}>
-                  {[{v:"he",label:"🇮🇱 עברית"},{v:"ru",label:"🇷🇺 Русский"}].map(opt=>(
+                  {[{v:"he",label:"🇮🇱 עברית"},{v:"ru",label:"🇷🇺 Русский"},{v:"ar",label:"🇸🇦 العربية"}].map(opt=>(
                     <button key={opt.v} onClick={()=>setLang(opt.v)}
                       style={{flex:1,padding:"10px",borderRadius:"12px",cursor:"pointer",fontWeight:"800",fontSize:"14px",
                         background:lang===opt.v?"#052e16":"var(--card)",
@@ -4168,13 +4316,13 @@ function App(){
     const ci=LS.get(K.clockin);if(ci)setClockInState(ci);
     const ob=LS.get(K.onboarded);if(ob)setOnboarded(true);
     const pr=LS.get(K.privacy);if(pr)setPrivacyMode(true);
-    const ln=LS.get(K.lang);if(ln)setLang(ln);
+    const ln=LS.get(K.lang);if(ln){setLang(ln);document.documentElement.lang=ln;}
     const th=LS.get(K.theme);if(th){setTheme(th);document.documentElement.dataset.theme=th;}
     setLoaded(true);
   },[]);
 
   const saveTheme=t=>{setTheme(t);LS.set(K.theme,t);document.documentElement.dataset.theme=t;};
-  const saveLang=l=>{setLang(l);LS.set(K.lang,l);};
+  const saveLang=l=>{setLang(l);LS.set(K.lang,l);document.documentElement.lang=l;};
   const togglePrivacy=()=>{
     const next=!privacyMode;
     setPrivacyMode(next);
@@ -4225,7 +4373,7 @@ function App(){
 
   return(
   <LangCtx.Provider value={lang}>
-    <div dir="rtl" style={{fontFamily:"'Heebo','Arial Hebrew',sans-serif",minWidth:"100%",maxWidth:"430px",margin:"0 auto",height:"100%",display:"flex",flexDirection:"column",background:"var(--bg)",color:"var(--txt)",filter:nightMode?"brightness(0.82) saturate(0.9)":"none",transition:"filter 1s ease",position:"relative"}}>
+    <div dir={lang==="ru"?"ltr":"rtl"} style={{fontFamily:"'Heebo','Noto Sans Arabic','Arial Hebrew',sans-serif",minWidth:"100%",maxWidth:"430px",margin:"0 auto",height:"100%",display:"flex",flexDirection:"column",background:"var(--bg)",color:"var(--txt)",filter:nightMode?"brightness(0.82) saturate(0.9)":"none",transition:"filter 1s ease",position:"relative"}}>
 
       {/* Toast notification */}
       {toast&&(
@@ -4326,6 +4474,7 @@ function App(){
           ))}
         </div>
       </div>
+    <InstallBanner/>
     </div>
   </LangCtx.Provider>
   );
