@@ -1273,6 +1273,32 @@ function InstallBanner(){
     </div>
   );
 }
+function InstallSettingsBtn(){
+  const t=useT();
+  const[prompt,setPrompt]=useState(()=>window.__installPrompt||null);
+  const[done,setDone]=useState(false);
+  useEffect(()=>{
+    const h=e=>{e.preventDefault();window.__installPrompt=e;setPrompt(e);};
+    window.addEventListener('beforeinstallprompt',h);
+    return()=>window.removeEventListener('beforeinstallprompt',h);
+  },[]);
+  if(!prompt||done)return null;
+  const install=async()=>{
+    prompt.prompt();
+    const r=await prompt.userChoice;
+    window.__installPrompt=null;
+    setPrompt(null);
+    if(r.outcome==='accepted')setDone(true);
+  };
+  return(
+    <button onClick={install}
+      style={{width:"100%",padding:"12px",background:"none",border:"1px solid #166534",borderRadius:"12px",
+        color:"#4ade80",fontSize:"13px",fontWeight:"700",cursor:"pointer",marginTop:"10px",
+        display:"flex",alignItems:"center",justifyContent:"center",gap:"8px"}}>
+      📲 {t("pwa_install")}
+    </button>
+  );
+}
 // Fixed number input — allows free editing, shows 0 only after blur if empty
 function NumInput({value,onChange,step=1,min=0,max,style={}}){
   const[local,setLocal]=useState(String(value));
@@ -3960,6 +3986,7 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
               <Toggle on={privacyMode} onToggle={togglePrivacy}/>
             </div>
           </div>
+          <InstallSettingsBtn/>
           <button onClick={()=>{if(window.confirm(uT("sg_reset_c")))onReset();}}
             style={{width:"100%",padding:"12px",background:"none",border:"1px solid #1f2937",borderRadius:"12px",color:"var(--txt-dd)",fontSize:"13px",fontWeight:"700",cursor:"pointer",marginTop:"10px"}}>
             {uT("sg_reset")}
