@@ -184,6 +184,7 @@ const TR={
     sg_theme:"🎨 ערכת נושא",sg_theme_dark:"🌙 חשוך",sg_theme_light:"☀️ בהיר",
     ob_theme_h:"בחר ערכת נושא",
     pwa_install:"התקן כאפליקציה",pwa_install_btn:"התקן",
+    pwa_how:"כיצד להתקין:",pwa_ios:"לחץ על 📤 שתף ← 'הוסף למסך הבית'",pwa_android:"לחץ על ⋮ ← 'הוסף למסך הבית'",pwa_installed:"מותקנת ✓",
     // Shift settings
     sg_shifts:"משמרות",sg_shift_cfg:"הגדרת סוגי משמרות",
     sg_sh_morning:"☀️ בוקר",sg_sh_afternoon:"🌤️ צהריים",sg_sh_night:"🌙 לילה",
@@ -386,6 +387,7 @@ const TR={
     sg_theme:"🎨 Тема",sg_theme_dark:"🌙 Тёмная",sg_theme_light:"☀️ Светлая",
     ob_theme_h:"Выберите тему",
     pwa_install:"Установить приложение",pwa_install_btn:"Установить",
+    pwa_how:"Как установить:",pwa_ios:"Нажмите 📤 → 'На экран Домой'",pwa_android:"Нажмите ⋮ → 'Добавить на главный экран'",pwa_installed:"Установлено ✓",
     // Shift settings
     sg_shifts:"Смены",sg_shift_cfg:"Настройка типов смен",
     sg_sh_morning:"☀️ Утро",sg_sh_afternoon:"🌤️ День",sg_sh_night:"🌙 Ночь",
@@ -500,6 +502,7 @@ const TR={
     // App
     app_loading:"Shaati загружается...",app_privacy_show:"Показать суммы",app_privacy_hide:"Скрыть суммы",
     pwa_install:"Установить приложение",pwa_install_btn:"Установить",
+    pwa_how:"Как установить:",pwa_ios:"Нажмите 📤 → 'На экран Домой'",pwa_android:"Нажмите ⋮ → 'Добавить на главный экран'",pwa_installed:"Установлено ✓",
   },
   ar:{
     locale:"ar-IL",
@@ -615,6 +618,7 @@ const TR={
     // App
     app_loading:"Shaati يُحمَّل...",app_privacy_show:"عرض المبالغ",app_privacy_hide:"إخفاء المبالغ",
     pwa_install:"تثبيت التطبيق",pwa_install_btn:"تثبيت",
+    pwa_how:"كيفية التثبيت:",pwa_ios:"اضغط 📤 مشاركة ← 'إضافة إلى الشاشة الرئيسية'",pwa_android:"اضغط ⋮ ← 'إضافة إلى الشاشة الرئيسية'",pwa_installed:"مثبت ✓",
     // Header
     hdr_active:"وردية نشطة",hdr_month_shifts:"ورديات الشهر",
     hdr_privacy_on:"وضع الخصوصية — المبالغ مخفية",hdr_show:"عرض",
@@ -1276,27 +1280,47 @@ function InstallBanner(){
 function InstallSettingsBtn(){
   const t=useT();
   const[prompt,setPrompt]=useState(()=>window.__installPrompt||null);
-  const[done,setDone]=useState(false);
+  const[installed,setInstalled]=useState(false);
+  const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
   useEffect(()=>{
     const h=e=>{e.preventDefault();window.__installPrompt=e;setPrompt(e);};
     window.addEventListener('beforeinstallprompt',h);
+    window.addEventListener('appinstalled',()=>{window.__installPrompt=null;setPrompt(null);setInstalled(true);});
     return()=>window.removeEventListener('beforeinstallprompt',h);
   },[]);
-  if(!prompt||done)return null;
   const install=async()=>{
+    if(!prompt)return;
     prompt.prompt();
     const r=await prompt.userChoice;
     window.__installPrompt=null;
     setPrompt(null);
-    if(r.outcome==='accepted')setDone(true);
+    if(r.outcome==='accepted')setInstalled(true);
   };
+  // Always show the card
   return(
-    <button onClick={install}
-      style={{width:"100%",padding:"12px",background:"none",border:"1px solid #166534",borderRadius:"12px",
-        color:"#4ade80",fontSize:"13px",fontWeight:"700",cursor:"pointer",marginTop:"10px",
-        display:"flex",alignItems:"center",justifyContent:"center",gap:"8px"}}>
-      📲 {t("pwa_install")}
-    </button>
+    <div style={{marginTop:"10px",padding:"14px",background:"var(--bg2)",border:"1px solid #1f2937",borderRadius:"12px"}}>
+      <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"10px"}}>
+        <span style={{fontSize:"20px"}}>📲</span>
+        <span style={{fontSize:"13px",fontWeight:"700",color:"var(--txt)"}}>{t("pwa_install")}</span>
+      </div>
+      {installed?(
+        <div style={{fontSize:"13px",color:"#4ade80",fontWeight:"700",textAlign:"center"}}>{t("pwa_installed")}</div>
+      ):prompt?(
+        <button onClick={install}
+          style={{width:"100%",padding:"10px",background:"#052e16",border:"1px solid #166534",borderRadius:"10px",
+            color:"#4ade80",fontSize:"13px",fontWeight:"800",cursor:"pointer"}}>
+          {t("pwa_install_btn")}
+        </button>
+      ):(
+        <div style={{fontSize:"12px",color:"var(--txt-d)",lineHeight:"1.6"}}>
+          <div style={{fontWeight:"700",color:"var(--txt-m)",marginBottom:"6px"}}>{t("pwa_how")}</div>
+          {isIOS
+            ?<div>{t("pwa_ios")}</div>
+            :<div>{t("pwa_android")}</div>
+          }
+        </div>
+      )}
+    </div>
   );
 }
 // Fixed number input — allows free editing, shows 0 only after blur if empty
