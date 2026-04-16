@@ -1,5 +1,5 @@
-const CACHE = "shaati-v5";
-const STATIC = ["/manifest.json", "/icon-192.png", "/icon-512.png"];
+const CACHE = "shaati-v6";
+const STATIC = ["./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(STATIC)));
@@ -15,8 +15,8 @@ self.addEventListener("activate", e => {
 
 self.addEventListener("fetch", e => {
   const url = new URL(e.request.url);
-  // index.html — network-first: תמיד מנסה לקבל גרסה עדכנית
-  if (url.pathname === "/" || url.pathname === "/index.html") {
+  // index.html — network-first: always fetch fresh
+  if (url.pathname.endsWith("/") || url.pathname.endsWith("/index.html")) {
     e.respondWith(
       fetch(e.request)
         .then(res => {
@@ -28,6 +28,6 @@ self.addEventListener("fetch", e => {
     );
     return;
   }
-  // שאר הקבצים — cache-first
+  // other files — cache-first
   e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
 });

@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="שעתי"/>
 <meta name="theme-color" content="#090c14"/>
-<link rel="manifest" href="/manifest.json"/>
-<link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png"/>
-<link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png"/>
+<link rel="manifest" href="./manifest.json"/>
+<link rel="apple-touch-icon" sizes="192x192" href="./icon-192.png"/>
+<link rel="apple-touch-icon" sizes="512x512" href="./icon-512.png"/>
 <title>שעתי</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;800;900&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;900&display=swap" rel="stylesheet"/>
@@ -71,7 +71,7 @@ select option{background:var(--bg2);color:var(--txt)}
 </head>
 <body>
 <div id="root"></div>
-<script>if("serviceWorker"in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}window.__installPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();window.__installPrompt=e;});</script>
+<script>if("serviceWorker"in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{});}window.__installPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();window.__installPrompt=e;});</script>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -4064,8 +4064,15 @@ function App(){
   const[addForm,setAddForm]=useState({date:null,start:"",end:"",type:"regular",note:"",templateName:"",allowanceIds:[],customMult:null});
 
   useEffect(()=>{
-    const s=LS.get(K.shifts);if(s)setShifts(s);
-    const c=LS.get(K.cfg);if(c)setCfg({...DEF_CFG,...c});
+    const c=LS.get(K.cfg);const loadedCfg=c?{...DEF_CFG,...c}:DEF_CFG;if(c)setCfg(loadedCfg);
+    const s=LS.get(K.shifts);if(s){
+      // one-time migration: recalculate shift types using dominant hours
+      const migrated=s.map(sh=>{
+        if(!sh.start||!sh.end||isSpecialDay(sh.type)||sh.customMult)return sh;
+        return{...sh,type:dominantShiftType(sh.start,sh.end,loadedCfg)};
+      });
+      setShifts(migrated);LS.set(K.shifts,migrated);
+    }
     const t=LS.get(K.tpls);if(t)setTpls(t);
     const a=LS.get(K.als);if(a){setAls(a);setAddForm(f=>({...f,allowanceIds:a.filter(x=>x.active&&x.type==="per_shift").map(x=>x.id)}));}
     const v=LS.get(K.vac);if(v)setVacCfg({...DEF_VAC,...v});
@@ -4089,7 +4096,7 @@ function App(){
   const saveSh=useCallback(ns=>{setShifts(ns);LS.set(K.shifts,ns);},[]);
   const saveCfg=useCallback(ns=>{setCfg(ns);LS.set(K.cfg,ns);},[]);
   const saveTpls=useCallback(ns=>{setTpls(ns);LS.set(K.tpls,ns);},[]);
-  const saveAls=useCallback(ns=>{setAls(ns);LS.set(K.als,ns);},[]);
+  const saveAls=useCallback(ns=>{setAls(ns);LS.set(K.als,ns);setAddForm(f=>({...f,allowanceIds:ns.filter(a=>a.active&&a.type==="per_shift").map(a=>a.id)}));},[]);
   const saveVacCfg=useCallback(ns=>{setVacCfg(ns);LS.set(K.vac,ns);},[]);
   const addSh=useCallback(s=>{
     // לא לשמור משמרת עבודה קצרה מ-3 דקות (0.05 שעות)
@@ -4146,8 +4153,6 @@ function App(){
         <div style={{padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
         <div style={{fontSize:"17px",fontWeight:"900",color:"var(--txt-hi)"}}>שעתי ⏱</div>
         <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
-          {/* Install button */}
-          <HeaderInstallBtn/>
           {/* Privacy toggle */}
           <button onClick={togglePrivacy} style={{
             background:privacyMode?"#2d1f00":"var(--divider)",
