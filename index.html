@@ -93,7 +93,7 @@ const LS = {
   get: k=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch{return null;}},
   set: (k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}},
 };
-const K={shifts:"wt-shifts-v5",cfg:"wt-cfg-v5",tpls:"wt-tpls-v2",als:"wt-als-v2",clockin:"wt-clockin-v1",vac:"wt-vac-v1",onboarded:"wt-onboarded-v1",privacy:"wt-privacy-v1",lang:"wt-lang-v1",theme:"wt-theme-v1",installDismissed:"wt-install-dismissed-v1",addAlsIds:"wt-addals-v1"};
+const K={shifts:"wt-shifts-v5",cfg:"wt-cfg-v5",tpls:"wt-tpls-v2",als:"wt-als-v2",clockin:"wt-clockin-v1",vac:"wt-vac-v1",onboarded:"wt-onboarded-v1",privacy:"wt-privacy-v1",lang:"wt-lang-v1",theme:"wt-theme-v1",installDismissed:"wt-install-dismissed-v1",addAlsIds:"wt-addals-v1",clockAlsIds:"wt-clockals-v1"};
 const LangCtx=React.createContext("he");
 const useT=()=>{const l=React.useContext(LangCtx);return k=>TR[l]?.[k]??TR.he[k]??k;};
 const TR={
@@ -1771,7 +1771,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
   const uT=useT();
   const lang=React.useContext(LangCtx);
   const[tick,setTick]=useState(0);
-  const[selAls,setSelAls]=useState([]);
+  const[selAls,setSelAls]=useState(()=>clockIn?LS.get(K.clockAlsIds)||[]:[]);
   const[note,setNote]=useState("");
   const[inMsg,setInMsg]=useState(null);
   const[outMsg,setOutMsg]=useState(null);
@@ -1783,6 +1783,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
     const id=setInterval(()=>setTick(t=>t+1),1000);
     return()=>clearInterval(id);
   },[clockIn]);
+  useEffect(()=>{if(clockIn)LS.set(K.clockAlsIds,selAls);},[selAls,clockIn]);
 
   const shiftAls=als.filter(a=>a.active&&a.type==="per_shift");
 
@@ -1797,7 +1798,8 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
       const ci={date:tdy(),time:nowTime(),iso:now.toISOString(),type:detectShiftType(now.getHours(),cfg)};
       setClockIn(ci);
       LS.set(K.clockin,ci);
-      setSelAls(shiftAls.map(a=>a.id));
+      const defAls=shiftAls.map(a=>a.id);
+      setSelAls(defAls);LS.set(K.clockAlsIds,defAls);
     },2200);
   };
 
@@ -1807,7 +1809,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
     const hours=ch(clockIn.time,endTime);
     if(hours<0.05){
       setShortMsg(true);
-      setClockIn(null);LS.set(K.clockin,null);setSelAls([]);setNote("");
+      setClockIn(null);LS.set(K.clockin,null);setSelAls([]);LS.set(K.clockAlsIds,null);setNote("");
       setTimeout(()=>setShortMsg(null),2500);
       return;
     }
@@ -1815,7 +1817,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
     onShiftSaved(shift);
     setClockIn(null);
     LS.set(K.clockin,null);
-    setSelAls([]);setNote("");
+    setSelAls([]);LS.set(K.clockAlsIds,null);setNote("");
     haptic("out");
     playSound("out");
     const msg=randMsg(OUT_MSGS[lang]||OUT_MSGS.he);
