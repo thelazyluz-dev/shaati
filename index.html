@@ -93,7 +93,7 @@ const LS = {
   get: k=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch{return null;}},
   set: (k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}},
 };
-const K={shifts:"wt-shifts-v5",cfg:"wt-cfg-v5",tpls:"wt-tpls-v2",als:"wt-als-v2",clockin:"wt-clockin-v1",vac:"wt-vac-v1",onboarded:"wt-onboarded-v1",privacy:"wt-privacy-v1",lang:"wt-lang-v1",theme:"wt-theme-v1",installDismissed:"wt-install-dismissed-v1"};
+const K={shifts:"wt-shifts-v5",cfg:"wt-cfg-v5",tpls:"wt-tpls-v2",als:"wt-als-v2",clockin:"wt-clockin-v1",vac:"wt-vac-v1",onboarded:"wt-onboarded-v1",privacy:"wt-privacy-v1",lang:"wt-lang-v1",theme:"wt-theme-v1",installDismissed:"wt-install-dismissed-v1",addAlsIds:"wt-addals-v1"};
 const LangCtx=React.createContext("he");
 const useT=()=>{const l=React.useContext(LangCtx);return k=>TR[l]?.[k]??TR.he[k]??k;};
 const TR={
@@ -4060,8 +4060,7 @@ function App(){
   const[lang,setLang]=useState("he");
   const[theme,setTheme]=useState("dark");
   const[selM,setSelM]=useState(()=>tdy().substring(0,7));
-  // addForm lifted to App so it survives tab switches
-  const[addForm,setAddForm]=useState({date:null,start:"",end:"",type:"regular",note:"",templateName:"",allowanceIds:[],customMult:null});
+  const[addForm,setAddForm]=useState(()=>({date:null,start:"",end:"",type:"regular",note:"",templateName:"",allowanceIds:LS.get(K.addAlsIds)||[],customMult:null}));
 
   useEffect(()=>{
     const c=LS.get(K.cfg);const loadedCfg=c?{...DEF_CFG,...c}:DEF_CFG;if(c)setCfg(loadedCfg);
@@ -4074,7 +4073,7 @@ function App(){
       setShifts(migrated);LS.set(K.shifts,migrated);
     }
     const t=LS.get(K.tpls);if(t)setTpls(t);
-    const a=LS.get(K.als);if(a){setAls(a);setAddForm(f=>({...f,allowanceIds:a.filter(x=>x.active&&x.type==="per_shift").map(x=>x.id)}));}
+    const a=LS.get(K.als);if(a){setAls(a);const allIds=a.filter(x=>x.active&&x.type==="per_shift").map(x=>x.id);const saved=LS.get(K.addAlsIds);const ids=saved===null?allIds:allIds.filter(id=>saved.includes(id));setAddForm(f=>({...f,allowanceIds:ids}));}
     const v=LS.get(K.vac);if(v)setVacCfg({...DEF_VAC,...v});
     const ci=LS.get(K.clockin);if(ci)setClockInState(ci);
     const ob=LS.get(K.onboarded);if(ob)setOnboarded(true);
@@ -4084,6 +4083,7 @@ function App(){
     setLoaded(true);
   },[]);
 
+  useEffect(()=>{LS.set(K.addAlsIds,addForm.allowanceIds);},[addForm.allowanceIds]);
   const saveTheme=t=>{setTheme(t);LS.set(K.theme,t);document.documentElement.dataset.theme=t;};
   const saveLang=l=>{setLang(l);LS.set(K.lang,l);document.documentElement.lang=l;};
   const togglePrivacy=()=>{
@@ -4192,10 +4192,13 @@ function App(){
 
       {/* Scrollable content */}
       <div ref={scrollRef} style={{flex:1,overflowY:"auto",overflowX:"hidden",WebkitOverflowScrolling:"touch",minHeight:0}}>
-        <div key={tabKey} className={slideClass(prevTab,tab)} style={{width:"100%"}}>
+        {/* AddShift: always mounted so form state (incl. allowances) never resets on tab switch */}
+        <div style={{display:tab==="add"?"block":"none",width:"100%"}}>
+          <AddShift cfg={cfg} tpls={tpls} als={als} shifts={shifts} form={addForm} onFormChange={setAddForm} onAdd={s=>{addSh(s);showToast(appT("as_saved"));scrollTop();}} onEdit={editSh} onDelete={delSh} privacyMode={privacyMode} onResetForm={()=>{const ids=als.filter(a=>a.active&&a.type==="per_shift").map(a=>a.id);setAddForm({date:null,start:"",end:"",type:"regular",note:"",templateName:"",allowanceIds:ids,customMult:null});}}/>
+        </div>
+        <div key={tabKey} className={slideClass(prevTab,tab)} style={{display:tab==="add"?"none":"block",width:"100%"}}>
           {tab==="clock"    &&<ClockScreen clockIn={clockIn} setClockIn={setClockIn} als={als} cfg={cfg} onShiftSaved={s=>{addSh(s);showToast(appT("as_saved"));}} privacyMode={privacyMode} togglePrivacy={togglePrivacy}/>}
           {tab==="dashboard"&&<Dashboard shifts={shifts} cfg={cfg} als={als} selM={selM} setSelM={setSelM} privacyMode={privacyMode}/>}
-          {tab==="add"      &&<AddShift cfg={cfg} tpls={tpls} als={als} shifts={shifts} form={addForm} onFormChange={setAddForm} onAdd={s=>{addSh(s);showToast(appT("as_saved"));scrollTop();}} onEdit={editSh} onDelete={delSh} privacyMode={privacyMode} onResetForm={()=>setAddForm({date:null,start:"",end:"",type:"regular",note:"",templateName:"",allowanceIds:als.filter(a=>a.active&&a.type==="per_shift").map(a=>a.id),customMult:null})}/>}
           {tab==="shifts"   &&<ShiftsList shifts={shifts} cfg={cfg} als={als} onDelete={delSh} onEdit={editSh} privacyMode={privacyMode}/>}
           {tab==="graph"    &&<Graph shifts={shifts} cfg={cfg} als={als} privacyMode={privacyMode}/>}
           {tab==="settings" &&<Settings cfg={cfg} tpls={tpls} als={als} shifts={shifts} vacCfg={vacCfg} onSaveCfg={saveCfg} onSaveTpls={saveTpls} onSaveAls={saveAls} onSaveVacCfg={saveVacCfg} privacyMode={privacyMode} togglePrivacy={togglePrivacy} onReset={()=>{LS.set(K.onboarded,false);setOnboarded(false);}} lang={lang} onSaveLang={saveLang} theme={theme} onSaveTheme={saveTheme}/>}
