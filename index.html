@@ -2360,18 +2360,23 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
 // ════════════════════════════════════════
 // MANUAL ADD SHIFT
 // ════════════════════════════════════════
-function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode}){
+function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode,form,onFormChange,onResetForm}){
   const uT=useT();
   const sAls=als.filter(a=>a.active&&a.type==="per_shift");
-  const defIds=sAls.map(a=>a.id);
-  const[form,setForm]=useState({date:null,start:"",end:"",type:"regular",note:"",templateName:"",allowanceIds:defIds,customMult:null});
   const[saved,setSaved]=useState(false);const[err,setErr]=useState("");const[showT,setShowT]=useState(true);
   const[editingShift,setEditingShift]=useState(null);
+  const setForm=onFormChange;
   const hours=form.start&&form.end?ch(form.start,form.end):0;
   const prev=hours>0?(isSpecialDay(form.type)?calcSpecialPay(hours,form.type,cfg):cp(hours,form.type,cfg,form.customMult)):null;
   const aTotal=csa(form.allowanceIds,als);
   const togA=(id)=>setForm(f=>({...f,allowanceIds:f.allowanceIds.includes(id)?f.allowanceIds.filter(x=>x!==id):[...f.allowanceIds,id]}));
-  const applyT=(t)=>setForm(f=>({...f,start:t.start,end:t.end,type:t.type,templateName:t.name,customMult:t.customMult||null}));
+  const applyT=(t)=>setForm(f=>{
+    const next={...f,start:t.start,end:t.end,type:t.type,templateName:t.name,customMult:t.customMult||null};
+    // Re-detect dominant shift type from template times (same as manual entry)
+    if(!t.customMult&&!isSpecialDay(t.type)&&t.start&&t.end)
+      next.type=dominantShiftType(t.start,t.end,cfg);
+    return next;
+  });
   // Auto-detect shift type from start/end times when user edits times
   const setTime=(field,val)=>setForm(f=>{
     const next={...f,[field]:val};
@@ -2394,7 +2399,7 @@ function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode}){
     const h=ch(start,end);
     if(!isSpec&&h<0.1){setErr(uT("as_err_hours"));return;}
     setErr("");onAdd({...form,id:Date.now(),start,end});setSaved(true);
-    setForm({date:null,start:"",end:"",type:"regular",note:"",templateName:"",allowanceIds:defIds,customMult:null});
+    onResetForm();
     setTimeout(()=>setSaved(false),2000);
   };
   const hol=form.date?IL_HOLIDAYS[form.date]:null;
@@ -3990,12 +3995,14 @@ function App(){
   const[lang,setLang]=useState("he");
   const[theme,setTheme]=useState("dark");
   const[selM,setSelM]=useState(()=>tdy().substring(0,7));
+  // addForm lifted to App so it survives tab switches
+  const[addForm,setAddForm]=useState({date:null,start:"",end:"",type:"regular",note:"",templateName:"",allowanceIds:[],customMult:null});
 
   useEffect(()=>{
     const s=LS.get(K.shifts);if(s)setShifts(s);
     const c=LS.get(K.cfg);if(c)setCfg({...DEF_CFG,...c});
     const t=LS.get(K.tpls);if(t)setTpls(t);
-    const a=LS.get(K.als);if(a)setAls(a);
+    const a=LS.get(K.als);if(a){setAls(a);setAddForm(f=>({...f,allowanceIds:a.filter(x=>x.active&&x.type==="per_shift").map(x=>x.id)}));}
     const v=LS.get(K.vac);if(v)setVacCfg({...DEF_VAC,...v});
     const ci=LS.get(K.clockin);if(ci)setClockInState(ci);
     const ob=LS.get(K.onboarded);if(ob)setOnboarded(true);
@@ -4116,7 +4123,7 @@ function App(){
         <div key={tabKey} className={slideClass(prevTab,tab)} style={{width:"100%"}}>
           {tab==="clock"    &&<ClockScreen clockIn={clockIn} setClockIn={setClockIn} als={als} cfg={cfg} onShiftSaved={s=>{addSh(s);showToast(appT("as_saved"));}} privacyMode={privacyMode} togglePrivacy={togglePrivacy}/>}
           {tab==="dashboard"&&<Dashboard shifts={shifts} cfg={cfg} als={als} selM={selM} setSelM={setSelM} privacyMode={privacyMode}/>}
-          {tab==="add"      &&<AddShift cfg={cfg} tpls={tpls} als={als} shifts={shifts} onAdd={s=>{addSh(s);showToast(appT("as_saved"));scrollTop();}} onEdit={editSh} onDelete={delSh} privacyMode={privacyMode}/>}
+          {tab==="add"      &&<AddShift cfg={cfg} tpls={tpls} als={als} shifts={shifts} form={addForm} onFormChange={setAddForm} onAdd={s=>{addSh(s);showToast(appT("as_saved"));scrollTop();}} onEdit={editSh} onDelete={delSh} privacyMode={privacyMode} onResetForm={()=>setAddForm({date:null,start:"",end:"",type:"regular",note:"",templateName:"",allowanceIds:als.filter(a=>a.active&&a.type==="per_shift").map(a=>a.id),customMult:null})}/>}
           {tab==="shifts"   &&<ShiftsList shifts={shifts} cfg={cfg} als={als} onDelete={delSh} onEdit={editSh} privacyMode={privacyMode}/>}
           {tab==="graph"    &&<Graph shifts={shifts} cfg={cfg} als={als} privacyMode={privacyMode}/>}
           {tab==="settings" &&<Settings cfg={cfg} tpls={tpls} als={als} shifts={shifts} vacCfg={vacCfg} onSaveCfg={saveCfg} onSaveTpls={saveTpls} onSaveAls={saveAls} onSaveVacCfg={saveVacCfg} privacyMode={privacyMode} togglePrivacy={togglePrivacy} onReset={()=>{LS.set(K.onboarded,false);setOnboarded(false);}} lang={lang} onSaveLang={saveLang} theme={theme} onSaveTheme={saveTheme}/>}
