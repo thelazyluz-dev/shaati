@@ -185,7 +185,7 @@ const TR={
     sg_theme:"🎨 ערכת נושא",sg_theme_dark:"🌙 חשוך",sg_theme_light:"☀️ בהיר",
     ob_theme_h:"בחר ערכת נושא",
     pwa_install:"התקן כאפליקציה",pwa_install_btn:"התקן",
-    pwa_how:"כיצד להתקין:",pwa_ios:"לחץ על 📤 שתף ← 'הוסף למסך הבית'",pwa_android:"לחץ על ⋮ ← 'הוסף למסך הבית'",pwa_installed:"מותקנת ✓",
+    pwa_how:"כיצד להתקין:",pwa_ios:"לחץ על 📤 שתף ← 'הוסף למסך הבית'",pwa_android:"1. סגור ופתח מחדש את Chrome\n2. תפריט ⋮ ← 'התקן אפליקציה'",pwa_installed:"מותקנת ✓",pwa_reload:"רענן דף אחרי פתיחה מחדש",
     // Shift settings
     sg_shifts:"משמרות",sg_shift_cfg:"הגדרת סוגי משמרות",
     sg_sh_morning:"☀️ בוקר",sg_sh_afternoon:"🌤️ צהריים",sg_sh_night:"🌙 לילה",
@@ -1342,11 +1342,11 @@ function InstallSettingsBtn(){
           {t("pwa_install_btn")}
         </button>
       ):(
-        <div style={{fontSize:"12px",color:"var(--txt-d)",lineHeight:"1.6"}}>
-          <div style={{fontWeight:"700",color:"var(--txt-m)",marginBottom:"6px"}}>{t("pwa_how")}</div>
+        <div style={{fontSize:"13px",color:"var(--txt-d)",lineHeight:"1.8",background:"var(--bg)",borderRadius:"10px",padding:"12px"}}>
+          <div style={{fontWeight:"800",color:"var(--txt-m)",marginBottom:"8px"}}>{t("pwa_how")}</div>
           {isIOS
             ?<div>{t("pwa_ios")}</div>
-            :<div>{t("pwa_android")}</div>
+            :<div style={{whiteSpace:"pre-line"}}>{t("pwa_android")}</div>
           }
         </div>
       )}
