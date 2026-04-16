@@ -1746,7 +1746,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
       setTimeout(()=>setShortMsg(null),2500);
       return;
     }
-    const shift={id:Date.now(),date:clockIn.date,start:clockIn.time,end:endTime,type:clockIn.type,allowanceIds:selAls,note,templateName:""};
+    const shift={id:Date.now(),date:clockIn.date,start:clockIn.time,end:endTime,type:dominantShiftType(clockIn.time,endTime,cfg),allowanceIds:selAls,note,templateName:""};
     onShiftSaved(shift);
     setClockIn(null);
     LS.set(K.clockin,null);
