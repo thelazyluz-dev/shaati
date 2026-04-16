@@ -1353,6 +1353,71 @@ function InstallSettingsBtn(){
     </div>
   );
 }
+// Header install button — always visible, triggers native prompt or shows instructions
+function HeaderInstallBtn(){
+  const t=useT();
+  const[prompt,setPrompt]=useState(()=>window.__installPrompt||null);
+  const[installed,setInstalled]=useState(()=>
+    window.matchMedia('(display-mode:standalone)').matches||!!window.navigator.standalone
+  );
+  const[showInfo,setShowInfo]=useState(false);
+  const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+
+  useEffect(()=>{
+    const h=e=>{e.preventDefault();window.__installPrompt=e;setPrompt(e);};
+    window.addEventListener('beforeinstallprompt',h);
+    window.addEventListener('appinstalled',()=>{window.__installPrompt=null;setPrompt(null);setInstalled(true);});
+    return()=>window.removeEventListener('beforeinstallprompt',h);
+  },[]);
+
+  if(installed)return null;
+
+  const install=async()=>{
+    if(prompt){
+      prompt.prompt();
+      const r=await prompt.userChoice;
+      window.__installPrompt=null;setPrompt(null);
+      if(r.outcome==='accepted')setInstalled(true);
+    }else{
+      setShowInfo(v=>!v);
+    }
+  };
+
+  return(
+    <>
+      <button onClick={install} title={t("pwa_install")} style={{
+        background:"#052e16",border:"1px solid #166534",borderRadius:"8px",
+        padding:"3px 10px",fontSize:"16px",cursor:"pointer",lineHeight:1,
+      }}>📲</button>
+      {showInfo&&(
+        <div onClick={()=>setShowInfo(false)} style={{
+          position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:2000,
+          background:"#00000088",display:"flex",alignItems:"center",justifyContent:"center",
+        }}>
+          <div onClick={e=>e.stopPropagation()} style={{
+            background:"var(--card)",border:"1px solid var(--divider)",borderRadius:"18px",
+            padding:"24px",margin:"20px",maxWidth:"340px",width:"100%",
+          }}>
+            <div style={{fontSize:"32px",textAlign:"center",marginBottom:"10px"}}>📲</div>
+            <div style={{fontSize:"16px",fontWeight:"800",color:"var(--txt-hi)",marginBottom:"12px",textAlign:"center"}}>
+              {t("pwa_install")}
+            </div>
+            <div style={{fontSize:"13px",color:"var(--txt)",lineHeight:"1.8",background:"var(--bg2)",borderRadius:"12px",padding:"14px"}}>
+              <div style={{fontWeight:"700",color:"var(--txt-m)",marginBottom:"6px"}}>{t("pwa_how")}</div>
+              {isIOS?<div>{t("pwa_ios")}</div>:<div>{t("pwa_android")}</div>}
+            </div>
+            <button onClick={()=>setShowInfo(false)} style={{
+              width:"100%",marginTop:"14px",padding:"12px",
+              background:"var(--divider)",border:"none",borderRadius:"12px",
+              color:"var(--txt-m)",fontWeight:"700",cursor:"pointer",fontSize:"14px",
+            }}>סגור</button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 // Fixed number input — allows free editing, shows 0 only after blur if empty
 function NumInput({value,onChange,step=1,min=0,max,style={}}){
   const[local,setLocal]=useState(String(value));
@@ -4081,6 +4146,8 @@ function App(){
         <div style={{padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
         <div style={{fontSize:"17px",fontWeight:"900",color:"var(--txt-hi)"}}>שעתי ⏱</div>
         <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
+          {/* Install button */}
+          <HeaderInstallBtn/>
           {/* Privacy toggle */}
           <button onClick={togglePrivacy} style={{
             background:privacyMode?"#2d1f00":"var(--divider)",
