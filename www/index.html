@@ -1317,6 +1317,7 @@ function InstallSettingsBtn(){
     window.addEventListener('appinstalled',()=>{window.__installPrompt=null;setPrompt(null);setInstalled(true);});
     return()=>window.removeEventListener('beforeinstallprompt',h);
   },[]);
+  if(installed)return null;
   const install=async()=>{
     if(!prompt)return;
     prompt.prompt();
@@ -1324,20 +1325,14 @@ function InstallSettingsBtn(){
     window.__installPrompt=null;setPrompt(null);
     if(r.outcome==='accepted')setInstalled(true);
   };
-  if(installed)return(
-    <div style={{marginTop:"10px",padding:"12px",background:"var(--bg2)",border:"1px solid #166534",borderRadius:"12px",textAlign:"center",fontSize:"13px",color:"#4ade80",fontWeight:"700"}}>
-      📲 {t("pwa_installed")}
-    </div>
-  );
   return(
-    <button onClick={prompt?install:undefined}
-      style={{marginTop:"10px",width:"100%",padding:"14px",background:prompt?"#052e16":"var(--bg2)",
-        border:`1px solid ${prompt?"#166534":"#374151"}`,borderRadius:"12px",
-        color:prompt?"#4ade80":"var(--txt-d)",fontSize:"14px",fontWeight:"800",
-        cursor:prompt?"pointer":"default",display:"flex",alignItems:"center",justifyContent:"center",gap:"8px"}}>
-      <span style={{fontSize:"20px"}}>📲</span>
-      <span>{prompt?t("pwa_install_btn"):t("pwa_install")}</span>
-      {!prompt&&<span style={{fontSize:"11px",color:"var(--txt-dd)",fontWeight:"400",marginRight:"4px"}}>— {t("pwa_not_ready")}</span>}
+    <button onClick={install} disabled={!prompt}
+      style={{marginTop:"10px",width:"100%",padding:"14px",background:"#052e16",
+        border:"1px solid #166534",borderRadius:"12px",
+        color:"#4ade80",fontSize:"14px",fontWeight:"800",
+        cursor:prompt?"pointer":"not-allowed",opacity:prompt?1:0.4,
+        display:"flex",alignItems:"center",justifyContent:"center",gap:"8px"}}>
+      📲 {t("pwa_install")}
     </button>
   );
 }
