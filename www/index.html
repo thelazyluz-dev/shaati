@@ -185,7 +185,7 @@ const TR={
     sg_theme:"🎨 ערכת נושא",sg_theme_dark:"🌙 חשוך",sg_theme_light:"☀️ בהיר",
     ob_theme_h:"בחר ערכת נושא",
     pwa_install:"התקן כאפליקציה",pwa_install_btn:"התקן",
-    pwa_how:"כיצד להתקין:",pwa_ios:"לחץ על 📤 שתף ← 'הוסף למסך הבית'",pwa_android:"1. סגור ופתח מחדש את Chrome\n2. תפריט ⋮ ← 'התקן אפליקציה'",pwa_installed:"מותקנת ✓",pwa_reload:"רענן דף אחרי פתיחה מחדש",
+    pwa_how:"כיצד להתקין:",pwa_ios:"לחץ על 📤 שתף ← 'הוסף למסך הבית'",pwa_android:"1. סגור ופתח מחדש את Chrome\n2. תפריט ⋮ ← 'התקן אפליקציה'",pwa_installed:"מותקנת ✓",pwa_not_ready:"סגור ופתח מחדש את Chrome",
     // Shift settings
     sg_shifts:"משמרות",sg_shift_cfg:"הגדרת סוגי משמרות",
     sg_sh_morning:"☀️ בוקר",sg_sh_afternoon:"🌤️ צהריים",sg_sh_night:"🌙 לילה",
@@ -1310,8 +1310,7 @@ function InstallBanner(){
 function InstallSettingsBtn(){
   const t=useT();
   const[prompt,setPrompt]=useState(()=>window.__installPrompt||null);
-  const[installed,setInstalled]=useState(false);
-  const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  const[installed,setInstalled]=useState(()=>window.matchMedia('(display-mode:standalone)').matches||!!window.navigator.standalone);
   useEffect(()=>{
     const h=e=>{e.preventDefault();window.__installPrompt=e;setPrompt(e);};
     window.addEventListener('beforeinstallprompt',h);
@@ -1322,35 +1321,24 @@ function InstallSettingsBtn(){
     if(!prompt)return;
     prompt.prompt();
     const r=await prompt.userChoice;
-    window.__installPrompt=null;
-    setPrompt(null);
+    window.__installPrompt=null;setPrompt(null);
     if(r.outcome==='accepted')setInstalled(true);
   };
-  // Always show the card
-  return(
-    <div style={{marginTop:"10px",padding:"14px",background:"var(--bg2)",border:"1px solid #1f2937",borderRadius:"12px"}}>
-      <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"10px"}}>
-        <span style={{fontSize:"20px"}}>📲</span>
-        <span style={{fontSize:"13px",fontWeight:"700",color:"var(--txt)"}}>{t("pwa_install")}</span>
-      </div>
-      {installed?(
-        <div style={{fontSize:"13px",color:"#4ade80",fontWeight:"700",textAlign:"center"}}>{t("pwa_installed")}</div>
-      ):prompt?(
-        <button onClick={install}
-          style={{width:"100%",padding:"10px",background:"#052e16",border:"1px solid #166534",borderRadius:"10px",
-            color:"#4ade80",fontSize:"13px",fontWeight:"800",cursor:"pointer"}}>
-          {t("pwa_install_btn")}
-        </button>
-      ):(
-        <div style={{fontSize:"13px",color:"var(--txt-d)",lineHeight:"1.8",background:"var(--bg)",borderRadius:"10px",padding:"12px"}}>
-          <div style={{fontWeight:"800",color:"var(--txt-m)",marginBottom:"8px"}}>{t("pwa_how")}</div>
-          {isIOS
-            ?<div>{t("pwa_ios")}</div>
-            :<div style={{whiteSpace:"pre-line"}}>{t("pwa_android")}</div>
-          }
-        </div>
-      )}
+  if(installed)return(
+    <div style={{marginTop:"10px",padding:"12px",background:"var(--bg2)",border:"1px solid #166534",borderRadius:"12px",textAlign:"center",fontSize:"13px",color:"#4ade80",fontWeight:"700"}}>
+      📲 {t("pwa_installed")}
     </div>
+  );
+  return(
+    <button onClick={prompt?install:undefined}
+      style={{marginTop:"10px",width:"100%",padding:"14px",background:prompt?"#052e16":"var(--bg2)",
+        border:`1px solid ${prompt?"#166534":"#374151"}`,borderRadius:"12px",
+        color:prompt?"#4ade80":"var(--txt-d)",fontSize:"14px",fontWeight:"800",
+        cursor:prompt?"pointer":"default",display:"flex",alignItems:"center",justifyContent:"center",gap:"8px"}}>
+      <span style={{fontSize:"20px"}}>📲</span>
+      <span>{prompt?t("pwa_install_btn"):t("pwa_install")}</span>
+      {!prompt&&<span style={{fontSize:"11px",color:"var(--txt-dd)",fontWeight:"400",marginRight:"4px"}}>— {t("pwa_not_ready")}</span>}
+    </button>
   );
 }
 // Header install button — always visible, triggers native prompt or shows instructions
