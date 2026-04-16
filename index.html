@@ -6,11 +6,12 @@
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="שעות עבודה"/>
-<meta name="theme-color" content="var(--bg)"/>
+<meta name="apple-mobile-web-app-title" content="שעתי"/>
+<meta name="theme-color" content="#090c14"/>
 <link rel="manifest" href="/manifest.json"/>
-<link rel="apple-touch-icon" href="/icon-192.png"/>
-<title>שעות עבודה</title>
+<link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png"/>
+<link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png"/>
+<title>שעתי</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;800;900&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;900&display=swap" rel="stylesheet"/>
 <style>
@@ -1063,6 +1064,35 @@ function detectShiftType(hour,cfg){
   if(hour>=mh && hour<ah) return "regular";
   if(hour>=ah && hour<nh) return "afternoon";
   return "night";
+}
+// ── Dominant shift type from a time range ──
+// Returns whichever period (regular/afternoon/night) covers the most minutes
+function dominantShiftType(start,end,cfg){
+  if(!start||!end)return"regular";
+  const mf=cfg?pt(cfg.morningStart||"06:00"):360;
+  const af=cfg?pt(cfg.afternoonStart||"14:00"):840;
+  const nf=cfg?pt(cfg.nightStart||"22:00"):1320;
+  const sf=pt(start), ef0=pt(end);
+  const ef=ef0<=sf?ef0+1440:ef0; // handle overnight
+  const totalMin=ef-sf;
+  if(totalMin<=0)return"regular";
+  // boundaries repeated for next day
+  const bounds=[mf,af,nf,mf+1440,af+1440,nf+1440];
+  const names=["regular","afternoon","night","regular","afternoon","night"];
+  let mins={regular:0,afternoon:0,night:0};
+  // find starting period
+  for(let i=0;i<3;i++){
+    const a=bounds[i], b=bounds[i+1];
+    // overlap of [sf,ef] with [a,b] — but periods wrap, need offset search
+  }
+  // simpler: walk minute by minute in 5-min steps
+  const step=5;
+  for(let m=sf;m<ef;m+=step){
+    const mm=m%1440;
+    const type=mm>=mf&&mm<af?"regular":mm>=af&&mm<nf?"afternoon":"night";
+    mins[type]+=step;
+  }
+  return Object.entries(mins).reduce((a,b)=>b[1]>a[1]?b:a)[0];
 }
 // ── Shift multiplier from config ──
 function getShiftMult(type,cfg){
@@ -2342,6 +2372,13 @@ function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode}){
   const aTotal=csa(form.allowanceIds,als);
   const togA=(id)=>setForm(f=>({...f,allowanceIds:f.allowanceIds.includes(id)?f.allowanceIds.filter(x=>x!==id):[...f.allowanceIds,id]}));
   const applyT=(t)=>setForm(f=>({...f,start:t.start,end:t.end,type:t.type,templateName:t.name,customMult:t.customMult||null}));
+  // Auto-detect shift type from start/end times when user edits times
+  const setTime=(field,val)=>setForm(f=>{
+    const next={...f,[field]:val};
+    if(!isSpecialDay(f.type)&&next.start&&next.end)
+      next.type=dominantShiftType(next.start,next.end,cfg);
+    return next;
+  });
   const selectDate=(ds)=>{
     const hol=IL_HOLIDAYS[ds];
     const autoType=hol?.paid?"holiday":"regular";
@@ -2402,8 +2439,8 @@ function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode}){
 
           {!isSpecialDay(form.type)&&(
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"14px"}}>
-              <Field label={uT("as_start")}><input type="time" value={form.start} onChange={e=>setForm({...form,start:e.target.value,templateName:""})} style={SI}/></Field>
-              <Field label={uT("as_end")}><input type="time" value={form.end} onChange={e=>setForm({...form,end:e.target.value,templateName:""})} style={SI}/></Field>
+              <Field label={uT("as_start")}><input type="time" value={form.start} onChange={e=>setTime("start",e.target.value)} style={SI}/></Field>
+              <Field label={uT("as_end")}><input type="time" value={form.end} onChange={e=>setTime("end",e.target.value)} style={SI}/></Field>
             </div>
           )}
 
@@ -2479,6 +2516,12 @@ function EditModal({shift,cfg,als,onSave,onClose}){
   const sAls=als.filter(a=>a.active&&a.type==="per_shift");
   const aTotal=csa(form.allowanceIds||[],als);
   const togA=(id)=>setForm(f=>({...f,allowanceIds:(f.allowanceIds||[]).includes(id)?(f.allowanceIds||[]).filter(x=>x!==id):[...(f.allowanceIds||[]),id]}));
+  const setTime=(field,val)=>setForm(f=>{
+    const next={...f,[field]:val};
+    if(!isSpecialDay(f.type)&&next.start&&next.end)
+      next.type=dominantShiftType(next.start,next.end,cfg);
+    return next;
+  });
   const save=()=>{
     if(!form.date||!form.start||!form.end){setErr(uT("em_err"));return;}
     if(hours<0.1){setErr(uT("em_err_h"));return;}
@@ -2493,8 +2536,8 @@ function EditModal({shift,cfg,als,onSave,onClose}){
         </div>
         <Field label={uT("em_date")}><input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})} style={SI}/></Field>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
-          <Field label={uT("as_start")}><input type="time" value={form.start} onChange={e=>setForm({...form,start:e.target.value})} style={SI}/></Field>
-          <Field label={uT("as_end")}><input type="time" value={form.end} onChange={e=>setForm({...form,end:e.target.value})} style={SI}/></Field>
+          <Field label={uT("as_start")}><input type="time" value={form.start} onChange={e=>setTime("start",e.target.value)} style={SI}/></Field>
+          <Field label={uT("as_end")}><input type="time" value={form.end} onChange={e=>setTime("end",e.target.value)} style={SI}/></Field>
         </div>
         <Field label={uT("as_shift_type")}>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"8px"}}>
