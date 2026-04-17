@@ -1585,7 +1585,7 @@ function playSound(type){
 // ════════════════════════════════════════
 // LIVE EARNINGS DURING SHIFT
 // ════════════════════════════════════════
-function LiveEarnings({clockIn,cfg,selAls,als,privacyMode}){
+function LiveEarnings({clockIn,cfg,selAls,als,privacyMode,shifts}){
   const uT=useT();
   const[now,setNow]=useState(()=>new Date());
   const[showDetails,setShowDetails]=useState(false);
@@ -1617,7 +1617,11 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode}){
   const diffSec=Math.max(0,Math.floor((now-startDate)/1000));
   const hours=diffSec/3600;
   const nowStr2=`${String(new Date(now).getHours()).padStart(2,"0")}:${String(new Date(now).getMinutes()).padStart(2,"0")}:${String(new Date(now).getSeconds()).padStart(2,"0")}`;
-  const c=clockIn.customMult?cp(hours,clockIn.type,cfg,clockIn.customMult):cpAuto(clockIn.time,nowStr2,cfg);
+  const wkKey=getWeekKey(clockIn.date,clockIn.time);
+  const wkHoursBefore=(shifts||[]).filter(s=>!isSpecialDay(s.type)&&getWeekKey(s.date,s.start)===wkKey).reduce((a,s)=>a+ch(s.start,s.end),0);
+  const wkRemaining=Math.max(0,(cfg.weeklyOTThreshold||42)-wkHoursBefore);
+  const effectiveDailyThresh=Math.min(cfg.overtimeThreshold||8.6,wkRemaining);
+  const c=clockIn.customMult?cp(hours,clockIn.type,cfg,clockIn.customMult,effectiveDailyThresh):cpAuto(clockIn.time,nowStr2,cfg,effectiveDailyThresh);
   const gross=c.gross;
   const baseSalary=c.regPay!==undefined?c.regPay:(c.regH||0)*cfg.baseRate;
   const ded=cfg.enableDeductions?cd(gross,cfg,baseSalary):null;
@@ -1627,7 +1631,7 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode}){
   const sty=ST[curShiftType]||ST.regular;
   const ratePerHour=cfg.baseRate*(clockIn.customMult?clockIn.customMult/100:sty.mult);
 
-  const threshold=cfg.overtimeThreshold||8.6;
+  const threshold=effectiveDailyThresh;
   const ot125Hrs=cfg.overtime125Hours||2;
   const isOT=hours>=threshold;
   const isOT150=hours>=threshold+ot125Hrs;
@@ -1806,7 +1810,7 @@ function ShiftBg({type}){
 // ════════════════════════════════════════
 // CLOCK IN/OUT SCREEN (main screen)
 // ════════════════════════════════════════
-function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
+function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts}){
   const uT=useT();
   const lang=React.useContext(LangCtx);
   const[tick,setTick]=useState(0);
@@ -1954,7 +1958,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode}){
         </div>
       ):(
         <div style={{position:"relative",zIndex:5}}>
-          <LiveEarnings clockIn={clockIn} cfg={cfg} selAls={selAls} als={als} privacyMode={privacyMode}/>
+          <LiveEarnings clockIn={clockIn} cfg={cfg} selAls={selAls} als={als} privacyMode={privacyMode} shifts={shifts}/>
 
           {shiftAls.length>0&&(
             <div style={{display:"flex",flexWrap:"wrap",gap:"6px",marginBottom:"10px"}}>
@@ -2473,7 +2477,10 @@ function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode,form,on
   const[editingShift,setEditingShift]=useState(null);
   const setForm=onFormChange;
   const hours=form.start&&form.end?ch(form.start,form.end):0;
-  const prev=hours>0?(isSpecialDay(form.type)?calcSpecialPay(hours,form.type,cfg):cp(hours,form.type,cfg,form.customMult)):null;
+  const addWkKey=form.date?getWeekKey(form.date,form.start||"00:00"):null;
+  const addWkHours=addWkKey?shifts.filter(s=>!isSpecialDay(s.type)&&getWeekKey(s.date,s.start)===addWkKey).reduce((a,s)=>a+ch(s.start,s.end),0):0;
+  const addWkThresh=Math.min(cfg.overtimeThreshold||8.6,Math.max(0,(cfg.weeklyOTThreshold||42)-addWkHours));
+  const prev=hours>0?(isSpecialDay(form.type)?calcSpecialPay(hours,form.type,cfg):getShiftPay({start:form.start,end:form.end,type:form.type,customMult:form.customMult},cfg,addWkThresh)):null;
   const aTotal=csa(form.allowanceIds,als);
   const togA=(id)=>setForm(f=>({...f,allowanceIds:f.allowanceIds.includes(id)?f.allowanceIds.filter(x=>x!==id):[...f.allowanceIds,id]}));
   const applyT=(t)=>setForm(f=>{
@@ -2511,7 +2518,7 @@ function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode,form,on
   const hol=form.date?IL_HOLIDAYS[form.date]:null;
   return(
     <div style={{paddingBottom:"20px",width:"100%",boxSizing:"border-box"}}>
-      {editingShift&&<EditModal shift={editingShift} cfg={cfg} als={als} onSave={s=>{onEdit(s);setEditingShift(null);}} onClose={()=>setEditingShift(null)}/>}
+      {editingShift&&<EditModal shift={editingShift} cfg={cfg} als={als} shifts={shifts} onSave={s=>{onEdit(s);setEditingShift(null);}} onClose={()=>setEditingShift(null)}/>}
       <div style={{fontSize:"15px",fontWeight:"800",marginBottom:"10px",color:"var(--txt-hi)",padding:"12px 16px 0"}}>{uT("as_pick_day")}</div>
       <ShiftCalendar inline value={form.date} onChange={selectDate} shifts={shifts} cfg={cfg} als={als} onEditShift={s=>setEditingShift(s)} onDeleteShift={id=>onDelete(id)}/>
 
@@ -2617,12 +2624,15 @@ function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode,form,on
 // ════════════════════════════════════════
 // EDIT SHIFT MODAL
 // ════════════════════════════════════════
-function EditModal({shift,cfg,als,onSave,onClose}){
+function EditModal({shift,cfg,als,shifts,onSave,onClose}){
   const uT=useT();
   const[form,setForm]=useState({...shift});
   const[err,setErr]=useState("");
   const hours=form.start&&form.end?ch(form.start,form.end):0;
-  const prev=hours>0?getShiftPay({...form},cfg):null;
+  const editWkKey=getWeekKey(form.date||shift.date,form.start||"00:00");
+  const editWkHours=(shifts||[]).filter(s=>!isSpecialDay(s.type)&&s.id!==shift.id&&getWeekKey(s.date,s.start)===editWkKey).reduce((a,s)=>a+ch(s.start,s.end),0);
+  const editWkThresh=Math.min(cfg.overtimeThreshold||8.6,Math.max(0,(cfg.weeklyOTThreshold||42)-editWkHours));
+  const prev=hours>0?getShiftPay({...form},cfg,editWkThresh):null;
   const prevTotal=prev?(prev.gross+(isSpecialDay(form.type)?0:csa(form.allowanceIds||[],als))):0;
   const sAls=als.filter(a=>a.active&&a.type==="per_shift");
   const aTotal=csa(form.allowanceIds||[],als);
@@ -2700,7 +2710,7 @@ function ShiftsList({shifts,cfg,als,onDelete,onEdit,privacyMode}){
   const months=Object.keys(grp).sort().reverse();
   return(
     <div style={{padding:"16px",paddingBottom:"20px"}}>
-      {editShift&&<EditModal shift={editShift} cfg={cfg} als={als} onSave={s=>{onEdit(s);setEditShift(null);}} onClose={()=>setEditShift(null)}/>}
+      {editShift&&<EditModal shift={editShift} cfg={cfg} als={als} shifts={shifts} onSave={s=>{onEdit(s);setEditShift(null);}} onClose={()=>setEditShift(null)}/>}
       <div style={{fontSize:"18px",fontWeight:"800",marginBottom:"20px",color:"var(--txt-hi)"}}>{uT("sl_title")}</div>
       {months.length===0&&(
         <div style={{textAlign:"center",padding:"60px 20px"}}>
@@ -4238,7 +4248,7 @@ function App(){
           <AddShift cfg={cfg} tpls={tpls} als={als} shifts={shifts} form={addForm} onFormChange={setAddForm} onAdd={s=>{addSh(s);showToast(appT("as_saved"));scrollTop();}} onEdit={editSh} onDelete={delSh} privacyMode={privacyMode} onResetForm={()=>{const ids=als.filter(a=>a.active&&a.type==="per_shift").map(a=>a.id);setAddForm({date:null,start:"",end:"",type:"regular",note:"",templateName:"",allowanceIds:ids,customMult:null});}}/>
         </div>
         <div key={tabKey} className={slideClass(prevTab,tab)} style={{display:tab==="add"?"none":"block",width:"100%"}}>
-          {tab==="clock"    &&<ClockScreen clockIn={clockIn} setClockIn={setClockIn} als={als} cfg={cfg} onShiftSaved={s=>{addSh(s);showToast(appT("as_saved"));}} privacyMode={privacyMode} togglePrivacy={togglePrivacy}/>}
+          {tab==="clock"    &&<ClockScreen clockIn={clockIn} setClockIn={setClockIn} als={als} cfg={cfg} shifts={shifts} onShiftSaved={s=>{addSh(s);showToast(appT("as_saved"));}} privacyMode={privacyMode} togglePrivacy={togglePrivacy}/>}
           {tab==="dashboard"&&<Dashboard shifts={shifts} cfg={cfg} als={als} selM={selM} setSelM={setSelM} privacyMode={privacyMode}/>}
           {tab==="shifts"   &&<ShiftsList shifts={shifts} cfg={cfg} als={als} onDelete={delSh} onEdit={editSh} privacyMode={privacyMode}/>}
           {tab==="graph"    &&<Graph shifts={shifts} cfg={cfg} als={als} privacyMode={privacyMode}/>}
