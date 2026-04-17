@@ -2817,7 +2817,8 @@ function Graph({shifts,cfg,als,privacyMode,manualMonths,onSaveManual}){
 
   const withData=months.filter(m=>m.count>0||m.isManual);
   const maxNet=Math.max(...months.map(m=>m.net),1);
-  const avgNet=withData.length?withData.reduce((s,m)=>s+m.net,0)/withData.length:0;
+  const avgData=withData.filter(m=>viewYear<curYear||m.i<curMonth);
+  const avgNet=(avgData.length?avgData:withData).reduce((s,m)=>s+m.net,0)/Math.max(1,avgData.length||withData.length);
   const peakIdx=months.reduce((a,b)=>a.net>b.net?a:b).i;
   const lowIdx=withData.length?withData.reduce((a,b)=>a.net<b.net?a:b).i:-1;
   const totalYear=withData.reduce((s,m)=>s+m.net,0);
