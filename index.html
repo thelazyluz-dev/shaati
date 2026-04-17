@@ -2910,7 +2910,7 @@ function Graph({shifts,cfg,als,privacyMode,manualMonths,onSaveManual}){
                 }}>
                 <div style={{
                   width:"100%",height:`${barH}px`,
-                  background:isEditing?"#a5b4fc":isSel?"#4ade80":barColor,
+                  background:isEditing?"#4ade80":isSel?"#4ade80":barColor,
                   borderRadius:"4px 4px 0 0",
                   border:isEditing?"2px solid #4ade80":isSel?"2px solid #fff":"2px solid transparent",
                   transition:"all 0.35s cubic-bezier(0.34,1.56,0.64,1)",
@@ -2938,7 +2938,7 @@ function Graph({shifts,cfg,als,privacyMode,manualMonths,onSaveManual}){
               placeholder={uT("gr_manual_add")+"..."}
               style={{flex:1,background:"var(--bg2)",border:"1px solid #818cf8",borderRadius:"8px",padding:"8px 10px",color:"var(--txt)",fontSize:"14px",outline:"none"}}/>
             <button onClick={()=>{const v=parseFloat(manualInput);if(v>0){onSaveManual(editingManual,v);setEditingManual(null);}}}
-              style={{padding:"8px 14px",background:"#4c1d95",border:"none",borderRadius:"8px",color:"#a5b4fc",fontWeight:"800",cursor:"pointer",fontSize:"14px"}}>✓</button>
+              style={{padding:"8px 14px",background:"#166534",border:"none",borderRadius:"8px",color:"#4ade80",fontWeight:"800",cursor:"pointer",fontSize:"14px"}}>✓</button>
             <button onClick={()=>setEditingManual(null)}
               style={{padding:"8px 10px",background:"var(--divider)",border:"none",borderRadius:"8px",color:"var(--txt-d)",cursor:"pointer",fontSize:"14px"}}>✕</button>
           </div>
@@ -2961,6 +2961,12 @@ function Graph({shifts,cfg,als,privacyMode,manualMonths,onSaveManual}){
               <button onClick={()=>setSelBar(null)} style={{background:"none",border:"none",color:"var(--txt-dd)",cursor:"pointer",fontSize:"16px"}}>✕</button>
             </div>
           </div>
+          {selData.isManual?(
+            <div style={{textAlign:"center",padding:"8px 0"}}>
+              <div style={{fontSize:"11px",color:"#86efac99",marginBottom:"6px"}}>{uT("gr_net")}</div>
+              <div style={{fontSize:"34px",fontWeight:"900",color:"#4ade80",letterSpacing:"-1px"}}>{fM(selData.net)}</div>
+            </div>
+          ):(
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"8px"}}>
             {[
               {l:uT("d_shifts"),v:selData.workCount,c:"var(--txt-m)"},
@@ -2976,6 +2982,7 @@ function Graph({shifts,cfg,als,privacyMode,manualMonths,onSaveManual}){
               </div>
             ))}
           </div>
+          )}
           {/* Mini bar vs avg */}
           <div style={{marginTop:"10px"}}>
             <div style={{fontSize:"10px",color:"var(--txt-dd)",marginBottom:"4px"}}>{uT("gr_vs_avg")}</div>
@@ -2998,9 +3005,7 @@ function Graph({shifts,cfg,als,privacyMode,manualMonths,onSaveManual}){
           style={{...CARD,marginBottom:"6px",cursor:"pointer",border:selBar===m.i?"1px solid #4ade80":"1px solid #1f2937",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
             <div style={{fontSize:"13px",fontWeight:"700",color:"var(--txt)"}}>{m.labelFull}</div>
-            <div style={{fontSize:"11px",color:"var(--txt-d)",marginTop:"2px"}}>
-              {m.isManual?uT("gr_manual_lbl"):`${m.workCount} ${uT("d_shifts")} · ${fH(m.hours)}${uT("hr")}`}
-            </div>
+            {!m.isManual&&<div style={{fontSize:"11px",color:"var(--txt-d)",marginTop:"2px"}}>{m.workCount} {uT("d_shifts")} · {fH(m.hours)}{uT("hr")}</div>}
           </div>
           <div style={{textAlign:"left"}}>
             <div style={{fontSize:"15px",fontWeight:"800",color:m.i===peakIdx?"#4ade80":m.i===lowIdx?"#f87171":"var(--txt)"}}>{fM(m.net)}</div>
