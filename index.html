@@ -2815,6 +2815,8 @@ function Graph({shifts,cfg,als,privacyMode,manualMonths,onSaveManual}){
     return{ym,i,label:MN[i],labelFull:MNF[i],gross,allow,net:count>0?net:(manualEntry?manualEntry.net:0),hours,count,workCount,isManual};
   });
 
+  const curMonth=new Date().getMonth();
+  const curYear=new Date().getFullYear();
   const withData=months.filter(m=>m.count>0||m.isManual);
   const maxNet=Math.max(...months.map(m=>m.net),1);
   const avgData=withData.filter(m=>viewYear<curYear||m.i<curMonth);
@@ -2823,8 +2825,6 @@ function Graph({shifts,cfg,als,privacyMode,manualMonths,onSaveManual}){
   const lowIdx=withData.length?withData.reduce((a,b)=>a.net<b.net?a:b).i:-1;
   const totalYear=withData.reduce((s,m)=>s+m.net,0);
   const totalHours=withData.reduce((s,m)=>s+m.hours,0);
-  const curMonth=new Date().getMonth();
-  const curYear=new Date().getFullYear();
 
   if(withData.length===0){
     return(
