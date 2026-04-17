@@ -299,6 +299,11 @@ const TR={
     cal_no_shift:"אין משמרת מוגדרת ליום זה",cal_edit:"✏️ ערוך",cal_holiday:"חג",cal_paid_hol:"חג בתשלום",
     // App
     app_loading:"שעתי טוען...",app_privacy_show:"הצג סכומים",app_privacy_hide:"הסתר סכומים",
+    // Export
+    ex_btn:"📄",ex_title:"דוח פיצול שעות",ex_print:"🖨️ הדפס / שמור כ-PDF",
+    ex_day:"יום",ex_in:"כניסה",ex_out:"יציאה",ex_total_h:"מח\"כ",ex_reg:"ש.רגיל",
+    ex_vac:"חופש",ex_shift:"משמרת",ex_total:"סה\"כ",
+    ex_work_days:"ימי עבודה",ex_reg_h:"שעות רגיל",ex_ot125:"שעות נוספות 125%",ex_ot150:"שעות נוספות 150%",ex_total_hrs:"סה\"כ שעות",
   },
   ru:{
     ob_skip:"Пропустить →",ob_back:"← Назад",ob_next:"Далее →",ob_start:"Начнём →",ob_enter:"🚀 Войти в приложение",
@@ -504,6 +509,11 @@ const TR={
     app_loading:"Shaati загружается...",app_privacy_show:"Показать суммы",app_privacy_hide:"Скрыть суммы",
     pwa_install:"Установить приложение",pwa_install_btn:"Установить",
     pwa_how:"Как установить:",pwa_ios:"Нажмите 📤 → 'На экран Домой'",pwa_android:"Нажмите ⋮ → 'Добавить на главный экран'",pwa_installed:"Установлено ✓",
+    // Export
+    ex_btn:"📄",ex_title:"Отчёт часов",ex_print:"🖨️ Печать / Сохранить как PDF",
+    ex_day:"день",ex_in:"приход",ex_out:"уход",ex_total_h:"итого ч",ex_reg:"обычные",
+    ex_vac:"отпуск",ex_shift:"смена",ex_total:"итого",
+    ex_work_days:"рабочих дней",ex_reg_h:"обычные часы",ex_ot125:"сверхурочные 125%",ex_ot150:"сверхурочные 150%",ex_total_hrs:"всего часов",
   },
   ar:{
     locale:"ar-IL",
@@ -2698,6 +2708,45 @@ function EditModal({shift,cfg,als,shifts,onSave,onClose}){
   );
 }
 
+function generateMonthExportHTML(ym,monthShifts,cfg,als,wMap,T){
+  const[yr,mo]=ym.split("-");
+  const monthLabel=new Date(+yr,parseInt(mo)-1,1).toLocaleDateString("he-IL",{month:"long",year:"numeric"});
+  const hHM=h=>{const t=Math.round(Math.abs(h)*60);return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0");};
+  const dayNames=["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"];
+  const rows=monthShifts.map(s=>{
+    const dateObj=new Date(s.date+"T12:00:00");
+    const dayName=dayNames[dateObj.getDay()];
+    const dateStr=s.date.split("-").reverse().join("/");
+    const isSpec=isSpecialDay(s.type);
+    const h=ch(s.start,s.end);
+    const c=getShiftPay(s,cfg,wMap[s.id]);
+    let regH=0,ot125H=0,ot150H=0,vacH=0;
+    if(s.type==="vacation"){vacH=h;}
+    else if(s.type==="holiday"){ot150H=h;}
+    else if(isSpec){vacH=h;}
+    else{regH=c.regH||0;ot125H=c.ot125H||0;ot150H=c.ot150H||0;}
+    const shiftLabel=isSpec?(s.type==="vacation"?"חופש":s.type==="holiday"?"חג":"מחלה"):(s.type==="regular"?"בוקר":s.type==="afternoon"?"צהריים":"לילה");
+    return`<tr><td>${dateStr} ${dayName}</td><td>${s.start||""}</td><td>${s.end||""}</td><td>${hHM(h)}</td><td>${regH>0?hHM(regH):""}</td><td>${ot125H>0?hHM(ot125H):""}</td><td>${ot150H>0?hHM(ot150H):""}</td><td></td><td></td><td></td><td>${vacH>0?hHM(vacH):""}</td><td>${shiftLabel}</td></tr>`;
+  }).join("\n");
+  let totH=0,totReg=0,totOT125=0,totOT150=0,totVac=0;
+  monthShifts.forEach(s=>{
+    const h=ch(s.start,s.end);const c=getShiftPay(s,cfg,wMap[s.id]);totH+=h;
+    if(s.type==="vacation"){totVac+=h;}
+    else if(s.type==="holiday"){totOT150+=h;}
+    else if(!isSpecialDay(s.type)){totReg+=c.regH||0;totOT125+=c.ot125H||0;totOT150+=c.ot150H||0;}
+  });
+  const workDays=monthShifts.filter(s=>!isSpecialDay(s.type)).length;
+  return`<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="UTF-8"/><title>${T("ex_title")} — ${monthLabel}</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,'Arial Hebrew',sans-serif;font-size:12px;color:#111;background:#fff;direction:rtl;padding:20px}h1{font-size:16px;font-weight:bold;text-align:center;margin-bottom:4px}h2{font-size:13px;text-align:center;color:#555;margin-bottom:16px}table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:11px}th{background:#d4edda;font-weight:bold;padding:6px 3px;border:1px solid #999;text-align:center}td{padding:5px 3px;border:1px solid #ccc;text-align:center}tr:nth-child(even){background:#f5f5f5}.foot td{font-weight:bold;background:#d4edda;border-top:2px solid #666}.summary{margin-top:12px;border:1px solid #aaa;padding:10px 14px;background:#f9f9f9;font-size:11px}.sr{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #eee}.sr:last-child{border-bottom:none;font-weight:bold}.print-btn{display:block;margin:0 auto 16px;padding:8px 24px;background:#1a7f37;color:#fff;border:none;border-radius:6px;font-size:13px;cursor:pointer;font-family:inherit}@media print{.print-btn{display:none}body{padding:8px}}</style></head><body>
+<button class="print-btn" onclick="window.print()">${T("ex_print")}</button>
+<h1>${T("ex_title")}</h1><h2>${monthLabel}</h2>
+<table><thead><tr><th>${T("ex_day")}</th><th>${T("ex_in")}</th><th>${T("ex_out")}</th><th>${T("ex_total_h")}</th><th>${T("ex_reg")}</th><th>125%</th><th>150%</th><th>175%</th><th>200%</th><th>210%</th><th>${T("ex_vac")}</th><th>${T("ex_shift")}</th></tr></thead>
+<tbody>${rows}
+<tr class="foot"><td colspan="3">${T("ex_total")}</td><td>${hHM(totH)}</td><td>${totReg>0?hHM(totReg):""}</td><td>${totOT125>0?hHM(totOT125):""}</td><td>${totOT150>0?hHM(totOT150):""}</td><td></td><td></td><td></td><td>${totVac>0?hHM(totVac):""}</td><td></td></tr>
+</tbody></table>
+<div class="summary"><div class="sr"><span>${T("ex_work_days")}</span><span>${workDays}</span></div><div class="sr"><span>${T("ex_reg_h")}</span><span>${hHM(totReg)}</span></div><div class="sr"><span>${T("ex_ot125")}</span><span>${hHM(totOT125)}</span></div><div class="sr"><span>${T("ex_ot150")}</span><span>${hHM(totOT150)}</span></div>${totVac>0?`<div class="sr"><span>${T("ex_vac")}</span><span>${hHM(totVac)}</span></div>`:""}<div class="sr"><span>${T("ex_total_hrs")}</span><span>${hHM(totH)}</span></div></div>
+</body></html>`;
+}
+
 // ════════════════════════════════════════
 // SHIFTS LIST
 // ════════════════════════════════════════
@@ -2724,9 +2773,12 @@ function ShiftsList({shifts,cfg,als,onDelete,onEdit,privacyMode}){
           {mi>0&&<div style={{height:"2px",background:"linear-gradient(90deg,#22c55e44,#22c55e,#22c55e44)",borderRadius:"2px",margin:"0 0 20px"}}/>}
           <div style={{background:"linear-gradient(135deg,#052e16,#0a3a1a)",border:"1px solid #166534",borderRadius:"12px",padding:"10px 14px",marginBottom:"12px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <span style={{fontSize:"15px",fontWeight:"900",color:"#4ade80"}}>📅 {mLbl(ym,uT("locale"))}</span>
-            <div style={{textAlign:"left"}}>
-              <div style={{fontSize:"13px",fontWeight:"800",color:"#4ade80"}}>{prv(grp[ym].reduce((acc,s)=>acc+getShiftTotal(s,cfg,als,wMap[s.id]),0)+cma(als),privacyMode)}</div>
-              <div style={{fontSize:"10px",color:"#4ade8066"}}>{grp[ym].length} {uT("d_shifts")}</div>
+            <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+              <button onClick={()=>{const sorted=[...grp[ym]].sort((a,b)=>a.date.localeCompare(b.date));const html=generateMonthExportHTML(ym,sorted,cfg,als,wMap,uT);const w=window.open("","_blank");if(w){w.document.write(html);w.document.close();}}} style={{background:"#0c2a4a",border:"1px solid #3b82f6",color:"#93c5fd",borderRadius:"6px",padding:"3px 8px",cursor:"pointer",fontSize:"13px",fontWeight:"700",lineHeight:1}} title={uT("ex_title")}>{uT("ex_btn")}</button>
+              <div style={{textAlign:"left"}}>
+                <div style={{fontSize:"13px",fontWeight:"800",color:"#4ade80"}}>{prv(grp[ym].reduce((acc,s)=>acc+getShiftTotal(s,cfg,als,wMap[s.id]),0)+cma(als),privacyMode)}</div>
+                <div style={{fontSize:"10px",color:"#4ade8066"}}>{grp[ym].length} {uT("d_shifts")}</div>
+              </div>
             </div>
           </div>
           {[...grp[ym]].sort((a,b)=>b.date.localeCompare(a.date)).map(s=>{
