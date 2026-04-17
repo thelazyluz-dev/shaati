@@ -93,7 +93,7 @@ const LS = {
   get: k=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch{return null;}},
   set: (k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}},
 };
-const K={shifts:"wt-shifts-v5",cfg:"wt-cfg-v5",tpls:"wt-tpls-v2",als:"wt-als-v2",clockin:"wt-clockin-v1",vac:"wt-vac-v1",onboarded:"wt-onboarded-v1",privacy:"wt-privacy-v1",lang:"wt-lang-v1",theme:"wt-theme-v1",installDismissed:"wt-install-dismissed-v1",addAlsIds:"wt-addals-v1",clockAlsIds:"wt-clockals-v1"};
+const K={shifts:"wt-shifts-v5",cfg:"wt-cfg-v5",tpls:"wt-tpls-v2",als:"wt-als-v2",clockin:"wt-clockin-v1",vac:"wt-vac-v1",onboarded:"wt-onboarded-v1",privacy:"wt-privacy-v1",lang:"wt-lang-v1",theme:"wt-theme-v1",installDismissed:"wt-install-dismissed-v1",addAlsIds:"wt-addals-v1",clockAlsIds:"wt-clockals-v1",manualMonths:"wt-manual-months-v1"};
 const LangCtx=React.createContext("he");
 const useT=()=>{const l=React.useContext(LangCtx);return k=>TR[l]?.[k]??TR.he[k]??k;};
 const TR={
@@ -231,7 +231,7 @@ const TR={
     gr_total_year:"סה״כ שנתי נטו",gr_hours_sfx:"שעות",gr_avg_month:"ממוצע חודשי",gr_active_months:"חודשים פעילים",
     gr_peak:"🏆 שיא חודשי",gr_low:"📉 חודש נמוך",gr_vs_avg:"לעומת ממוצע שנתי",
     gr_monthly_dtl:"פירוט חודשי",gr_peak_lbl:"🏆 שיא",gr_low_lbl:"📉 נמוך",
-    gr_gross:"ברוטו",gr_net:"נטו",
+    gr_gross:"ברוטו",gr_net:"נטו",gr_manual_lbl:"ידני",gr_manual_add:"הזן נטו",gr_manual_del:"מחק",gr_manual_edit:"ערוך",
     // Vacation
     vac_days_vac:"🏖️ ימי חופש",vac_used:"נוצלו",vac_accrued:"נצברו",vac_days_sick:"🤒 ימי מחלה",
     vac_settings:"הגדרות יתרה",vac_how:"💡 איך זה עובד?",
@@ -434,7 +434,7 @@ const TR={
     gr_total_year:"Итого годовых нетто",gr_hours_sfx:"часов",gr_avg_month:"Среднемесячный",gr_active_months:"активных месяцев",
     gr_peak:"🏆 Лучший месяц",gr_low:"📉 Худший месяц",gr_vs_avg:"относительно среднегодового",
     gr_monthly_dtl:"Детализация по месяцам",gr_peak_lbl:"🏆 пик",gr_low_lbl:"📉 минимум",
-    gr_gross:"Брутто",gr_net:"Нетто",
+    gr_gross:"Брутто",gr_net:"Нетто",gr_manual_lbl:"Вручную",gr_manual_add:"Ввести",gr_manual_del:"Удалить",gr_manual_edit:"Изменить",
     // Vacation
     vac_days_vac:"🏖️ Дней отпуска",vac_used:"использовано",vac_accrued:"накоплено",vac_days_sick:"🤒 Дней больничного",
     vac_settings:"Настройки баланса",vac_how:"💡 Как это работает?",
@@ -607,7 +607,7 @@ const TR={
     sv_icon:"أيقونة",sv_type:"النوع",
     // Graph
     gr_monthly:"شهري",gr_weekly:"أسبوعي",gr_no_data:"لا توجد بيانات",
-    gr_net:"صافي",gr_gross:"إجمالي",
+    gr_net:"صافي",gr_gross:"إجمالي",gr_manual_lbl:"يدوي",gr_manual_add:"أدخل",gr_manual_del:"احذف",gr_manual_edit:"عدّل",
     // Special shift types
     sp_vacation_lbl:"إجازة",sp_vacation_desc:"يوم إجازة — يخصم من الرصيد",
     sp_holiday_lbl:"عطلة",sp_holiday_desc:"يوم عطلة رسمية — 100% راتب أساسي بدون نوافل",
@@ -2783,10 +2783,12 @@ function ShiftsList({shifts,cfg,als,onDelete,onEdit,privacyMode}){
 // ════════════════════════════════════════
 // ANNUAL GRAPH
 // ════════════════════════════════════════
-function Graph({shifts,cfg,als,privacyMode}){
+function Graph({shifts,cfg,als,privacyMode,manualMonths,onSaveManual}){
   const uT=useT();
   const[selBar,setSelBar]=useState(null);
   const[viewYear,setViewYear]=useState(()=>new Date().getFullYear());
+  const[editingManual,setEditingManual]=useState(null);
+  const[manualInput,setManualInput]=useState("");
   const loc=uT("locale");
   const MN=Array.from({length:12},(_,i)=>new Date(2024,i,1).toLocaleDateString(loc,{month:"short"}));
   const MNF=Array.from({length:12},(_,i)=>new Date(2024,i,1).toLocaleDateString(loc,{month:"long"}));
@@ -2808,10 +2810,12 @@ function Graph({shifts,cfg,als,privacyMode}){
     const total=gross+allow;
     const ded=cfg.enableDeductions&&total>0?cd(total,cfg,baseS):null;
     const net=ded?total-ded.tot:total;
-    return{ym,i,label:MN[i],labelFull:MNF[i],gross,allow,net,hours,count,workCount};
+    const manualEntry=(manualMonths||{})[ym];
+    const isManual=count===0&&!!manualEntry;
+    return{ym,i,label:MN[i],labelFull:MNF[i],gross,allow,net:count>0?net:(manualEntry?manualEntry.net:0),hours,count,workCount,isManual};
   });
 
-  const withData=months.filter(m=>m.count>0);
+  const withData=months.filter(m=>m.count>0||m.isManual);
   const maxNet=Math.max(...months.map(m=>m.net),1);
   const avgNet=withData.length?withData.reduce((s,m)=>s+m.net,0)/withData.length:0;
   const peakIdx=months.reduce((a,b)=>a.net>b.net?a:b).i;
@@ -2843,12 +2847,12 @@ function Graph({shifts,cfg,als,privacyMode}){
     <div style={{padding:"16px",paddingBottom:"20px"}}>
       {/* Year nav */}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"20px"}}>
-        <button onClick={()=>{setViewYear(y=>y-1);setSelBar(null);}} style={{background:"var(--divider)",border:"none",color:"var(--txt-m)",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>‹</button>
+        <button onClick={()=>{setViewYear(y=>y-1);setSelBar(null);setEditingManual(null);}} style={{background:"var(--divider)",border:"none",color:"var(--txt-m)",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>‹</button>
         <div style={{textAlign:"center"}}>
           <div style={{fontSize:"18px",fontWeight:"800",color:"var(--txt-hi)"}}>📈 {viewYear}</div>
           {viewYear===curYear&&<div style={{fontSize:"11px",color:"#22c55e",marginTop:"2px"}}>{uT("gr_cur_year")}</div>}
         </div>
-        <button onClick={()=>{setViewYear(y=>y+1);setSelBar(null);}} style={{background:"var(--divider)",border:"none",color:"var(--txt-m)",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>›</button>
+        <button onClick={()=>{setViewYear(y=>y+1);setSelBar(null);setEditingManual(null);}} style={{background:"var(--divider)",border:"none",color:"var(--txt-m)",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>›</button>
       </div>
 
       <div style={{filter:privacyMode?"blur(10px)":"none",transition:"filter 0.25s ease",userSelect:privacyMode?"none":"auto"}}>
@@ -2891,39 +2895,72 @@ function Graph({shifts,cfg,als,privacyMode}){
         <div style={{display:"flex",alignItems:"flex-end",gap:"3px",height:"156px",position:"relative",zIndex:2}}>
           {months.map((m,i)=>{
             const barH=m.net>0?Math.max(4,Math.round((m.net/maxNet)*140)):4;
-            const isPeak=i===peakIdx&&m.count>0;
-            const isLow=i===lowIdx&&m.count>0;
+            const isPeak=i===peakIdx&&(m.count>0||m.isManual);
+            const isLow=i===lowIdx&&(m.count>0||m.isManual);
             const isCur=viewYear===curYear&&i===curMonth;
             const isSel=selBar===i;
-            const hasData=m.count>0;
-            const barColor=isPeak?"#4ade80":isLow?"#f87171":isCur?"#60a5fa":"#22c55e88";
+            const hasData=m.count>0||m.isManual;
+            const isEditing=editingManual===m.ym;
+            const barColor=m.isManual?"#818cf8":isPeak?"#4ade80":isLow?"#f87171":isCur?"#60a5fa":"#22c55e88";
             return(
-              <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:"3px",cursor:hasData?"pointer":"default"}}
-                onClick={()=>hasData&&setSelBar(selBar===i?null:i)}>
+              <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:"2px",cursor:"pointer"}}
+                onClick={()=>{
+                  if(hasData){setSelBar(selBar===i?null:i);setEditingManual(null);}
+                  else{setEditingManual(isEditing?null:m.ym);setManualInput("");setSelBar(null);}
+                }}>
                 <div style={{
                   width:"100%",height:`${barH}px`,
-                  background:isSel?"#4ade80":barColor,
+                  background:isEditing?"#a5b4fc":isSel?"#4ade80":barColor,
                   borderRadius:"4px 4px 0 0",
-                  border:isSel?"2px solid #fff":"2px solid transparent",
+                  border:isEditing?"2px solid #818cf8":isSel?"2px solid #fff":hasData?"2px solid transparent":"1px dashed #374151",
                   transition:"all 0.35s cubic-bezier(0.34,1.56,0.64,1)",
                   minHeight:"4px",
                   animation:`growBar 0.5s ${i*0.04}s cubic-bezier(0.34,1.56,0.64,1) both`,
-                }}/>
-                <div style={{fontSize:"8px",color:isSel?"#4ade80":isCur?"#60a5fa":hasData?"var(--txt-d)":"var(--divider2)",fontWeight:isSel||isCur?"800":"400"}}>
+                  display:"flex",alignItems:"center",justifyContent:"center",
+                }}>{!hasData&&<span style={{fontSize:"9px",color:"#374151"}}>+</span>}</div>
+                <div style={{fontSize:"8px",color:isEditing?"#a5b4fc":isSel?"#4ade80":isCur?"#60a5fa":hasData?"var(--txt-d)":"var(--divider2)",fontWeight:isSel||isCur?"800":"400"}}>
                   {m.label}
                 </div>
+                {m.isManual&&<div style={{fontSize:"7px",color:"#818cf8",lineHeight:1}}>✏️</div>}
               </div>
             );
           })}
         </div>
       </div>
 
+      {/* Manual month entry panel */}
+      {editingManual&&(
+        <div style={{...CARD,marginBottom:"12px",border:"1px solid #818cf8",background:"#0f0f2a"}}>
+          <div style={{fontSize:"13px",fontWeight:"700",color:"#a5b4fc",marginBottom:"10px"}}>
+            ✏️ {MNF[parseInt(editingManual.split("-")[1])-1]} {editingManual.split("-")[0]} — {uT("gr_manual_lbl")}
+          </div>
+          <div style={{display:"flex",gap:"8px",alignItems:"center"}}>
+            <input type="number" inputMode="decimal" value={manualInput} onChange={e=>setManualInput(e.target.value)}
+              placeholder={uT("gr_manual_add")+"..."}
+              style={{flex:1,background:"var(--bg2)",border:"1px solid #818cf8",borderRadius:"8px",padding:"8px 10px",color:"var(--txt)",fontSize:"14px",outline:"none"}}/>
+            <button onClick={()=>{const v=parseFloat(manualInput);if(v>0){onSaveManual(editingManual,v);setEditingManual(null);}}}
+              style={{padding:"8px 14px",background:"#4c1d95",border:"none",borderRadius:"8px",color:"#a5b4fc",fontWeight:"800",cursor:"pointer",fontSize:"14px"}}>✓</button>
+            <button onClick={()=>setEditingManual(null)}
+              style={{padding:"8px 10px",background:"var(--divider)",border:"none",borderRadius:"8px",color:"var(--txt-d)",cursor:"pointer",fontSize:"14px"}}>✕</button>
+          </div>
+          {(manualMonths||{})[editingManual]&&(
+            <button onClick={()=>{onSaveManual(editingManual,null);setEditingManual(null);}}
+              style={{marginTop:"8px",width:"100%",padding:"7px",background:"none",border:"1px solid #7f1d1d",borderRadius:"8px",color:"#f87171",fontSize:"12px",cursor:"pointer"}}>
+              🗑 {uT("gr_manual_del")}
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Selected month detail */}
       {selData&&(
-        <div style={{...CARD,marginBottom:"12px",background:"#0d1f0a",border:"1px solid #166534"}}>
+        <div style={{...CARD,marginBottom:"12px",background:selData.isManual?"#0d0d1f":"#0d1f0a",border:`1px solid ${selData.isManual?"#4c1d95":"#166534"}`}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}}>
-            <div style={{fontSize:"15px",fontWeight:"800",color:"#4ade80"}}>{selData.labelFull} {viewYear}</div>
-            <button onClick={()=>setSelBar(null)} style={{background:"none",border:"none",color:"var(--txt-dd)",cursor:"pointer",fontSize:"16px"}}>✕</button>
+            <div style={{fontSize:"15px",fontWeight:"800",color:selData.isManual?"#a5b4fc":"#4ade80"}}>{selData.labelFull} {viewYear} {selData.isManual&&<span style={{fontSize:"11px",background:"#4c1d95",padding:"2px 6px",borderRadius:"6px"}}>✏️ {uT("gr_manual_lbl")}</span>}</div>
+            <div style={{display:"flex",gap:"6px",alignItems:"center"}}>
+              {selData.isManual&&<button onClick={()=>{setEditingManual(selData.ym);setManualInput(String(selData.net));setSelBar(null);}} style={{background:"none",border:"1px solid #818cf8",borderRadius:"6px",color:"#a5b4fc",cursor:"pointer",fontSize:"11px",padding:"2px 8px"}}>{uT("gr_manual_edit")}</button>}
+              <button onClick={()=>setSelBar(null)} style={{background:"none",border:"none",color:"var(--txt-dd)",cursor:"pointer",fontSize:"16px"}}>✕</button>
+            </div>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"8px"}}>
             {[
@@ -2957,15 +2994,17 @@ function Graph({shifts,cfg,als,privacyMode}){
 
       {/* Monthly table */}
       <div style={SEC}>{uT("gr_monthly_dtl")}</div>
-      {[...months].filter(m=>m.count>0).reverse().map(m=>(
-        <div key={m.ym} onClick={()=>setSelBar(selBar===m.i?null:m.i)}
-          style={{...CARD,marginBottom:"6px",cursor:"pointer",border:selBar===m.i?"1px solid #4ade80":"1px solid #1f2937",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+      {[...months].filter(m=>m.count>0||m.isManual).reverse().map(m=>(
+        <div key={m.ym} onClick={()=>{setSelBar(selBar===m.i?null:m.i);setEditingManual(null);}}
+          style={{...CARD,marginBottom:"6px",cursor:"pointer",border:selBar===m.i?`1px solid ${m.isManual?"#818cf8":"#4ade80"}`:"1px solid #1f2937",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
             <div style={{fontSize:"13px",fontWeight:"700",color:"var(--txt)"}}>{m.labelFull}</div>
-            <div style={{fontSize:"11px",color:"var(--txt-d)",marginTop:"2px"}}>{m.workCount} {uT("d_shifts")} · {fH(m.hours)}{uT("hr")}</div>
+            <div style={{fontSize:"11px",color:m.isManual?"#818cf8":"var(--txt-d)",marginTop:"2px"}}>
+              {m.isManual?`✏️ ${uT("gr_manual_lbl")}`:`${m.workCount} ${uT("d_shifts")} · ${fH(m.hours)}${uT("hr")}`}
+            </div>
           </div>
           <div style={{textAlign:"left"}}>
-            <div style={{fontSize:"15px",fontWeight:"800",color:m.i===peakIdx?"#4ade80":m.i===lowIdx?"#f87171":"var(--txt)"}}>{fM(m.net)}</div>
+            <div style={{fontSize:"15px",fontWeight:"800",color:m.i===peakIdx?"#4ade80":m.i===lowIdx?"#f87171":m.isManual?"#a5b4fc":"var(--txt)"}}>{fM(m.net)}</div>
             <div style={{fontSize:"10px",color:"var(--divider2)",marginTop:"2px"}}>{m.i===peakIdx?uT("gr_peak_lbl"):m.i===lowIdx?uT("gr_low_lbl"):""}</div>
           </div>
         </div>
@@ -4108,6 +4147,13 @@ function App(){
   const[loaded,setLoaded]=useState(false);
   const[onboarded,setOnboarded]=useState(false);
   const[privacyMode,setPrivacyMode]=useState(false);
+  const[manualMonths,setManualMonths]=useState(()=>LS.get(K.manualMonths)||{});
+  const saveManualMonth=(ym,net)=>{
+    setManualMonths(prev=>{
+      const upd=net==null?Object.fromEntries(Object.entries(prev).filter(([k])=>k!==ym)):{...prev,[ym]:{net}};
+      LS.set(K.manualMonths,upd);return upd;
+    });
+  };
   const[lang,setLang]=useState("he");
   const[theme,setTheme]=useState("dark");
   const[selM,setSelM]=useState(()=>tdy().substring(0,7));
@@ -4251,7 +4297,7 @@ function App(){
           {tab==="clock"    &&<ClockScreen clockIn={clockIn} setClockIn={setClockIn} als={als} cfg={cfg} shifts={shifts} onShiftSaved={s=>{addSh(s);showToast(appT("as_saved"));}} privacyMode={privacyMode} togglePrivacy={togglePrivacy}/>}
           {tab==="dashboard"&&<Dashboard shifts={shifts} cfg={cfg} als={als} selM={selM} setSelM={setSelM} privacyMode={privacyMode}/>}
           {tab==="shifts"   &&<ShiftsList shifts={shifts} cfg={cfg} als={als} onDelete={delSh} onEdit={editSh} privacyMode={privacyMode}/>}
-          {tab==="graph"    &&<Graph shifts={shifts} cfg={cfg} als={als} privacyMode={privacyMode}/>}
+          {tab==="graph"    &&<Graph shifts={shifts} cfg={cfg} als={als} privacyMode={privacyMode} manualMonths={manualMonths} onSaveManual={saveManualMonth}/>}
           {tab==="settings" &&<Settings cfg={cfg} tpls={tpls} als={als} shifts={shifts} vacCfg={vacCfg} onSaveCfg={saveCfg} onSaveTpls={saveTpls} onSaveAls={saveAls} onSaveVacCfg={saveVacCfg} privacyMode={privacyMode} togglePrivacy={togglePrivacy} onReset={()=>{LS.set(K.onboarded,false);setOnboarded(false);}} lang={lang} onSaveLang={saveLang} theme={theme} onSaveTheme={saveTheme}/>}
         </div>
         {/* Watermark — inside scroll, above nav padding */}
