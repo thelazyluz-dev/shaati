@@ -93,7 +93,7 @@ const LS = {
   get: k=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch{return null;}},
   set: (k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}},
 };
-const K={shifts:"wt-shifts-v5",cfg:"wt-cfg-v5",tpls:"wt-tpls-v2",als:"wt-als-v2",clockin:"wt-clockin-v1",vac:"wt-vac-v1",onboarded:"wt-onboarded-v1",privacy:"wt-privacy-v1",lang:"wt-lang-v1",theme:"wt-theme-v1",installDismissed:"wt-install-dismissed-v1",addAlsIds:"wt-addals-v1",clockAlsIds:"wt-clockals-v1",manualMonths:"wt-manual-months-v1"};
+const K={shifts:"wt-shifts-v5",cfg:"wt-cfg-v5",tpls:"wt-tpls-v2",als:"wt-als-v2",clockin:"wt-clockin-v1",vac:"wt-vac-v1",onboarded:"wt-onboarded-v1",privacy:"wt-privacy-v1",lang:"wt-lang-v1",theme:"wt-theme-v1",installDismissed:"wt-install-dismissed-v1",addAlsIds:"wt-addals-v1",clockAlsIds:"wt-clockals-v1",manualMonths:"wt-manual-months-v1",payslips:"wt-payslips-v1"};
 const LangCtx=React.createContext("he");
 const useT=()=>{const l=React.useContext(LangCtx);return k=>TR[l]?.[k]??TR.he[k]??k;};
 const TR={
@@ -304,6 +304,12 @@ const TR={
     ex_day:"יום",ex_in:"כניסה",ex_out:"יציאה",ex_total_h:"מח\"כ",ex_reg:"ש.רגיל",
     ex_vac:"חופש",ex_shift:"משמרת",ex_total:"סה\"כ",
     ex_work_days:"ימי עבודה",ex_reg_h:"שעות רגיל",ex_ot125:"שעות נוספות 125%",ex_ot150:"שעות נוספות 150%",ex_total_hrs:"סה\"כ שעות",
+    // Payslip comparison
+    pc_title:"השוואת תלוש",pc_hint:"הזן את הנתונים מהתלוש החודשי שלך",
+    pc_gross:"ברוטו",pc_ded:"ניכויים",pc_net:"נטו",
+    pc_save:"שמור תלוש",pc_edit:"✏️ ערוך",pc_del:"מחק",pc_saved:"✓ נשמר",
+    pc_col_calc:"מחושב",pc_col_actual:"בתלוש",pc_col_diff:"הפרש",
+    pc_match:"✓ תואם",pc_no_data:"אין נתונים לחודש זה",
   },
   ru:{
     ob_skip:"Пропустить →",ob_back:"← Назад",ob_next:"Далее →",ob_start:"Начнём →",ob_enter:"🚀 Войти в приложение",
@@ -514,6 +520,12 @@ const TR={
     ex_day:"день",ex_in:"приход",ex_out:"уход",ex_total_h:"итого ч",ex_reg:"обычные",
     ex_vac:"отпуск",ex_shift:"смена",ex_total:"итого",
     ex_work_days:"рабочих дней",ex_reg_h:"обычные часы",ex_ot125:"сверхурочные 125%",ex_ot150:"сверхурочные 150%",ex_total_hrs:"всего часов",
+    // Payslip comparison
+    pc_title:"Сравнение расчётного листа",pc_hint:"Введите данные из вашего расчётного листа",
+    pc_gross:"Брутто",pc_ded:"Вычеты",pc_net:"Нетто",
+    pc_save:"Сохранить лист",pc_edit:"✏️ Изменить",pc_del:"Удалить",pc_saved:"✓ Сохранено",
+    pc_col_calc:"расчётное",pc_col_actual:"в листе",pc_col_diff:"разница",
+    pc_match:"✓ совпадает",pc_no_data:"Нет данных за этот месяц",
   },
   ar:{
     locale:"ar-IL",
@@ -2007,9 +2019,100 @@ function LiveClock(){
 }
 
 // ════════════════════════════════════════
+// PAYSLIP COMPARISON
+// ════════════════════════════════════════
+function PayslipComp({ym,appGross,appDed,appNet,hasDed,payslip,onSave,onDelete,privacyMode}){
+  const uT=useT();
+  const[open,setOpen]=useState(false);
+  const[editing,setEditing]=useState(false);
+  const[form,setForm]=useState({gross:"",deductions:"",net:""});
+
+  useEffect(()=>{
+    if(payslip){setForm({gross:String(payslip.gross||""),deductions:String(payslip.deductions||""),net:String(payslip.net||"")});}
+    else{setForm({gross:"",deductions:"",net:""});setEditing(false);}
+  },[ym,payslip]);
+
+  const save=()=>{
+    const g=parseFloat(form.gross)||0,d=parseFloat(form.deductions)||0,n=parseFloat(form.net)||0;
+    if(!g&&!d&&!n)return;
+    onSave({gross:g,deductions:d,net:n});setEditing(false);
+  };
+
+  const showForm=!payslip||editing;
+  const INP={width:"100%",background:"var(--inp-b)",border:"1px solid var(--divider2)",borderRadius:"8px",padding:"9px 11px",color:"var(--txt)",fontSize:"15px",outline:"none"};
+
+  return(
+    <div style={{...CARD,marginBottom:"12px",border:"1px solid #1e3a5f",background:"#070e1a"}}>
+      <button onClick={()=>setOpen(o=>!o)} style={{width:"100%",background:"none",border:"none",color:"var(--txt)",cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",padding:0}}>
+        <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+          <span style={{fontSize:"15px"}}>📋</span>
+          <span style={{fontSize:"13px",fontWeight:"800",color:"#60a5fa"}}>{uT("pc_title")}</span>
+          {payslip&&<span style={{fontSize:"10px",background:"#1e3a5f",color:"#93c5fd",borderRadius:"4px",padding:"1px 6px",fontWeight:"700"}}>{uT("pc_saved")}</span>}
+        </div>
+        <span style={{color:"#3b82f6",fontSize:"13px"}}>{open?"▲":"▼"}</span>
+      </button>
+
+      {open&&(
+        <div style={{marginTop:"14px"}}>
+          {showForm?(
+            <>
+              <div style={{fontSize:"11px",color:"#6b8ab8",marginBottom:"12px"}}>{uT("pc_hint")}</div>
+              {[{k:"gross",l:uT("pc_gross")},{k:"deductions",l:uT("pc_ded")},{k:"net",l:uT("pc_net")}].map(f=>(
+                <div key={f.k} style={{marginBottom:"10px"}}>
+                  <div style={{fontSize:"11px",color:"var(--txt-d)",marginBottom:"4px",fontWeight:"700"}}>{f.l}</div>
+                  <input type="number" value={form[f.k]} onChange={e=>setForm(p=>({...p,[f.k]:e.target.value}))} placeholder="₪" style={INP}/>
+                </div>
+              ))}
+              <div style={{display:"flex",gap:"8px",marginTop:"4px"}}>
+                <button onClick={save} style={{flex:1,background:"#1e3a5f",border:"1px solid #3b82f6",color:"#93c5fd",borderRadius:"9px",padding:"10px",cursor:"pointer",fontSize:"13px",fontWeight:"800"}}>{uT("pc_save")}</button>
+                {editing&&<button onClick={()=>setEditing(false)} style={{background:"var(--divider)",border:"none",color:"var(--txt-m)",borderRadius:"9px",padding:"10px 14px",cursor:"pointer",fontSize:"13px"}}>{uT("sl_cancel")}</button>}
+              </div>
+            </>
+          ):(
+            <>
+              {/* Header row */}
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"4px",marginBottom:"4px",padding:"0 2px"}}>
+                {["",uT("pc_col_calc"),uT("pc_col_actual")].map((h,i)=>(
+                  <div key={i} style={{fontSize:"10px",color:"var(--txt-dd)",fontWeight:"700",textAlign:i===0?"right":"center"}}>{h}</div>
+                ))}
+              </div>
+              {/* Data rows */}
+              {[
+                {l:uT("pc_gross"),app:appGross,actual:payslip.gross||0,isDed:false},
+                ...(hasDed?[{l:uT("pc_ded"),app:appDed,actual:payslip.deductions||0,isDed:true}]:[]),
+                {l:uT("pc_net"),app:appNet,actual:payslip.net||0,isDed:false},
+              ].map((row,i,arr)=>{
+                const diff=row.actual-row.app;
+                const good=row.isDed?diff<=0:diff>=0;
+                const dc=Math.abs(diff)<1?"#9ca3af":good?"#4ade80":"#f87171";
+                const diffLabel=Math.abs(diff)<1?uT("pc_match"):(diff>0?"+":"")+fM(diff);
+                return(
+                  <div key={i} style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"4px",padding:"9px 2px",borderBottom:i<arr.length-1?"1px solid var(--divider)":"none",alignItems:"center"}}>
+                    <div style={{fontSize:"12px",color:"var(--txt-m)",fontWeight:"700"}}>{row.l}</div>
+                    <div style={{fontSize:"13px",fontWeight:"700",color:"var(--txt)",textAlign:"center"}}>{prv(row.app,privacyMode)}</div>
+                    <div style={{textAlign:"center"}}>
+                      <div style={{fontSize:"13px",fontWeight:"700",color:"var(--txt)"}}>{prv(row.actual,privacyMode)}</div>
+                      <div style={{fontSize:"10px",fontWeight:"700",color:dc,marginTop:"1px"}}>{diffLabel}</div>
+                    </div>
+                  </div>
+                );
+              })}
+              <div style={{display:"flex",gap:"8px",marginTop:"12px"}}>
+                <button onClick={()=>setEditing(true)} style={{flex:1,background:"#0c2a4a",border:"1px solid #3b82f6",color:"#93c5fd",borderRadius:"8px",padding:"7px",cursor:"pointer",fontSize:"12px",fontWeight:"700"}}>{uT("pc_edit")}</button>
+                <button onClick={()=>{onDelete();}} style={{background:"#2d0505",border:"none",color:"#f87171",borderRadius:"8px",padding:"7px 12px",cursor:"pointer",fontSize:"12px"}}>{uT("pc_del")}</button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ════════════════════════════════════════
 // DASHBOARD
 // ════════════════════════════════════════
-function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
+function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode,payslips,onSavePayslip}){
   const t=useT();
   const[nowStr,setNowStr]=useState(nowTime());
   const[showNet,setShowNet]=useState(true);
@@ -2256,6 +2359,20 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode}){
           </div>
         ))}
       </div>
+
+      {(ms.length>0||holPay>0)&&(
+        <PayslipComp
+          ym={selM}
+          appGross={dedBase}
+          appDed={ded?ded.tot:0}
+          appNet={ded?net:dedBase}
+          hasDed={!!ded}
+          payslip={(payslips||{})[selM]}
+          onSave={data=>onSavePayslip(selM,data)}
+          onDelete={()=>onSavePayslip(selM,null)}
+          privacyMode={privacyMode}
+        />
+      )}
 
     </div>
   );
@@ -4211,6 +4328,13 @@ function App(){
       LS.set(K.manualMonths,upd);return upd;
     });
   };
+  const[payslips,setPayslips]=useState(()=>LS.get(K.payslips)||{});
+  const savePayslip=(ym,data)=>{
+    setPayslips(prev=>{
+      const upd=data==null?Object.fromEntries(Object.entries(prev).filter(([k])=>k!==ym)):{...prev,[ym]:data};
+      LS.set(K.payslips,upd);return upd;
+    });
+  };
   const[lang,setLang]=useState("he");
   const[theme,setTheme]=useState("dark");
   const[selM,setSelM]=useState(()=>tdy().substring(0,7));
@@ -4352,7 +4476,7 @@ function App(){
         </div>
         <div key={tabKey} className={slideClass(prevTab,tab)} style={{display:tab==="add"?"none":"block",width:"100%"}}>
           {tab==="clock"    &&<ClockScreen clockIn={clockIn} setClockIn={setClockIn} als={als} cfg={cfg} shifts={shifts} onShiftSaved={s=>{addSh(s);showToast(appT("as_saved"));}} privacyMode={privacyMode} togglePrivacy={togglePrivacy}/>}
-          {tab==="dashboard"&&<Dashboard shifts={shifts} cfg={cfg} als={als} selM={selM} setSelM={setSelM} privacyMode={privacyMode}/>}
+          {tab==="dashboard"&&<Dashboard shifts={shifts} cfg={cfg} als={als} selM={selM} setSelM={setSelM} privacyMode={privacyMode} payslips={payslips} onSavePayslip={savePayslip}/>}
           {tab==="shifts"   &&<ShiftsList shifts={shifts} cfg={cfg} als={als} onDelete={delSh} onEdit={editSh} privacyMode={privacyMode}/>}
           {tab==="graph"    &&<Graph shifts={shifts} cfg={cfg} als={als} privacyMode={privacyMode} manualMonths={manualMonths} onSaveManual={saveManualMonth}/>}
           {tab==="settings" &&<Settings cfg={cfg} tpls={tpls} als={als} shifts={shifts} vacCfg={vacCfg} onSaveCfg={saveCfg} onSaveTpls={saveTpls} onSaveAls={saveAls} onSaveVacCfg={saveVacCfg} privacyMode={privacyMode} togglePrivacy={togglePrivacy} onReset={()=>{LS.set(K.onboarded,false);setOnboarded(false);}} lang={lang} onSaveLang={saveLang} theme={theme} onSaveTheme={saveTheme}/>}
