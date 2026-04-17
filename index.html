@@ -137,7 +137,7 @@ const TR={
     ot_daily:"⏱ יומי:",ot_weekly:"📅 שבועי:",ot_above_th:"ש׳ מעל הסף",
     // Clock screen
     cl_shift:"משמרת",cl_active:"פעילה",cl_start:"התחלה",cl_elapsed:"זמן עבודה",
-    cl_net:"שכר נטו",cl_gross_pfx:"ברוטו",cl_calc:"פירוט חישוב",cl_gross_lbl:"ברוטו",cl_net_lbl:"נטו",
+    cl_net:"שכר נטו",cl_gross_pfx:"ברוטו",cl_calc:"פירוט חישוב",cl_gross_lbl:"ברוטו",cl_net_lbl:"נטו",cl_per_min:"נטו/דקה",
     cl_in:"כניסה למשמרת",cl_in_hint:"לחץ כניסה כשמתחיל המשמרת · השעה תירשם אוטומטית",
     cl_note_ph:"הערה אופציונלית (חג, שעות מיוחדות...)",cl_out:"סיום משמרת",
     cl_short_t:"כבר סיימת משמרת??",cl_short_s:"על מי את/ה עובד/ת",cl_no_rec:"לא מתעד",
@@ -340,7 +340,7 @@ const TR={
     ot_daily:"⏱ Дневные:",ot_weekly:"📅 Недельные:",ot_above_th:"ч выше порога",
     // Clock screen
     cl_shift:"Смена",cl_active:"активна",cl_start:"Начало",cl_elapsed:"Время работы",
-    cl_net:"Чистая",cl_gross_pfx:"Брутто",cl_calc:"Детали расчёта",cl_gross_lbl:"Брутто",cl_net_lbl:"Нетто",
+    cl_net:"Чистая",cl_gross_pfx:"Брутто",cl_calc:"Детали расчёта",cl_gross_lbl:"Брутто",cl_net_lbl:"Нетто",cl_per_min:"нетто/мин",
     cl_in:"Начать смену",cl_in_hint:"Нажмите начало · время запишется автоматически",
     cl_note_ph:"Необязательная заметка...",cl_out:"Закончить смену",
     cl_short_t:"Уже закончил смену??",cl_short_s:"Кого ты пытаешься обмануть",cl_no_rec:"Не записываю",
@@ -572,7 +572,7 @@ const TR={
     ot_daily:"⏱ يومي:",ot_weekly:"📅 أسبوعي:",ot_above_th:"س فوق الحد",
     // Clock screen
     cl_shift:"وردية",cl_active:"نشطة",cl_start:"البداية",cl_elapsed:"وقت العمل",
-    cl_net:"صافي الراتب",cl_gross_pfx:"إجمالي",cl_calc:"تفاصيل الحساب",cl_gross_lbl:"إجمالي",cl_net_lbl:"صافي",
+    cl_net:"صافي الراتب",cl_gross_pfx:"إجمالي",cl_calc:"تفاصيل الحساب",cl_gross_lbl:"إجمالي",cl_net_lbl:"صافي",cl_per_min:"صافي/دقيقة",
     cl_in:"بدء الوردية",cl_in_hint:"اضغط البداية عند بدء الوردية · سيُسجَّل الوقت تلقائياً",
     cl_note_ph:"ملاحظة اختيارية (عطلة، ساعات خاصة...)",cl_out:"إنهاء الوردية",
     cl_short_t:"انتهيت من الوردية بالفعل؟",cl_short_s:"على من تعمل؟",cl_no_rec:"لا أسجل",
@@ -1591,6 +1591,7 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode}){
   const[showDetails,setShowDetails]=useState(false);
   const[coins,setCoins]=useState([]);
   const coinRef=useRef(0);
+  const otNotifRef=useRef(null);
 
   useEffect(()=>{
     const id=setInterval(()=>{
@@ -1606,6 +1607,12 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode}){
     return()=>clearInterval(id);
   },[]);
 
+  useEffect(()=>{
+    if('Notification' in window&&Notification.permission==='default'){
+      Notification.requestPermission();
+    }
+  },[]);
+
   const startDate=new Date(clockIn.iso);
   const diffSec=Math.max(0,Math.floor((now-startDate)/1000));
   const hours=diffSec/3600;
@@ -1619,6 +1626,36 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode}){
   const curShiftType=clockIn.customMult?clockIn.type:detectShiftType(new Date(now).getHours());
   const sty=ST[curShiftType]||ST.regular;
   const ratePerHour=cfg.baseRate*(clockIn.customMult?clockIn.customMult/100:sty.mult);
+
+  const threshold=cfg.overtimeThreshold||8.6;
+  const ot125Hrs=cfg.overtime125Hours||2;
+  const isOT=hours>=threshold;
+  const isOT150=hours>=threshold+ot125Hrs;
+  const otMult=isOT150?1.5:isOT?1.25:1;
+  const nowM=new Date(now).getHours()*60+new Date(now).getMinutes();
+  const mfMin=pt(cfg.morningStart||"06:00");
+  const afMin=pt(cfg.afternoonStart||"14:00");
+  const nfMin=pt(cfg.nightStart||"22:00");
+  const curPeriod=nowM>=mfMin&&nowM<afMin?"regular":nowM>=afMin&&nowM<nfMin?"afternoon":"night";
+  const curMult=clockIn.customMult?clockIn.customMult/100:getShiftMult(curPeriod,cfg);
+  const effectivePct=Math.round(curMult*otMult*100);
+  const netRatio=(ded&&gross>0)?net/gross:1;
+  const netRatePerMin=cfg.baseRate*curMult*otMult/60*netRatio;
+
+  useEffect(()=>{
+    const zone=isOT150?"ot150":isOT?"ot125":"none";
+    if(otNotifRef.current===null){otNotifRef.current=zone;return;}
+    if(zone===otNotifRef.current)return;
+    otNotifRef.current=zone;
+    if(!isOT)return;
+    if('Notification' in window&&Notification.permission==='granted'){
+      try{
+        const title=isOT150?uT("ot_d1t"):uT("ot_d0t");
+        const body=`${isOT150?uT("ot_d1s"):uT("ot_d0s")} — ${effectivePct}%`;
+        new Notification(title,{body,icon:'./icon-192.png',tag:'overtime'});
+      }catch(e){}
+    }
+  },[isOT,isOT150]);
 
   const hh=Math.floor(diffSec/3600);
   const mm=Math.floor((diffSec%3600)/60);
@@ -1666,6 +1703,25 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode}){
             </div>
           </div>
         </div>
+
+        {/* Rate info row: current % + net per minute */}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:"8px",padding:"5px 8px",background:"#ffffff08",borderRadius:"8px"}}>
+          <div style={{display:"flex",alignItems:"center",gap:"5px"}}>
+            <span style={{fontSize:"12px"}}>{isOT?"⚡":"💼"}</span>
+            <span style={{fontSize:"13px",fontWeight:"800",color:isOT150?"#f87171":isOT?"#fb923c":sty.color}}>{effectivePct}%</span>
+          </div>
+          <span style={{fontSize:"12px",color:"#86efac",fontWeight:"600",filter:privacyMode?"blur(5px)":"none"}}>{fM(netRatePerMin)}/{uT("cl_per_min")}</span>
+        </div>
+
+        {/* OT banner */}
+        {isOT&&(
+          <div style={{marginTop:"6px",background:isOT150?"linear-gradient(90deg,#450a0a,#7f1d1d)":"linear-gradient(90deg,#431407,#7c2d12)",border:`1px solid ${isOT150?"#ef4444":"#f97316"}`,borderRadius:"8px",padding:"6px 10px",display:"flex",alignItems:"center",gap:"6px",animation:"otGlow 2s ease-in-out infinite"}}>
+            <span style={{fontSize:"14px"}}>{isOT150?"🔥":"⏰"}</span>
+            <span style={{fontSize:"12px",fontWeight:"800",color:isOT150?"#fca5a5":"#fed7aa"}}>{uT(isOT150?"ot_d1t":"ot_d0t")}</span>
+            <span style={{flex:1}}/>
+            <span style={{fontSize:"11px",color:isOT150?"#f87171":"#fb923c"}}>{uT(isOT150?"ot_d1s":"ot_d0s")}</span>
+          </div>
+        )}
 
         {/* Details panel */}
         {showDetails&&(
