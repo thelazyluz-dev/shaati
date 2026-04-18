@@ -59,6 +59,10 @@ select option{background:var(--bg2);color:var(--txt)}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @keyframes buttonSuccess{0%{width:100%}40%{width:52px;border-radius:50%}60%{width:52px;border-radius:50%}100%{width:100%;border-radius:12px}}
 @keyframes slideInNew{from{opacity:0;transform:translateX(-24px) scaleY(0.8)}to{opacity:1;transform:translateX(0) scaleY(1)}}
+@keyframes cometTop{0%{transform:translateX(-120px);opacity:1}22%{opacity:1}25%{transform:translateX(calc(100vw + 120px));opacity:0}25.5%{transform:translateX(-120px)}100%{transform:translateX(-120px);opacity:0}}
+@keyframes cometRight{0%{transform:translateY(-120px);opacity:1}22%{opacity:1}25%{transform:translateY(calc(100vh + 120px));opacity:0}25.5%{transform:translateY(-120px)}100%{transform:translateY(-120px);opacity:0}}
+@keyframes cometBottom{0%{transform:translateX(calc(100vw + 120px));opacity:1}22%{opacity:1}25%{transform:translateX(-120px);opacity:0}25.5%{transform:translateX(calc(100vw + 120px))}100%{transform:translateX(calc(100vw + 120px));opacity:0}}
+@keyframes cometLeft{0%{transform:translateY(calc(100vh + 120px));opacity:1}22%{opacity:1}25%{transform:translateY(-120px);opacity:0}25.5%{transform:translateY(calc(100vh + 120px))}100%{transform:translateY(calc(100vh + 120px));opacity:0}}
 
 .tab-slide-right{animation:slideInRight 0.22s ease-out}
 .tab-slide-left{animation:slideInLeft 0.22s ease-out}
@@ -4517,6 +4521,18 @@ function App(){
         </div>
       </div>
     <InstallBanner/>
+    {clockIn&&(
+      <div style={{position:"fixed",inset:0,zIndex:60,pointerEvents:"none"}}>
+        {/* Top: L→R */}
+        <div style={{position:"absolute",top:0,left:0,width:"120px",height:"3px",background:"linear-gradient(90deg,transparent,#22c55e,#86efac,#22c55e,transparent)",boxShadow:"0 0 10px #22c55e,0 0 20px #22c55e66",animation:"cometTop 3s linear infinite",animationDelay:"0s"}}/>
+        {/* Right: T→B */}
+        <div style={{position:"absolute",top:0,right:0,width:"3px",height:"120px",background:"linear-gradient(180deg,transparent,#22c55e,#86efac,#22c55e,transparent)",boxShadow:"0 0 10px #22c55e,0 0 20px #22c55e66",animation:"cometRight 3s linear infinite",animationDelay:"-2.25s"}}/>
+        {/* Bottom: R→L */}
+        <div style={{position:"absolute",bottom:0,right:0,width:"120px",height:"3px",background:"linear-gradient(270deg,transparent,#22c55e,#86efac,#22c55e,transparent)",boxShadow:"0 0 10px #22c55e,0 0 20px #22c55e66",animation:"cometBottom 3s linear infinite",animationDelay:"-1.5s"}}/>
+        {/* Left: B→T */}
+        <div style={{position:"absolute",bottom:0,left:0,width:"3px",height:"120px",background:"linear-gradient(0deg,transparent,#22c55e,#86efac,#22c55e,transparent)",boxShadow:"0 0 10px #22c55e,0 0 20px #22c55e66",animation:"cometLeft 3s linear infinite",animationDelay:"-0.75s"}}/>
+      </div>
+    )}
     </div>
   </LangCtx.Provider>
   );
