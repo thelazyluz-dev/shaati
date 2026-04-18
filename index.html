@@ -2173,12 +2173,12 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode,payslips,onSavePaysl
   return(
     <div style={{padding:"16px",paddingBottom:"20px"}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"18px"}}>
-        <button onClick={()=>nav(1)} style={{background:"var(--divider)",border:"none",color:"var(--txt-m)",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>‹</button>
+        <button onClick={()=>nav(-1)} style={{background:"var(--divider)",border:"none",color:"var(--txt-m)",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>‹</button>
         <div style={{textAlign:"center"}}>
           <div style={{fontSize:"18px",fontWeight:"800",color:"var(--txt-hi)"}}>{mLbl(selM,t("locale"))}</div>
           {selM===tdy().substring(0,7)&&<div style={{fontSize:"11px",color:"#22c55e",marginTop:"2px"}}>{t("d_cur_month")}</div>}
         </div>
-        <button onClick={()=>nav(-1)} style={{background:"var(--divider)",border:"none",color:"var(--txt-m)",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>›</button>
+        <button onClick={()=>nav(1)} style={{background:"var(--divider)",border:"none",color:"var(--txt-m)",borderRadius:"9px",width:"36px",height:"36px",fontSize:"20px",cursor:"pointer"}}>›</button>
       </div>
 
       {otMsg&&(
