@@ -4292,6 +4292,64 @@ function Onboarding({onDone,lang="he",setLang,theme="dark",setTheme}){
 }
 
 // ════════════════════════════════════════
+// SHIFT NEON BORDER
+// ════════════════════════════════════════
+function ShiftNeonBorder({clockIn,cfg}){
+  const[elapsed,setElapsed]=useState(0);
+  const[dims,setDims]=useState({w:window.innerWidth||390,h:window.innerHeight||800});
+
+  useEffect(()=>{
+    const up=()=>setDims({w:window.innerWidth,h:window.innerHeight});
+    window.addEventListener('resize',up);
+    return()=>window.removeEventListener('resize',up);
+  },[]);
+
+  useEffect(()=>{
+    const tick=()=>setElapsed(ch(clockIn.time,nowTime()));
+    tick();
+    const id=setInterval(tick,60000);
+    return()=>clearInterval(id);
+  },[clockIn.time]);
+
+  const threshold=cfg.overtimeThreshold||8.6;
+  const pct=Math.min(1,elapsed/threshold);
+  const{w,h}=dims;
+  const perim=Math.round(2*(w+h));
+  const trailLen=Math.round(perim*pct);
+  const isOT=elapsed>=threshold;
+  const tc=isOT?"#f97316":"#22c55e";
+  const cc=isOT?"#fdba74":"#86efac";
+
+  return(
+    <svg style={{position:"fixed",inset:0,zIndex:60,pointerEvents:"none"}} width="100%" height="100%">
+      <defs>
+        <filter id="snb-glow" x="-100%" y="-100%" width="300%" height="300%">
+          <feGaussianBlur stdDeviation="3" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      {/* Growing progress trail */}
+      {trailLen>0&&(
+        <rect x="1.5" y="1.5" width={w-3} height={h-3}
+          fill="none" stroke={tc} strokeWidth="2.5" strokeOpacity="0.35"
+          strokeDasharray={`${trailLen} ${perim+100}`}
+          strokeLinecap="round" strokeLinejoin="round"
+        />
+      )}
+      {/* Fast comet */}
+      <rect x="1.5" y="1.5" width={w-3} height={h-3}
+        fill="none" stroke={cc} strokeWidth="3.5"
+        strokeDasharray={`90 ${perim}`}
+        strokeLinecap="round"
+        filter="url(#snb-glow)"
+      >
+        <animate attributeName="stroke-dashoffset" from="0" to={`${-perim}`} dur="2.5s" repeatCount="indefinite"/>
+      </rect>
+    </svg>
+  );
+}
+
+// ════════════════════════════════════════
 // MAIN APP
 // ════════════════════════════════════════
 function App(){
@@ -4521,18 +4579,7 @@ function App(){
         </div>
       </div>
     <InstallBanner/>
-    {clockIn&&(
-      <div style={{position:"fixed",inset:0,zIndex:60,pointerEvents:"none"}}>
-        {/* Top: L→R */}
-        <div style={{position:"absolute",top:0,left:0,width:"120px",height:"3px",background:"linear-gradient(90deg,transparent,#22c55e,#86efac,#22c55e,transparent)",boxShadow:"0 0 10px #22c55e,0 0 20px #22c55e66",animation:"cometTop 3s linear infinite",animationDelay:"0s"}}/>
-        {/* Right: T→B */}
-        <div style={{position:"absolute",top:0,right:0,width:"3px",height:"120px",background:"linear-gradient(180deg,transparent,#22c55e,#86efac,#22c55e,transparent)",boxShadow:"0 0 10px #22c55e,0 0 20px #22c55e66",animation:"cometRight 3s linear infinite",animationDelay:"-2.25s"}}/>
-        {/* Bottom: R→L */}
-        <div style={{position:"absolute",bottom:0,right:0,width:"120px",height:"3px",background:"linear-gradient(270deg,transparent,#22c55e,#86efac,#22c55e,transparent)",boxShadow:"0 0 10px #22c55e,0 0 20px #22c55e66",animation:"cometBottom 3s linear infinite",animationDelay:"-1.5s"}}/>
-        {/* Left: B→T */}
-        <div style={{position:"absolute",bottom:0,left:0,width:"3px",height:"120px",background:"linear-gradient(0deg,transparent,#22c55e,#86efac,#22c55e,transparent)",boxShadow:"0 0 10px #22c55e,0 0 20px #22c55e66",animation:"cometLeft 3s linear infinite",animationDelay:"-0.75s"}}/>
-      </div>
-    )}
+    {clockIn&&<ShiftNeonBorder clockIn={clockIn} cfg={cfg}/>}
     </div>
   </LangCtx.Provider>
   );
