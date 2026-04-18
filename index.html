@@ -2839,7 +2839,7 @@ function generateMonthExportHTML(ym,monthShifts,cfg,als,wMap,T){
     const c=getShiftPay(s,cfg,wMap[s.id]);
     let regH=0,ot125H=0,ot150H=0,vacH=0;
     if(s.type==="vacation"){vacH=h;}
-    else if(s.type==="holiday"){ot150H=h;}
+    else if(s.type==="holiday"){regH=h;}
     else if(isSpec){vacH=h;}
     else{regH=c.regH||0;ot125H=c.ot125H||0;ot150H=c.ot150H||0;}
     const shiftLabel=isSpec?(s.type==="vacation"?"חופש":s.type==="holiday"?"חג":"מחלה"):(s.type==="regular"?"בוקר":s.type==="afternoon"?"צהריים":"לילה");
@@ -2849,7 +2849,7 @@ function generateMonthExportHTML(ym,monthShifts,cfg,als,wMap,T){
   monthShifts.forEach(s=>{
     const h=ch(s.start,s.end);const c=getShiftPay(s,cfg,wMap[s.id]);totH+=h;
     if(s.type==="vacation"){totVac+=h;}
-    else if(s.type==="holiday"){totOT150+=h;}
+    else if(s.type==="holiday"){totReg+=h;}
     else if(!isSpecialDay(s.type)){totReg+=c.regH||0;totOT125+=c.ot125H||0;totOT150+=c.ot150H||0;}
   });
   const workDays=monthShifts.filter(s=>!isSpecialDay(s.type)).length;
