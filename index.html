@@ -4326,7 +4326,6 @@ function ShiftNeonBorder({clockIn,cfg}){
   const regLen=Math.round((Math.min(elapsedMin,totalMin)/totalMin)*perim);
   const otLen=Math.min(Math.round((Math.max(0,elapsedMin-totalMin)/totalMin)*perim),perim);
   const dotPhase=dotPhaseRef.current;
-  const dotSz=90,tailSz=55;
 
   useEffect(()=>{
     if(prevRegLenRef.current===-1){prevRegLenRef.current=regLen;return;}
@@ -4339,13 +4338,21 @@ function ShiftNeonBorder({clockIn,cfg}){
     }
   },[regLen]);
 
-  // Path starting at top-center going clockwise — seam at top-center, NOT at top-left corner
+  // Path from top-center clockwise — seam at top-center, corners are mid-path
   const pathD=`M ${w/2} 1.5 L ${w-1.5} 1.5 L ${w-1.5} ${h-1.5} L 1.5 ${h-1.5} L 1.5 1.5 Z`;
+  // 5 gradient layers — all share the same leading edge, each extends further back and dims out
+  // from=L so leading edge starts at top-center; to=L-perim = one full clockwise lap
+  const comet=[
+    {l:260,o:0.04,w:2  },
+    {l:160,o:0.10,w:2.5},
+    {l:90, o:0.24,w:3  },
+    {l:45, o:0.55,w:3.5},
+    {l:16, o:0.95,w:5  },
+  ];
 
   return(
     <svg style={{position:"fixed",inset:0,zIndex:60,pointerEvents:"none",overflow:"visible"}} width="100%" height="100%">
       <defs>
-        <path id="snb-mp" d={pathD}/>
         <filter id="snb-gt"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
         <filter id="snb-gd"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
       </defs>
@@ -4353,13 +4360,14 @@ function ShiftNeonBorder({clockIn,cfg}){
       {regLen>0&&<rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#38bdf8" strokeWidth="2.5" strokeOpacity="0.55" strokeDasharray={`${regLen} ${perim+100}`} strokeDashoffset={`${-halfTop}`} filter="url(#snb-gt)"/>}
       {flash&&<rect key={flash.key} x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#e0f2fe" strokeWidth="4" strokeDasharray={`${flash.len} ${perim+100}`} strokeDashoffset={`${-halfTop-flash.start}`} filter="url(#snb-gd)"><animate attributeName="stroke-opacity" values="0.95;0.95;0" keyTimes="0;0.15;1" dur="1.5s" fill="freeze"/></rect>}
       {otLen>0&&<rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fb923c" strokeWidth="2.5" strokeOpacity="0.75" strokeDasharray={`${otLen} ${perim+100}`} strokeDashoffset={`${-halfTop}`} filter="url(#snb-gt)"/>}
-      {/* Tail and segment both on path starting at top-center — top-left corner is mid-path, no seam there */}
-      <path d={pathD} fill="none" stroke="#fca5a5" strokeWidth="3" strokeOpacity="0.25" strokeDasharray={`${tailSz} ${perim}`} strokeLinecap="round">
-        <animate attributeName="stroke-dashoffset" from={`${tailSz}`} to={`${tailSz-perim}`} dur="60s" begin={`-${dotPhase}s`} repeatCount="indefinite"/>
-      </path>
-      <path d={pathD} fill="none" stroke="#fca5a5" strokeWidth="5" strokeDasharray={`${dotSz} ${perim}`} strokeLinecap="round" filter="url(#snb-gd)">
-        <animate attributeName="stroke-dashoffset" from="0" to={`${-perim}`} dur="60s" begin={`-${dotPhase}s`} repeatCount="indefinite"/>
-      </path>
+      {comet.map(({l,o,w},i)=>(
+        <path key={i} d={pathD} fill="none" stroke="#fca5a5" strokeWidth={w} strokeOpacity={o}
+          strokeDasharray={`${l} ${perim*2}`} strokeLinecap="round"
+          filter={i===comet.length-1?"url(#snb-gd)":undefined}>
+          <animate attributeName="stroke-dashoffset" from={`${l}`} to={`${l-perim}`}
+            dur="60s" begin={`-${dotPhase}s`} repeatCount="indefinite"/>
+        </path>
+      ))}
     </svg>
   );
 }
