@@ -4319,7 +4319,6 @@ function ShiftNeonBorder({clockIn,cfg}){
   const{w,h}=dims;
   const rw=w-3,rh=h-3;
   const perim=2*rw+2*rh;
-  // Starting point: top-center — offset from SVG rect's top-left corner
   const halfTop=Math.round(rw/2);
   const elapsedMin=elapsed*60;
   const regLen=Math.round((Math.min(elapsedMin,totalMin)/totalMin)*perim);
