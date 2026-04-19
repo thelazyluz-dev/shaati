@@ -4326,9 +4326,8 @@ function ShiftNeonBorder({clockIn,cfg}){
   const regLen=Math.round((Math.min(elapsedMin,totalMin)/totalMin)*perim);
   const otLen=Math.min(Math.round((Math.max(0,elapsedMin-totalMin)/totalMin)*perim),perim);
   const dotPhase=dotPhaseRef.current;
-  const tailSz=55;
+  const dotSz=90,tailSz=55;
 
-  // Detect trail growth and flash the new segment
   useEffect(()=>{
     if(prevRegLenRef.current===-1){prevRegLenRef.current=regLen;return;}
     if(regLen>prevRegLenRef.current){
@@ -4340,29 +4339,26 @@ function ShiftNeonBorder({clockIn,cfg}){
     }
   },[regLen]);
 
-  // Path from top-center clockwise — top-left corner is mid-path, eliminating the seam artifact
+  // Path starting at top-center going clockwise — seam at top-center, NOT at top-left corner
   const pathD=`M ${w/2} 1.5 L ${w-1.5} 1.5 L ${w-1.5} ${h-1.5} L 1.5 ${h-1.5} L 1.5 1.5 Z`;
 
   return(
     <svg style={{position:"fixed",inset:0,zIndex:60,pointerEvents:"none",overflow:"visible"}} width="100%" height="100%">
       <defs>
-        <path id="snb-mp" d={pathD}/>
         <filter id="snb-gt"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-        <filter id="snb-gd"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="snb-gd"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
       </defs>
       <rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fff" strokeWidth="1" strokeOpacity="0.07"/>
       {regLen>0&&<rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#38bdf8" strokeWidth="2.5" strokeOpacity="0.55" strokeDasharray={`${regLen} ${perim+100}`} strokeDashoffset={`${-halfTop}`} filter="url(#snb-gt)"/>}
       {flash&&<rect key={flash.key} x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#e0f2fe" strokeWidth="4" strokeDasharray={`${flash.len} ${perim+100}`} strokeDashoffset={`${-halfTop-flash.start}`} filter="url(#snb-gd)"><animate attributeName="stroke-opacity" values="0.95;0.95;0" keyTimes="0;0.15;1" dur="1.5s" fill="freeze"/></rect>}
       {otLen>0&&<rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fb923c" strokeWidth="2.5" strokeOpacity="0.75" strokeDasharray={`${otLen} ${perim+100}`} strokeDashoffset={`${-halfTop}`} filter="url(#snb-gt)"/>}
-      <rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fca5a5" strokeWidth="3" strokeOpacity="0.25" strokeDasharray={`${tailSz} ${perim}`} strokeLinecap="round">
-        <animate attributeName="stroke-dashoffset" from={`${-halfTop+tailSz}`} to={`${-halfTop+tailSz-perim}`} dur="60s" begin={`-${dotPhase}s`} repeatCount="indefinite"/>
-      </rect>
-      {/* Circle on explicit path — no dashoffset seam, corner transitions are smooth */}
-      <circle r="5" fill="#fca5a5" filter="url(#snb-gd)">
-        <animateMotion dur="60s" begin={`-${dotPhase}s`} repeatCount="indefinite" rotate="none">
-          <mpath href="#snb-mp"/>
-        </animateMotion>
-      </circle>
+      {/* Tail and segment both on path starting at top-center — top-left corner is mid-path, no seam there */}
+      <path d={pathD} fill="none" stroke="#fca5a5" strokeWidth="3" strokeOpacity="0.25" strokeDasharray={`${tailSz} ${perim}`} strokeLinecap="round">
+        <animate attributeName="stroke-dashoffset" from={`${tailSz}`} to={`${tailSz-perim}`} dur="60s" begin={`-${dotPhase}s`} repeatCount="indefinite"/>
+      </path>
+      <path d={pathD} fill="none" stroke="#fca5a5" strokeWidth="5" strokeDasharray={`${dotSz} ${perim}`} strokeLinecap="round" filter="url(#snb-gd)">
+        <animate attributeName="stroke-dashoffset" from="0" to={`${-perim}`} dur="60s" begin={`-${dotPhase}s`} repeatCount="indefinite"/>
+      </path>
     </svg>
   );
 }
