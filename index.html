@@ -4297,8 +4297,10 @@ function Onboarding({onDone,lang="he",setLang,theme="dark",setTheme}){
 function ShiftNeonBorder({clockIn,cfg}){
   const[elapsed,setElapsed]=useState(0);
   const[dims,setDims]=useState({w:window.innerWidth||390,h:window.innerHeight||800});
-  // Compute dot animation phase once at mount so SVG animate runs uninterrupted
+  const[flash,setFlash]=useState(null);
   const dotPhaseRef=useRef(null);
+  const prevRegLenRef=useRef(-1);
+  const flashTimerRef=useRef(null);
   if(dotPhaseRef.current===null) dotPhaseRef.current=(ch(clockIn.time,nowTime())*3600)%60;
 
   useEffect(()=>{
@@ -4310,7 +4312,7 @@ function ShiftNeonBorder({clockIn,cfg}){
   useEffect(()=>{
     const tick=()=>setElapsed(ch(clockIn.time,nowTime()));
     tick();
-    const id=setInterval(tick,30000);
+    const id=setInterval(tick,15000);
     return()=>clearInterval(id);
   },[clockIn.time]);
 
@@ -4324,28 +4326,43 @@ function ShiftNeonBorder({clockIn,cfg}){
   const regLen=Math.round((Math.min(elapsedMin,totalMin)/totalMin)*perim);
   const otLen=Math.min(Math.round((Math.max(0,elapsedMin-totalMin)/totalMin)*perim),perim);
   const dotPhase=dotPhaseRef.current;
-  const dotSz=8,tailSz=55;
+  const tailSz=55;
+
+  // Detect trail growth and flash the new segment
+  useEffect(()=>{
+    if(prevRegLenRef.current===-1){prevRegLenRef.current=regLen;return;}
+    if(regLen>prevRegLenRef.current){
+      const seg={start:prevRegLenRef.current,len:regLen-prevRegLenRef.current,key:Date.now()};
+      prevRegLenRef.current=regLen;
+      clearTimeout(flashTimerRef.current);
+      setFlash(seg);
+      flashTimerRef.current=setTimeout(()=>setFlash(null),1600);
+    }
+  },[regLen]);
+
+  // Path from top-center clockwise — top-left corner is mid-path, eliminating the seam artifact
+  const pathD=`M ${w/2} 1.5 L ${w-1.5} 1.5 L ${w-1.5} ${h-1.5} L 1.5 ${h-1.5} L 1.5 1.5 Z`;
 
   return(
     <svg style={{position:"fixed",inset:0,zIndex:60,pointerEvents:"none",overflow:"visible"}} width="100%" height="100%">
       <defs>
+        <path id="snb-mp" d={pathD}/>
         <filter id="snb-gt"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
         <filter id="snb-gd"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
       </defs>
-      {/* Dim full-perimeter background track */}
       <rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fff" strokeWidth="1" strokeOpacity="0.07"/>
-      {/* Regular hours — sky-blue trail growing from top-center clockwise */}
       {regLen>0&&<rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#38bdf8" strokeWidth="2.5" strokeOpacity="0.55" strokeDasharray={`${regLen} ${perim+100}`} strokeDashoffset={`${-halfTop}`} filter="url(#snb-gt)"/>}
-      {/* Overtime — orange trail overlays from top-center, second lap */}
+      {flash&&<rect key={flash.key} x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#e0f2fe" strokeWidth="4" strokeDasharray={`${flash.len} ${perim+100}`} strokeDashoffset={`${-halfTop-flash.start}`} filter="url(#snb-gd)"><animate attributeName="stroke-opacity" values="0.95;0.95;0" keyTimes="0;0.15;1" dur="1.5s" fill="freeze"/></rect>}
       {otLen>0&&<rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fb923c" strokeWidth="2.5" strokeOpacity="0.75" strokeDasharray={`${otLen} ${perim+100}`} strokeDashoffset={`${-halfTop}`} filter="url(#snb-gt)"/>}
-      {/* Dot comet tail */}
       <rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fca5a5" strokeWidth="3" strokeOpacity="0.25" strokeDasharray={`${tailSz} ${perim}`} strokeLinecap="round">
         <animate attributeName="stroke-dashoffset" from={`${-halfTop+tailSz}`} to={`${-halfTop+tailSz-perim}`} dur="60s" begin={`-${dotPhase}s`} repeatCount="indefinite"/>
       </rect>
-      {/* Moving red dot — one full lap per minute, starts at top-center */}
-      <rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fca5a5" strokeWidth="5" strokeDasharray={`${dotSz} ${perim}`} strokeLinecap="round" filter="url(#snb-gd)">
-        <animate attributeName="stroke-dashoffset" from={`${-halfTop}`} to={`${-halfTop-perim}`} dur="60s" begin={`-${dotPhase}s`} repeatCount="indefinite"/>
-      </rect>
+      {/* Circle on explicit path — no dashoffset seam, corner transitions are smooth */}
+      <circle r="5" fill="#fca5a5" filter="url(#snb-gd)">
+        <animateMotion dur="60s" begin={`-${dotPhase}s`} repeatCount="indefinite" rotate="none">
+          <mpath href="#snb-mp"/>
+        </animateMotion>
+      </circle>
     </svg>
   );
 }
