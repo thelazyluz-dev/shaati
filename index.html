@@ -97,7 +97,7 @@ const LS = {
   get: k=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch{return null;}},
   set: (k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}},
 };
-const K={shifts:"wt-shifts-v5",cfg:"wt-cfg-v5",tpls:"wt-tpls-v2",als:"wt-als-v2",clockin:"wt-clockin-v1",vac:"wt-vac-v1",onboarded:"wt-onboarded-v1",privacy:"wt-privacy-v1",lang:"wt-lang-v1",theme:"wt-theme-v1",installDismissed:"wt-install-dismissed-v1",addAlsIds:"wt-addals-v1",clockAlsIds:"wt-clockals-v1",manualMonths:"wt-manual-months-v1",payslips:"wt-payslips-v1"};
+const K={shifts:"wt-shifts-v5",cfg:"wt-cfg-v5",tpls:"wt-tpls-v2",als:"wt-als-v2",clockin:"wt-clockin-v1",vac:"wt-vac-v1",onboarded:"wt-onboarded-v1",privacy:"wt-privacy-v1",lang:"wt-lang-v1",theme:"wt-theme-v1",installDismissed:"wt-install-dismissed-v1",addAlsIds:"wt-addals-v1",clockAlsIds:"wt-clockals-v1",manualMonths:"wt-manual-months-v1",payslips:"wt-payslips-v1",lastVisit:"wt-last-visit-v1"};
 const LangCtx=React.createContext("he");
 const useT=()=>{const l=React.useContext(LangCtx);return k=>TR[l]?.[k]??TR.he[k]??k;};
 const TR={
@@ -141,7 +141,7 @@ const TR={
     ot_daily:"⏱ יומי:",ot_weekly:"📅 שבועי:",ot_above_th:"ש׳ מעל הסף",
     // Clock screen
     cl_shift:"משמרת",cl_active:"פעילה",cl_start:"התחלה",cl_elapsed:"זמן עבודה",
-    cl_net:"שכר נטו",cl_gross_pfx:"ברוטו",cl_calc:"פירוט חישוב",cl_gross_lbl:"ברוטו",cl_net_lbl:"נטו",cl_per_min:"נטו/דקה",
+    cl_net:"שכר נטו",cl_gross_pfx:"ברוטו",cl_calc:"פירוט חישוב",cl_gross_lbl:"ברוטו",cl_net_lbl:"נטו",cl_per_min:"נטו/דקה",cl_per_hr:"נטו/שעה",
     cl_in:"כניסה למשמרת",cl_in_hint:"לחץ כניסה כשמתחיל המשמרת · השעה תירשם אוטומטית",
     cl_note_ph:"הערה אופציונלית (חג, שעות מיוחדות...)",cl_out:"סיום משמרת",
     cl_short_t:"כבר סיימת משמרת??",cl_short_s:"על מי את/ה עובד/ת",cl_no_rec:"לא מתעד",
@@ -355,7 +355,7 @@ const TR={
     ot_daily:"⏱ Дневные:",ot_weekly:"📅 Недельные:",ot_above_th:"ч выше порога",
     // Clock screen
     cl_shift:"Смена",cl_active:"активна",cl_start:"Начало",cl_elapsed:"Время работы",
-    cl_net:"Чистая",cl_gross_pfx:"Брутто",cl_calc:"Детали расчёта",cl_gross_lbl:"Брутто",cl_net_lbl:"Нетто",cl_per_min:"нетто/мин",
+    cl_net:"Чистая",cl_gross_pfx:"Брутто",cl_calc:"Детали расчёта",cl_gross_lbl:"Брутто",cl_net_lbl:"Нетто",cl_per_min:"нетто/мин",cl_per_hr:"нетто/час",
     cl_in:"Начать смену",cl_in_hint:"Нажмите начало · время запишется автоматически",
     cl_note_ph:"Необязательная заметка...",cl_out:"Закончить смену",
     cl_short_t:"Уже закончил смену??",cl_short_s:"Кого ты пытаешься обмануть",cl_no_rec:"Не записываю",
@@ -598,7 +598,7 @@ const TR={
     ot_daily:"⏱ يومي:",ot_weekly:"📅 أسبوعي:",ot_above_th:"س فوق الحد",
     // Clock screen
     cl_shift:"وردية",cl_active:"نشطة",cl_start:"البداية",cl_elapsed:"وقت العمل",
-    cl_net:"صافي الراتب",cl_gross_pfx:"إجمالي",cl_calc:"تفاصيل الحساب",cl_gross_lbl:"إجمالي",cl_net_lbl:"صافي",cl_per_min:"صافي/دقيقة",
+    cl_net:"صافي الراتب",cl_gross_pfx:"إجمالي",cl_calc:"تفاصيل الحساب",cl_gross_lbl:"إجمالي",cl_net_lbl:"صافي",cl_per_min:"صافي/دقيقة",cl_per_hr:"صافي/ساعة",
     cl_in:"بدء الوردية",cl_in_hint:"اضغط البداية عند بدء الوردية · سيُسجَّل الوقت تلقائياً",
     cl_note_ph:"ملاحظة اختيارية (عطلة، ساعات خاصة...)",cl_out:"إنهاء الوردية",
     cl_short_t:"انتهيت من الوردية بالفعل؟",cl_short_s:"على من تعمل؟",cl_no_rec:"لا أسجل",
@@ -1671,6 +1671,7 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode,shifts}){
   const effectivePct=Math.round(curMult*otMult*100);
   const netRatio=(ded&&gross>0)?net/gross:1;
   const netRatePerMin=cfg.baseRate*curMult*otMult/60*netRatio;
+  const netRatePerHr=netRatePerMin*60;
 
   useEffect(()=>{
     const zone=isOT150?"ot150":isOT?"ot125":"none";
@@ -1740,7 +1741,10 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode,shifts}){
             <span style={{fontSize:"12px"}}>{isOT?"⚡":"💼"}</span>
             <span style={{fontSize:"13px",fontWeight:"800",color:isOT150?"#f87171":isOT?"#fb923c":sty.color}}>{effectivePct}%</span>
           </div>
-          <span style={{fontSize:"12px",color:"#86efac",fontWeight:"600",filter:privacyMode?"blur(5px)":"none"}}>{fM(netRatePerMin)}/{uT("cl_per_min")}</span>
+          <span style={{display:"flex",alignItems:"center",gap:"4px",filter:privacyMode?"blur(5px)":"none"}}>
+            <MinerAnim/>
+            <span style={{fontSize:"12px",color:"#86efac",fontWeight:"600"}}>{fM(netRatePerHr)}/{uT("cl_per_hr")}</span>
+          </span>
         </div>
 
         {/* OT banner */}
@@ -4292,14 +4296,86 @@ function Onboarding({onDone,lang="he",setLang,theme="dark",setTheme}){
 }
 
 // ════════════════════════════════════════
+// MINER ANIM — animated coal miner SVG
+// ════════════════════════════════════════
+function MinerAnim(){
+  // 28×28 miner with swinging pick using CSS animation
+  return(
+    <svg width="28" height="28" viewBox="0 0 28 28" style={{display:"inline-block",verticalAlign:"middle",flexShrink:0}}>
+      <style>{`
+        @keyframes pick-swing{
+          0%,100%{transform-origin:18px 10px;transform:rotate(-30deg);}
+          50%{transform-origin:18px 10px;transform:rotate(20deg);}
+        }
+        @keyframes body-bob{
+          0%,100%{transform:translateY(0);}
+          50%{transform:translateY(1px);}
+        }
+        .mn-body{animation:body-bob 0.6s ease-in-out infinite;}
+        .mn-pick{animation:pick-swing 0.6s ease-in-out infinite;}
+      `}</style>
+      {/* helmet */}
+      <ellipse cx="13" cy="7" rx="5" ry="3.5" fill="#ca8a04" className="mn-body"/>
+      <rect x="10" y="6" width="6" height="2" rx="1" fill="#fbbf24" className="mn-body"/>
+      {/* lamp on helmet */}
+      <circle cx="13" cy="5" r="1.2" fill="#fef08a" className="mn-body"/>
+      {/* head */}
+      <circle cx="13" cy="10" r="3.2" fill="#d97706" className="mn-body"/>
+      {/* eyes */}
+      <circle cx="12" cy="9.5" r="0.5" fill="#1c1917" className="mn-body"/>
+      <circle cx="14" cy="9.5" r="0.5" fill="#1c1917" className="mn-body"/>
+      {/* body */}
+      <rect x="10" y="13" width="6" height="7" rx="1.5" fill="#44403c" className="mn-body"/>
+      {/* belt */}
+      <rect x="10" y="17" width="6" height="1.2" fill="#78716c" className="mn-body"/>
+      {/* legs */}
+      <rect x="10.5" y="20" width="2" height="5" rx="1" fill="#292524" className="mn-body"/>
+      <rect x="14" y="20" width="2" height="5" rx="1" fill="#292524" className="mn-body"/>
+      {/* boots */}
+      <rect x="9.5" y="24" width="3.5" height="2" rx="0.8" fill="#1c1917" className="mn-body"/>
+      <rect x="13" y="24" width="3.5" height="2" rx="0.8" fill="#1c1917" className="mn-body"/>
+      {/* arm + pick */}
+      <g className="mn-pick">
+        {/* arm */}
+        <rect x="15" y="14" width="2" height="5" rx="1" fill="#92400e" transform="rotate(15 16 16)"/>
+        {/* pick handle */}
+        <rect x="16" y="10" width="1.2" height="8" rx="0.6" fill="#a16207" transform="rotate(-10 17 14)"/>
+        {/* pick head */}
+        <path d="M14 9 Q17 7 20 9 L19 11 Q17 10 15 11 Z" fill="#9ca3af"/>
+        <path d="M20 9 L22 7" stroke="#6b7280" strokeWidth="1.2" strokeLinecap="round"/>
+        <path d="M14 9 L12 11" stroke="#6b7280" strokeWidth="1.2" strokeLinecap="round"/>
+      </g>
+    </svg>
+  );
+}
+
+// ════════════════════════════════════════
 // SHIFT NEON BORDER
 // ════════════════════════════════════════
 function ShiftNeonBorder({clockIn,cfg}){
   const[elapsed,setElapsed]=useState(0);
   const[dims,setDims]=useState({w:window.innerWidth||390,h:window.innerHeight||800});
   const[flash,setFlash]=useState(null);
+  const[scanAnim,setScanAnim]=useState(false);
   const prevRegLenRef=useRef(-1);
   const flashTimerRef=useRef(null);
+  const elapsedMinRef=useRef(0);
+  // lastVisitLen: how far along the perimeter the last visit was
+  const lastVisitLen=useRef(0);
+
+  // Load last visit on mount, save on hide/unmount
+  useEffect(()=>{
+    const raw=LS.get(K.lastVisit);
+    if(raw&&typeof raw.elapsedMin==="number"){
+      lastVisitLen.current=raw.elapsedMin; // store raw minutes; convert to px below
+      setScanAnim(true); // trigger scan sweep animation
+    }
+    const save=()=>{
+      if(elapsedMinRef.current>0)LS.set(K.lastVisit,{elapsedMin:elapsedMinRef.current});
+    };
+    document.addEventListener('visibilitychange',save);
+    return()=>{save();document.removeEventListener('visibilitychange',save);};
+  },[]);
 
   useEffect(()=>{
     const up=()=>setDims({w:window.innerWidth,h:window.innerHeight});
@@ -4308,7 +4384,11 @@ function ShiftNeonBorder({clockIn,cfg}){
   },[]);
 
   useEffect(()=>{
-    const tick=()=>setElapsed(ch(clockIn.time,nowTime()));
+    const tick=()=>{
+      const hr=ch(clockIn.time,nowTime());
+      setElapsed(hr);
+      elapsedMinRef.current=hr*60;
+    };
     tick();
     const id=setInterval(tick,15000);
     return()=>clearInterval(id);
@@ -4324,6 +4404,10 @@ function ShiftNeonBorder({clockIn,cfg}){
   const regLen=Math.round((Math.min(elapsedMin,totalMin)/totalMin)*perim);
   const otLen=Math.min(Math.round((Math.max(0,elapsedMin-totalMin)/totalMin)*perim),perim);
 
+  // Convert stored lastVisit minutes to perimeter pixels
+  const lvMin=lastVisitLen.current;
+  const lvLen=lvMin>0?Math.round((Math.min(lvMin,totalMin)/totalMin)*perim):0;
+
   // Flash the new segment each time a minute tick grows the trail
   useEffect(()=>{
     if(prevRegLenRef.current===-1){prevRegLenRef.current=regLen;return;}
@@ -4337,15 +4421,30 @@ function ShiftNeonBorder({clockIn,cfg}){
   },[regLen]);
 
   const tipSz=6; // pulsing dot at trail frontier
+  const markerSz=5; // permanent last-visit marker dot
 
   return(
     <svg style={{position:"fixed",inset:0,zIndex:60,pointerEvents:"none",overflow:"visible"}} width="100%" height="100%">
       <defs>
         <filter id="snb-gt"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
         <filter id="snb-gd"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="snb-gg"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
       </defs>
       {/* Dim full-perimeter track */}
       <rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fff" strokeWidth="1" strokeOpacity="0.06"/>
+      {/* Last-visit scan sweep (gold, animates from 0 to lvLen over 1.5s on mount) */}
+      {scanAnim&&lvLen>0&&(
+        <rect key="lv-scan" x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fbbf24" strokeWidth="2.5" strokeOpacity="0.55"
+          strokeDasharray={`${lvLen} ${perim+100}`} strokeDashoffset={`${-halfTop}`} filter="url(#snb-gg)">
+          <animate attributeName="stroke-dasharray" from={`0 ${perim+100}`} to={`${lvLen} ${perim+100}`} dur="1.5s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1"/>
+        </rect>
+      )}
+      {/* Permanent gold marker dot at last-visit position */}
+      {lvLen>0&&(
+        <rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#f59e0b" strokeWidth={markerSz}
+          strokeDasharray={`1 ${perim+100}`} strokeDashoffset={`${-halfTop-lvLen+1}`}
+          strokeLinecap="round" filter="url(#snb-gg)" strokeOpacity="0.9"/>
+      )}
       {/* Accumulated regular trail */}
       {regLen>0&&<rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#38bdf8" strokeWidth="2" strokeOpacity="0.5" strokeDasharray={`${regLen} ${perim+100}`} strokeDashoffset={`${-halfTop}`} filter="url(#snb-gt)"/>}
       {/* Overtime trail */}
