@@ -4297,6 +4297,9 @@ function Onboarding({onDone,lang="he",setLang,theme="dark",setTheme}){
 function ShiftNeonBorder({clockIn,cfg}){
   const[elapsed,setElapsed]=useState(0);
   const[dims,setDims]=useState({w:window.innerWidth||390,h:window.innerHeight||800});
+  // Compute dot animation phase once at mount so SVG animate runs uninterrupted
+  const dotPhaseRef=useRef(null);
+  if(dotPhaseRef.current===null) dotPhaseRef.current=(ch(clockIn.time,nowTime())*3600)%60;
 
   useEffect(()=>{
     const up=()=>setDims({w:window.innerWidth,h:window.innerHeight});
@@ -4307,53 +4310,43 @@ function ShiftNeonBorder({clockIn,cfg}){
   useEffect(()=>{
     const tick=()=>setElapsed(ch(clockIn.time,nowTime()));
     tick();
-    const id=setInterval(tick,60000);
+    const id=setInterval(tick,30000);
     return()=>clearInterval(id);
   },[clockIn.time]);
 
   const threshold=cfg.overtimeThreshold||8.6;
-  const pct=Math.min(1,elapsed/threshold);
+  const totalMin=Math.round(threshold*60);
   const{w,h}=dims;
-  const perim=Math.round(2*(w+h));
-  const trailLen=Math.round(perim*pct);
-  const isOT=elapsed>=threshold;
-  const tc=isOT?"#f97316":"#22c55e";
-  const cc=isOT?"#fdba74":"#86efac";
-  const cometLen=60;
-  const cometRange=Math.max(0,trailLen-cometLen);
+  const rw=w-3,rh=h-3;
+  const perim=2*rw+2*rh;
+  // Starting point: top-center — offset from SVG rect's top-left corner
+  const halfTop=Math.round(rw/2);
+  const elapsedMin=elapsed*60;
+  const regLen=Math.round((Math.min(elapsedMin,totalMin)/totalMin)*perim);
+  const otLen=Math.min(Math.round((Math.max(0,elapsedMin-totalMin)/totalMin)*perim),perim);
+  const dotPhase=dotPhaseRef.current;
+  const dotSz=8,tailSz=55;
 
   return(
-    <svg style={{position:"fixed",inset:0,zIndex:60,pointerEvents:"none"}} width="100%" height="100%">
+    <svg style={{position:"fixed",inset:0,zIndex:60,pointerEvents:"none",overflow:"visible"}} width="100%" height="100%">
       <defs>
-        <filter id="snb-glow" x="-100%" y="-100%" width="300%" height="300%">
-          <feGaussianBlur stdDeviation="3" result="b"/>
-          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
+        <filter id="snb-gt"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="snb-gd"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
       </defs>
-      {/* Dim full-perimeter track */}
-      <rect x="1.5" y="1.5" width={w-3} height={h-3}
-        fill="none" stroke={tc} strokeWidth="1.5" strokeOpacity="0.12"
-      />
-      {/* Growing progress trail */}
-      {trailLen>0&&(
-        <rect x="1.5" y="1.5" width={w-3} height={h-3}
-          fill="none" stroke={tc} strokeWidth="2.5" strokeOpacity="0.4"
-          strokeDasharray={`${trailLen} ${perim+100}`}
-        />
-      )}
-      {/* Comet constrained to run only within the accumulated trail */}
-      {cometRange>0&&(
-        <rect x="1.5" y="1.5" width={w-3} height={h-3}
-          fill="none" stroke={cc} strokeWidth="3.5"
-          strokeDasharray={`${cometLen} ${perim}`}
-          strokeLinecap="round"
-          filter="url(#snb-glow)"
-        >
-          <animate attributeName="stroke-dashoffset"
-            from="0" to={`${-cometRange}`}
-            dur="2.5s" repeatCount="indefinite"/>
-        </rect>
-      )}
+      {/* Dim full-perimeter background track */}
+      <rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fff" strokeWidth="1" strokeOpacity="0.07"/>
+      {/* Regular hours — sky-blue trail growing from top-center clockwise */}
+      {regLen>0&&<rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#38bdf8" strokeWidth="2.5" strokeOpacity="0.55" strokeDasharray={`${regLen} ${perim+100}`} strokeDashoffset={`${-halfTop}`} filter="url(#snb-gt)"/>}
+      {/* Overtime — orange trail overlays from top-center, second lap */}
+      {otLen>0&&<rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fb923c" strokeWidth="2.5" strokeOpacity="0.75" strokeDasharray={`${otLen} ${perim+100}`} strokeDashoffset={`${-halfTop}`} filter="url(#snb-gt)"/>}
+      {/* Dot comet tail */}
+      <rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fca5a5" strokeWidth="3" strokeOpacity="0.25" strokeDasharray={`${tailSz} ${perim}`} strokeLinecap="round">
+        <animate attributeName="stroke-dashoffset" from={`${-halfTop+tailSz}`} to={`${-halfTop+tailSz-perim}`} dur="60s" begin={`-${dotPhase}s`} repeatCount="indefinite"/>
+      </rect>
+      {/* Moving red dot — one full lap per minute, starts at top-center */}
+      <rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fca5a5" strokeWidth="5" strokeDasharray={`${dotSz} ${perim}`} strokeLinecap="round" filter="url(#snb-gd)">
+        <animate attributeName="stroke-dashoffset" from={`${-halfTop}`} to={`${-halfTop-perim}`} dur="60s" begin={`-${dotPhase}s`} repeatCount="indefinite"/>
+      </rect>
     </svg>
   );
 }
