@@ -4309,70 +4309,103 @@ function MinerAnim(){
       <svg width="34" height="34" viewBox="0 0 34 34" style={{display:"block",overflow:"visible"}}>
         <style>{`
           @keyframes mn-pick{
-            0%{transform:rotate(-45deg);}
-            30%{transform:rotate(-45deg);}
-            58%{transform:rotate(38deg);}
-            65%{transform:rotate(28deg);}
-            80%{transform:rotate(-10deg);}
-            100%{transform:rotate(-45deg);}
+            0%{transform:rotate(-55deg);}
+            25%{transform:rotate(-55deg);}
+            55%{transform:rotate(42deg);}
+            63%{transform:rotate(30deg);}
+            78%{transform:rotate(-20deg);}
+            100%{transform:rotate(-55deg);}
           }
           @keyframes mn-bob{
-            0%,30%,100%{transform:translateY(0);}
-            62%{transform:translateY(2.5px);}
+            0%,25%,100%{transform:translateY(0);}
+            59%{transform:translateY(3px);}
+            65%{transform:translateY(1px);}
+          }
+          @keyframes mn-lean{
+            0%,25%,100%{transform:rotate(0deg);}
+            55%{transform:rotate(4deg);}
           }
           @keyframes mn-lamp{
-            0%,100%{opacity:1;}
-            50%{opacity:0.6;}
+            0%,100%{opacity:1;r:1.8;}
+            50%{opacity:0.5;}
           }
           @keyframes mn-spark1{
-            0%{transform:translate(0,0) scale(1);opacity:1;}
-            100%{transform:translate(6px,-7px) scale(0);opacity:0;}
+            0%,55%{transform:translate(0,0) scale(0);opacity:0;}
+            60%{transform:translate(0,0) scale(1.4);opacity:1;}
+            100%{transform:translate(7px,-9px) scale(0);opacity:0;}
           }
           @keyframes mn-spark2{
-            0%{transform:translate(0,0) scale(1);opacity:1;}
-            100%{transform:translate(9px,-3px) scale(0);opacity:0;}
+            0%,56%{transform:translate(0,0) scale(0);opacity:0;}
+            62%{transform:translate(0,0) scale(1.2);opacity:1;}
+            100%{transform:translate(11px,-4px) scale(0);opacity:0;}
           }
           @keyframes mn-spark3{
-            0%{transform:translate(0,0) scale(1);opacity:0.8;}
-            100%{transform:translate(4px,-10px) scale(0);opacity:0;}
+            0%,57%{transform:translate(0,0) scale(0);opacity:0;}
+            63%{transform:translate(0,0) scale(1);opacity:0.9;}
+            100%{transform:translate(5px,-12px) scale(0);opacity:0;}
           }
-          .mn2-body{animation:mn-bob 0.7s ease-in-out infinite;}
-          .mn2-pick{transform-origin:20px 16px;animation:mn-pick 0.7s cubic-bezier(0.4,0,0.2,1) infinite;}
-          .mn2-lamp{animation:mn-lamp 1.4s ease-in-out infinite;}
-          .mn2-s1{transform-origin:26px 20px;animation:mn-spark1 0.7s 0.38s ease-out infinite;}
-          .mn2-s2{transform-origin:26px 20px;animation:mn-spark2 0.7s 0.40s ease-out infinite;}
-          .mn2-s3{transform-origin:26px 20px;animation:mn-spark3 0.7s 0.42s ease-out infinite;}
+          @keyframes mn-arm-l{
+            0%,25%,100%{transform:rotate(0deg);}
+            55%{transform:rotate(-8deg);}
+          }
+          .mn2-body{animation:mn-bob 1.4s ease-in-out infinite;}
+          .mn2-lean{animation:mn-lean 1.4s ease-in-out infinite;transform-origin:15px 18px;}
+          .mn2-pick{transform-origin:20px 16px;animation:mn-pick 1.4s cubic-bezier(0.5,0,0.15,1) infinite;}
+          .mn2-lamp{animation:mn-lamp 2s ease-in-out infinite;}
+          .mn2-arml{transform-origin:10px 18px;animation:mn-arm-l 1.4s ease-in-out infinite;}
+          .mn2-s1{transform-origin:27px 21px;animation:mn-spark1 1.4s ease-out infinite;}
+          .mn2-s2{transform-origin:27px 21px;animation:mn-spark2 1.4s ease-out infinite;}
+          .mn2-s3{transform-origin:27px 21px;animation:mn-spark3 1.4s ease-out infinite;}
         `}</style>
 
         {/* body group (bobs up/down) */}
         <g className="mn2-body">
-          {/* helmet */}
-          <ellipse cx="15" cy="8" rx="6" ry="4" fill="#b45309"/>
-          <rect x="10" y="7" width="10" height="2.5" rx="1.2" fill="#d97706"/>
-          {/* lamp */}
-          <circle cx="15" cy="5.5" r="1.8" fill="#fef08a" className="mn2-lamp" filter="url(#mn-glow)"/>
-          {/* head */}
-          <circle cx="15" cy="12" r="4" fill="#c2794a"/>
-          {/* eyes */}
-          <circle cx="13.5" cy="11.5" r="0.7" fill="#1c1917"/>
-          <circle cx="16.5" cy="11.5" r="0.7" fill="#1c1917"/>
-          {/* stubble smile */}
-          <path d="M13.5 13.5 Q15 14.5 16.5 13.5" stroke="#92400e" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
-          {/* body / overalls */}
-          <rect x="11" y="16" width="8" height="9" rx="2" fill="#1e3a5f"/>
-          {/* pocket stripe */}
-          <rect x="12" y="17.5" width="3" height="2" rx="0.6" fill="#1d4ed8" opacity="0.6"/>
-          {/* belt */}
-          <rect x="10.5" y="21.5" width="9" height="1.5" rx="0.7" fill="#92400e"/>
-          <rect x="14" y="21.5" width="2" height="1.5" fill="#d97706"/>
-          {/* legs */}
-          <rect x="11.5" y="25" width="2.5" height="6" rx="1.2" fill="#1e3a5f"/>
-          <rect x="15.5" y="25" width="2.5" height="6" rx="1.2" fill="#1e3a5f"/>
-          {/* boots */}
-          <rect x="10.5" y="29" width="4" height="2.5" rx="1" fill="#1c1917"/>
-          <rect x="14.5" y="29" width="4" height="2.5" rx="1" fill="#1c1917"/>
-          {/* left arm (static) */}
-          <rect x="8" y="17" width="2.5" height="6" rx="1.2" fill="#c2794a" transform="rotate(-10 9.25 20)"/>
+          {/* whole-body lean on impact */}
+          <g className="mn2-lean">
+            {/* helmet */}
+            <ellipse cx="15" cy="8" rx="6" ry="4" fill="#b45309"/>
+            <rect x="10" y="7" width="10" height="2.5" rx="1.2" fill="#d97706"/>
+            {/* lamp */}
+            <circle cx="15" cy="5.5" r="1.8" fill="#fef08a" className="mn2-lamp" filter="url(#mn-glow)"/>
+            {/* lamp beam */}
+            <ellipse cx="15" cy="4" rx="2.5" ry="1.2" fill="#fef08a" opacity="0.25" className="mn2-lamp"/>
+            {/* head */}
+            <circle cx="15" cy="12" r="4" fill="#c2794a"/>
+            {/* eyes */}
+            <circle cx="13.5" cy="11.5" r="0.7" fill="#1c1917"/>
+            <circle cx="16.5" cy="11.5" r="0.7" fill="#1c1917"/>
+            {/* eyebrow */}
+            <path d="M13 10.5 Q13.5 10 14 10.5" stroke="#7c4a1e" strokeWidth="0.7" fill="none"/>
+            <path d="M16 10.5 Q16.5 10 17 10.5" stroke="#7c4a1e" strokeWidth="0.7" fill="none"/>
+            {/* stubble */}
+            <path d="M13.5 13.5 Q15 14.8 16.5 13.5" stroke="#92400e" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
+            {/* body / overalls */}
+            <rect x="11" y="16" width="8" height="9" rx="2" fill="#1e3a5f"/>
+            {/* pocket */}
+            <rect x="12" y="17.5" width="3" height="2" rx="0.6" fill="#1d4ed8" opacity="0.6"/>
+            <rect x="12.4" y="17.8" width="2.2" height="0.6" rx="0.3" fill="#fff" opacity="0.15"/>
+            {/* belt */}
+            <rect x="10.5" y="21.5" width="9" height="1.5" rx="0.7" fill="#92400e"/>
+            <rect x="14" y="21.5" width="2" height="1.5" fill="#d97706"/>
+            {/* suspenders */}
+            <rect x="13" y="16" width="1" height="5.5" rx="0.4" fill="#2563eb" opacity="0.5"/>
+            <rect x="16" y="16" width="1" height="5.5" rx="0.4" fill="#2563eb" opacity="0.5"/>
+            {/* legs */}
+            <rect x="11.5" y="25" width="2.5" height="6" rx="1.2" fill="#1e3a5f"/>
+            <rect x="15.5" y="25" width="2.5" height="6" rx="1.2" fill="#1e3a5f"/>
+            {/* boots */}
+            <rect x="10.5" y="29" width="4" height="2.5" rx="1" fill="#1c1917"/>
+            <rect x="14.5" y="29" width="4" height="2.5" rx="1" fill="#1c1917"/>
+            {/* boot shine */}
+            <rect x="11" y="29.2" width="1.5" height="0.6" rx="0.3" fill="#374151" opacity="0.6"/>
+            <rect x="15" y="29.2" width="1.5" height="0.6" rx="0.3" fill="#374151" opacity="0.6"/>
+            {/* left arm (counter-swings) */}
+            <g className="mn2-arml">
+              <rect x="7.5" y="16.5" width="2.5" height="6.5" rx="1.2" fill="#c2794a"/>
+              {/* left hand */}
+              <circle cx="8.75" cy="23.5" r="1.4" fill="#b45309"/>
+            </g>
+          </g>
         </g>
 
         {/* pick arm (swings separately) */}
@@ -4387,10 +4420,10 @@ function MinerAnim(){
           <path d="M16 9 L13.5 11.5" stroke="#9ca3af" strokeWidth="1.4" strokeLinecap="round"/>
         </g>
 
-        {/* sparks at impact point */}
-        <circle cx="26" cy="20" r="1.2" fill="#fbbf24" className="mn2-s1"/>
-        <circle cx="26" cy="20" r="0.9" fill="#fef08a" className="mn2-s2"/>
-        <circle cx="26" cy="20" r="0.7" fill="#f59e0b" className="mn2-s3"/>
+        {/* sparks at pick impact point */}
+        <circle cx="27" cy="21" r="1.4" fill="#fbbf24" className="mn2-s1"/>
+        <circle cx="27" cy="21" r="1" fill="#fef08a" className="mn2-s2"/>
+        <circle cx="27" cy="21" r="0.8" fill="#f97316" className="mn2-s3"/>
 
         <defs>
           <filter id="mn-glow"><feGaussianBlur stdDeviation="1.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
@@ -4496,7 +4529,7 @@ function ShiftNeonBorder({clockIn,cfg}){
     }
   },[regLen]);
 
-  // Nugget spawner — every second, fly a coin/diamond from miner to frontier
+  // Nugget spawner — every 5 seconds, fly a coin/diamond from miner to frontier
   useEffect(()=>{
     const id=setInterval(()=>{
       const el=window.__minerEl;
@@ -4509,8 +4542,8 @@ function ShiftNeonBorder({clockIn,cfg}){
       const nid=++nuggetIdRef.current;
       const ot=elapsedMinRef.current/60>=(cfg.overtimeThreshold||8.6);
       setNuggets(prev=>[...prev,{id:nid,sx,sy,tx,ty,ot}]);
-      setTimeout(()=>setNuggets(prev=>prev.filter(n=>n.id!==nid)),1300);
-    },1000);
+      setTimeout(()=>setNuggets(prev=>prev.filter(n=>n.id!==nid)),2800);
+    },5000);
     return()=>clearInterval(id);
   },[cfg.overtimeThreshold]);
 
@@ -4521,9 +4554,11 @@ function ShiftNeonBorder({clockIn,cfg}){
     <>
       <style>{`
         @keyframes snb-fly{
-          0%{transform:translate(0,0) scale(1.4);opacity:1;}
-          70%{opacity:0.9;}
-          100%{transform:translate(var(--snb-tx),var(--snb-ty)) scale(0.3);opacity:0;}
+          0%{transform:translate(0,0) scale(1.6) rotate(0deg);opacity:1;}
+          30%{transform:translate(calc(var(--snb-tx)*0.25),calc(var(--snb-ty)*0.25 - 45px)) scale(1.3) rotate(90deg);opacity:1;}
+          65%{transform:translate(calc(var(--snb-tx)*0.7),calc(var(--snb-ty)*0.7 - 20px)) scale(0.9) rotate(200deg);opacity:0.9;}
+          90%{opacity:0.6;}
+          100%{transform:translate(var(--snb-tx),var(--snb-ty)) scale(0.25) rotate(360deg);opacity:0;}
         }
       `}</style>
       <svg style={{position:"fixed",inset:0,zIndex:60,pointerEvents:"none",overflow:"visible"}} width="100%" height="100%">
@@ -4589,7 +4624,7 @@ function ShiftNeonBorder({clockIn,cfg}){
           position:"fixed",left:n.sx,top:n.sy,
           "--snb-tx":`${n.tx-n.sx}px`,"--snb-ty":`${n.ty-n.sy}px`,
           fontSize:"16px",lineHeight:1,pointerEvents:"none",zIndex:65,
-          animation:"snb-fly 1.3s cubic-bezier(0.4,0,0.2,1) forwards",
+          animation:"snb-fly 2.6s cubic-bezier(0.25,0.46,0.45,0.94) forwards",
           transformOrigin:"center",userSelect:"none",
         }}>
           {n.ot?"💎":"🪙"}
