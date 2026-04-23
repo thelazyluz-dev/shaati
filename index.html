@@ -294,7 +294,7 @@ const TR={
     ob_s5_pension:"פנסיה עובד/מעסיק",ob_s5_keren:"קרן השתלמות עובד/מעסיק",
     ob_s5_allowances:"תוספות",ob_s5_none:"ללא",
     // Special day types
-    sp_vacation_lbl:"חופש בתשלום",sp_vacation_desc:"100% שכר בסיס, ללא תוספות",
+    sp_vacation_lbl:"חופש בתשלום",sp_vacation_desc:"100% שכר בסיס + תוספות קבועות",d_vac_days:"ח׳ בתשלום",
     sp_holiday_lbl:"חג",sp_holiday_desc:"100% שכר בסיס ליום חג, ללא תוספות",
     sp_sick_1_lbl:"מחלה יום 1",sp_sick_1_desc:"0% — יום ראשון ללא תשלום (לפי חוק)",
     sp_sick_23_lbl:"מחלה ימים 2-3",sp_sick_23_desc:"50% שכר בסיס, ללא תוספות ושעות נוספות",
@@ -508,7 +508,7 @@ const TR={
     ob_s5_pension:"Пенсия раб-к/работодатель",ob_s5_keren:"Образ. фонд раб-к/работодатель",
     ob_s5_allowances:"Надбавки",ob_s5_none:"Нет",
     // Special day types
-    sp_vacation_lbl:"Отпуск (оплачиваемый)",sp_vacation_desc:"100% базовой ставки, без надбавок",
+    sp_vacation_lbl:"Отпуск (оплачиваемый)",sp_vacation_desc:"100% базовой ставки + надбавки",d_vac_days:"отпуск",
     sp_holiday_lbl:"Праздник",sp_holiday_desc:"100% базовой ставки за праздник, без надбавок",
     sp_sick_1_lbl:"Больничный день 1",sp_sick_1_desc:"0% — первый день без оплаты (по закону)",
     sp_sick_23_lbl:"Больничные дни 2-3",sp_sick_23_desc:"50% базовой ставки, без надбавок и сверхурочных",
@@ -635,7 +635,7 @@ const TR={
     gr_monthly:"شهري",gr_weekly:"أسبوعي",gr_no_data:"لا توجد بيانات",
     gr_net:"صافي",gr_gross:"إجمالي",gr_manual_lbl:"يدوي",gr_manual_add:"أدخل",gr_manual_del:"احذف",gr_manual_edit:"عدّل",
     // Special shift types
-    sp_vacation_lbl:"إجازة",sp_vacation_desc:"يوم إجازة — يخصم من الرصيد",
+    sp_vacation_lbl:"إجازة",sp_vacation_desc:"يوم إجازة + بدلات",d_vac_days:"إجازة",
     sp_holiday_lbl:"عطلة",sp_holiday_desc:"يوم عطلة رسمية — 100% راتب أساسي بدون نوافل",
     sp_sick_1_lbl:"مرض اليوم 1",sp_sick_1_desc:"0% — اليوم الأول بدون أجر (وفق القانون)",
     sp_sick_23_lbl:"مرض اليوم 2-3",sp_sick_23_desc:"50% من الراتب الأساسي، بدون بدلات وساعات إضافية",
@@ -1237,7 +1237,7 @@ function getShiftPay(s,cfg,thresholdOverride){
 }
 function getShiftTotal(s,cfg,als,thresholdOverride){
   const c=getShiftPay(s,cfg,thresholdOverride);
-  const allowances=isSpecialDay(s.type)?0:csa(s.allowanceIds||[],als);
+  const allowances=(s.type==="vacation"||!isSpecialDay(s.type))?csa(s.allowanceIds||[],als):0;
   return c.gross+allowances;
 }
 function csa(ids=[],als){return als.filter(a=>a.active&&a.type==="per_shift"&&ids.includes(a.id)).reduce((s,a)=>s+a.amount,0);}
@@ -1868,7 +1868,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
     playSound("in");
     setTimeout(()=>{
       setInMsg(null);
-      const ci={date:tdy(),time:nowTime(),iso:now.toISOString(),type:detectShiftType(now.getHours(),cfg)};
+      const ci={date:tdy(),time:nowTime(),iso:new Date().toISOString(),type:detectShiftType(new Date().getHours(),cfg)};
       setClockIn(ci);
       LS.set(K.clockin,ci);
       const defAls=shiftAls.map(a=>a.id);
@@ -2272,7 +2272,7 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode,payslips,onSavePaysl
             );})()}
           </>
         )}
-        {(ms.length>0||holPay>0)&&<div style={{color:"#4ade8066",fontSize:"11px",marginTop:"12px"}}>{fH(tH)} {t("d_hours")} · {ms.filter(s=>!isSpecialDay(s.type)).length} {t("d_shifts")}{(autoHolDays.length+manualHolDays.length)>0?` + ${autoHolDays.length+manualHolDays.length} ${t("d_hol_days")}`:""}</div>}
+        {(ms.length>0||holPay>0)&&<div style={{color:"#4ade8066",fontSize:"11px",marginTop:"12px"}}>{fH(tH)} {t("d_hours")} · {ms.filter(s=>!isSpecialDay(s.type)).length} {t("d_shifts")}{(autoHolDays.length+manualHolDays.length)>0?` + ${autoHolDays.length+manualHolDays.length} ${t("d_hol_days")}`:""}{ms.filter(s=>s.type==="vacation").length>0?` · ${ms.filter(s=>s.type==="vacation").length} ${t("d_vac_days")}`:""}</div>}
         {(holPay>0||manualHolDays.length>0)&&<div style={{fontSize:"11px",color:"#fcd34d",marginTop:"4px"}}>✡️ {autoHolDays.length+manualHolDays.length} {t("d_paid_hol")}{holPay>0?` · ${prv(holPay,privacyMode)}`:""}</div>}
       </div>
 
@@ -2720,7 +2720,7 @@ function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode,form,on
             {isSpecialDay(form.type)&&<div style={{marginTop:"8px",fontSize:"11px",color:"var(--txt-dd)",background:"var(--card)",borderRadius:"8px",padding:"8px"}}>{uT("as_no_ot")}</div>}
           </Field>
 
-          {sAls.length>0&&!isSpecialDay(form.type)&&(
+          {sAls.length>0&&(!isSpecialDay(form.type)||form.type==="vacation")&&(
             <Field label={uT("as_allowances")}>
               <div style={{display:"flex",flexWrap:"wrap",gap:"8px"}}>
                 {sAls.map(a=>{const on=form.allowanceIds.includes(a.id);return(
@@ -2739,16 +2739,16 @@ function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode,form,on
                   <div style={{fontSize:"13px",color:"var(--txt-d)"}}>{fH(hours)} {uT("hr")}</div>
                   {!isSpecialDay(form.type)&&prev.ot125H>0&&<div style={{fontSize:"12px",color:"#f87171"}}>{fH(prev.ot125H)}{uT("hr")} ×125%{prev.ot150H>0?` + ${fH(prev.ot150H)}${uT("hr")} ×150%`:""}</div>}
                   {isSpecialDay(form.type)&&<div style={{fontSize:"12px",color:"var(--txt-d)"}}>{uT("sp_"+form.type+"_desc")}</div>}
-                  {!isSpecialDay(form.type)&&aTotal>0&&<div style={{fontSize:"12px",color:"#34d399"}}>{uT("as_allowances")} {prv(aTotal,privacyMode)}</div>}
+                  {(!isSpecialDay(form.type)||form.type==="vacation")&&aTotal>0&&<div style={{fontSize:"12px",color:"#34d399"}}>{uT("as_allowances")} {prv(aTotal,privacyMode)}</div>}
                 </div>
-                <div style={{fontSize:"24px",fontWeight:"900",color:isSpecialDay(form.type)?SPECIAL[form.type].color:"#4ade80"}}>{prv(isSpecialDay(form.type)?prev.gross:prev.gross+aTotal,privacyMode)}</div>
+                <div style={{fontSize:"24px",fontWeight:"900",color:isSpecialDay(form.type)?SPECIAL[form.type].color:"#4ade80"}}>{prv((isSpecialDay(form.type)&&form.type!=="vacation")?prev.gross:prev.gross+aTotal,privacyMode)}</div>
               </div>
             </div>
           )}
           <Field label={uT("as_note")}><input type="text" value={form.note} onChange={e=>setForm({...form,note:e.target.value})} placeholder={uT("as_note_ph")} style={SI}/></Field>
           {err&&<div style={{color:"#f87171",fontSize:"13px",marginBottom:"10px"}}>⚠ {err}</div>}
           <Btn onClick={add} color={saved?"#16a34a":"#22c55e"} textColor={saved?"#dcfce7":"#000"}>
-            {saved?uT("as_saved"):(prev?`${uT("as_save")} · ${prv(isSpecialDay(form.type)?prev.gross:prev.gross+aTotal,privacyMode)}`:uT("as_save"))}
+            {saved?uT("as_saved"):(prev?`${uT("as_save")} · ${prv((isSpecialDay(form.type)&&form.type!=="vacation")?prev.gross:prev.gross+aTotal,privacyMode)}`:uT("as_save"))}
           </Btn>
         </div>
       )}
@@ -4296,57 +4296,119 @@ function Onboarding({onDone,lang="he",setLang,theme="dark",setTheme}){
 }
 
 // ════════════════════════════════════════
-// MINER ANIM — animated coal miner SVG
+// MINER ANIM — improved coal miner with pick swing
 // ════════════════════════════════════════
 function MinerAnim(){
-  // 28×28 miner with swinging pick using CSS animation
+  const ref=useRef();
+  useEffect(()=>{
+    window.__minerEl=ref.current;
+    return()=>{window.__minerEl=null;};
+  },[]);
   return(
-    <svg width="28" height="28" viewBox="0 0 28 28" style={{display:"inline-block",verticalAlign:"middle",flexShrink:0}}>
-      <style>{`
-        @keyframes pick-swing{
-          0%,100%{transform-origin:18px 10px;transform:rotate(-30deg);}
-          50%{transform-origin:18px 10px;transform:rotate(20deg);}
-        }
-        @keyframes body-bob{
-          0%,100%{transform:translateY(0);}
-          50%{transform:translateY(1px);}
-        }
-        .mn-body{animation:body-bob 0.6s ease-in-out infinite;}
-        .mn-pick{animation:pick-swing 0.6s ease-in-out infinite;}
-      `}</style>
-      {/* helmet */}
-      <ellipse cx="13" cy="7" rx="5" ry="3.5" fill="#ca8a04" className="mn-body"/>
-      <rect x="10" y="6" width="6" height="2" rx="1" fill="#fbbf24" className="mn-body"/>
-      {/* lamp on helmet */}
-      <circle cx="13" cy="5" r="1.2" fill="#fef08a" className="mn-body"/>
-      {/* head */}
-      <circle cx="13" cy="10" r="3.2" fill="#d97706" className="mn-body"/>
-      {/* eyes */}
-      <circle cx="12" cy="9.5" r="0.5" fill="#1c1917" className="mn-body"/>
-      <circle cx="14" cy="9.5" r="0.5" fill="#1c1917" className="mn-body"/>
-      {/* body */}
-      <rect x="10" y="13" width="6" height="7" rx="1.5" fill="#44403c" className="mn-body"/>
-      {/* belt */}
-      <rect x="10" y="17" width="6" height="1.2" fill="#78716c" className="mn-body"/>
-      {/* legs */}
-      <rect x="10.5" y="20" width="2" height="5" rx="1" fill="#292524" className="mn-body"/>
-      <rect x="14" y="20" width="2" height="5" rx="1" fill="#292524" className="mn-body"/>
-      {/* boots */}
-      <rect x="9.5" y="24" width="3.5" height="2" rx="0.8" fill="#1c1917" className="mn-body"/>
-      <rect x="13" y="24" width="3.5" height="2" rx="0.8" fill="#1c1917" className="mn-body"/>
-      {/* arm + pick */}
-      <g className="mn-pick">
-        {/* arm */}
-        <rect x="15" y="14" width="2" height="5" rx="1" fill="#92400e" transform="rotate(15 16 16)"/>
-        {/* pick handle */}
-        <rect x="16" y="10" width="1.2" height="8" rx="0.6" fill="#a16207" transform="rotate(-10 17 14)"/>
-        {/* pick head */}
-        <path d="M14 9 Q17 7 20 9 L19 11 Q17 10 15 11 Z" fill="#9ca3af"/>
-        <path d="M20 9 L22 7" stroke="#6b7280" strokeWidth="1.2" strokeLinecap="round"/>
-        <path d="M14 9 L12 11" stroke="#6b7280" strokeWidth="1.2" strokeLinecap="round"/>
-      </g>
-    </svg>
+    <span ref={ref} style={{display:"inline-flex",alignItems:"center",flexShrink:0}}>
+      <svg width="34" height="34" viewBox="0 0 34 34" style={{display:"block",overflow:"visible"}}>
+        <style>{`
+          @keyframes mn-pick{
+            0%{transform:rotate(-45deg);}
+            30%{transform:rotate(-45deg);}
+            58%{transform:rotate(38deg);}
+            65%{transform:rotate(28deg);}
+            80%{transform:rotate(-10deg);}
+            100%{transform:rotate(-45deg);}
+          }
+          @keyframes mn-bob{
+            0%,30%,100%{transform:translateY(0);}
+            62%{transform:translateY(2.5px);}
+          }
+          @keyframes mn-lamp{
+            0%,100%{opacity:1;}
+            50%{opacity:0.6;}
+          }
+          @keyframes mn-spark1{
+            0%{transform:translate(0,0) scale(1);opacity:1;}
+            100%{transform:translate(6px,-7px) scale(0);opacity:0;}
+          }
+          @keyframes mn-spark2{
+            0%{transform:translate(0,0) scale(1);opacity:1;}
+            100%{transform:translate(9px,-3px) scale(0);opacity:0;}
+          }
+          @keyframes mn-spark3{
+            0%{transform:translate(0,0) scale(1);opacity:0.8;}
+            100%{transform:translate(4px,-10px) scale(0);opacity:0;}
+          }
+          .mn2-body{animation:mn-bob 0.7s ease-in-out infinite;}
+          .mn2-pick{transform-origin:20px 16px;animation:mn-pick 0.7s cubic-bezier(0.4,0,0.2,1) infinite;}
+          .mn2-lamp{animation:mn-lamp 1.4s ease-in-out infinite;}
+          .mn2-s1{transform-origin:26px 20px;animation:mn-spark1 0.7s 0.38s ease-out infinite;}
+          .mn2-s2{transform-origin:26px 20px;animation:mn-spark2 0.7s 0.40s ease-out infinite;}
+          .mn2-s3{transform-origin:26px 20px;animation:mn-spark3 0.7s 0.42s ease-out infinite;}
+        `}</style>
+
+        {/* body group (bobs up/down) */}
+        <g className="mn2-body">
+          {/* helmet */}
+          <ellipse cx="15" cy="8" rx="6" ry="4" fill="#b45309"/>
+          <rect x="10" y="7" width="10" height="2.5" rx="1.2" fill="#d97706"/>
+          {/* lamp */}
+          <circle cx="15" cy="5.5" r="1.8" fill="#fef08a" className="mn2-lamp" filter="url(#mn-glow)"/>
+          {/* head */}
+          <circle cx="15" cy="12" r="4" fill="#c2794a"/>
+          {/* eyes */}
+          <circle cx="13.5" cy="11.5" r="0.7" fill="#1c1917"/>
+          <circle cx="16.5" cy="11.5" r="0.7" fill="#1c1917"/>
+          {/* stubble smile */}
+          <path d="M13.5 13.5 Q15 14.5 16.5 13.5" stroke="#92400e" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+          {/* body / overalls */}
+          <rect x="11" y="16" width="8" height="9" rx="2" fill="#1e3a5f"/>
+          {/* pocket stripe */}
+          <rect x="12" y="17.5" width="3" height="2" rx="0.6" fill="#1d4ed8" opacity="0.6"/>
+          {/* belt */}
+          <rect x="10.5" y="21.5" width="9" height="1.5" rx="0.7" fill="#92400e"/>
+          <rect x="14" y="21.5" width="2" height="1.5" fill="#d97706"/>
+          {/* legs */}
+          <rect x="11.5" y="25" width="2.5" height="6" rx="1.2" fill="#1e3a5f"/>
+          <rect x="15.5" y="25" width="2.5" height="6" rx="1.2" fill="#1e3a5f"/>
+          {/* boots */}
+          <rect x="10.5" y="29" width="4" height="2.5" rx="1" fill="#1c1917"/>
+          <rect x="14.5" y="29" width="4" height="2.5" rx="1" fill="#1c1917"/>
+          {/* left arm (static) */}
+          <rect x="8" y="17" width="2.5" height="6" rx="1.2" fill="#c2794a" transform="rotate(-10 9.25 20)"/>
+        </g>
+
+        {/* pick arm (swings separately) */}
+        <g className="mn2-pick">
+          {/* right arm */}
+          <rect x="18.5" y="17" width="2.5" height="6" rx="1.2" fill="#c2794a"/>
+          {/* handle */}
+          <rect x="19" y="11" width="1.5" height="9" rx="0.7" fill="#92400e"/>
+          {/* pick head */}
+          <path d="M16 9 Q19.5 6.5 23 9 L22 11.5 Q19.5 10 17 11.5 Z" fill="#6b7280"/>
+          <path d="M23 9 L25.5 6.5" stroke="#9ca3af" strokeWidth="1.4" strokeLinecap="round"/>
+          <path d="M16 9 L13.5 11.5" stroke="#9ca3af" strokeWidth="1.4" strokeLinecap="round"/>
+        </g>
+
+        {/* sparks at impact point */}
+        <circle cx="26" cy="20" r="1.2" fill="#fbbf24" className="mn2-s1"/>
+        <circle cx="26" cy="20" r="0.9" fill="#fef08a" className="mn2-s2"/>
+        <circle cx="26" cy="20" r="0.7" fill="#f59e0b" className="mn2-s3"/>
+
+        <defs>
+          <filter id="mn-glow"><feGaussianBlur stdDeviation="1.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+      </svg>
+    </span>
   );
+}
+
+// Convert perimeter distance from top-center to screen XY
+function snbPerimToXY(pos,w,h){
+  const rw=w-3,rh=h-3,perim=2*rw+2*rh;
+  const halfTop=rw/2;
+  let p=((halfTop+pos)%perim+perim)%perim;
+  if(p<rw)return[1.5+p,1.5];
+  p-=rw;if(p<rh)return[w-1.5,1.5+p];
+  p-=rh;if(p<rw)return[w-1.5-p,h-1.5];
+  p-=rw;return[1.5,h-1.5-p];
 }
 
 // ════════════════════════════════════════
@@ -4357,22 +4419,26 @@ function ShiftNeonBorder({clockIn,cfg}){
   const[dims,setDims]=useState({w:window.innerWidth||390,h:window.innerHeight||800});
   const[flash,setFlash]=useState(null);
   const[scanAnim,setScanAnim]=useState(false);
+  const[nuggets,setNuggets]=useState([]);
   const prevRegLenRef=useRef(-1);
   const flashTimerRef=useRef(null);
   const elapsedMinRef=useRef(0);
-  // lastVisitLen: how far along the perimeter the last visit was
+  const nuggetIdRef=useRef(0);
   const lastVisitLen=useRef(0);
+  // keep regLen accessible to the nugget interval without stale closure
+  const regLenRef=useRef(0);
+  const dimsRef=useRef(dims);
+
+  useEffect(()=>{dimsRef.current=dims;},[dims]);
 
   // Load last visit on mount, save on hide/unmount
   useEffect(()=>{
     const raw=LS.get(K.lastVisit);
     if(raw&&typeof raw.elapsedMin==="number"){
-      lastVisitLen.current=raw.elapsedMin; // store raw minutes; convert to px below
-      setScanAnim(true); // trigger scan sweep animation
+      lastVisitLen.current=raw.elapsedMin;
+      setScanAnim(true);
     }
-    const save=()=>{
-      if(elapsedMinRef.current>0)LS.set(K.lastVisit,{elapsedMin:elapsedMinRef.current});
-    };
+    const save=()=>{if(elapsedMinRef.current>0)LS.set(K.lastVisit,{elapsedMin:elapsedMinRef.current});};
     document.addEventListener('visibilitychange',save);
     return()=>{save();document.removeEventListener('visibilitychange',save);};
   },[]);
@@ -4385,14 +4451,14 @@ function ShiftNeonBorder({clockIn,cfg}){
 
   useEffect(()=>{
     const tick=()=>{
-      const hr=ch(clockIn.time,nowTime());
+      const hr=Math.max(0,(Date.now()-new Date(clockIn.iso).getTime())/3600000);
       setElapsed(hr);
       elapsedMinRef.current=hr*60;
     };
     tick();
-    const id=setInterval(tick,15000);
+    const id=setInterval(tick,5000);
     return()=>clearInterval(id);
-  },[clockIn.time]);
+  },[clockIn.iso]);
 
   const threshold=cfg.overtimeThreshold||8.6;
   const totalMin=Math.round(threshold*60);
@@ -4403,12 +4469,22 @@ function ShiftNeonBorder({clockIn,cfg}){
   const elapsedMin=elapsed*60;
   const regLen=Math.round((Math.min(elapsedMin,totalMin)/totalMin)*perim);
   const otLen=Math.min(Math.round((Math.max(0,elapsedMin-totalMin)/totalMin)*perim),perim);
+  const isOT=elapsed>=threshold;
+
+  useEffect(()=>{regLenRef.current=regLen;},[regLen]);
+
+  // OT border: inset rect dimensions
+  const otOff=6; // px inside gold border
+  const oRW=w-3-2*otOff,oRH=h-3-2*otOff;
+  const oPerim=2*oRW+2*oRH;
+  const oHalfTop=Math.round(oRW/2);
+  const otBorderLen=Math.min(Math.round((Math.max(0,elapsedMin-totalMin)/totalMin)*oPerim),oPerim);
 
   // Convert stored lastVisit minutes to perimeter pixels
   const lvMin=lastVisitLen.current;
   const lvLen=lvMin>0?Math.round((Math.min(lvMin,totalMin)/totalMin)*perim):0;
 
-  // Flash the new segment each time a minute tick grows the trail
+  // Flash when trail grows
   useEffect(()=>{
     if(prevRegLenRef.current===-1){prevRegLenRef.current=regLen;return;}
     if(regLen>prevRegLenRef.current){
@@ -4420,54 +4496,106 @@ function ShiftNeonBorder({clockIn,cfg}){
     }
   },[regLen]);
 
-  const tipSz=6; // pulsing dot at trail frontier
-  const markerSz=5; // permanent last-visit marker dot
+  // Nugget spawner — every second, fly a coin/diamond from miner to frontier
+  useEffect(()=>{
+    const id=setInterval(()=>{
+      const el=window.__minerEl;
+      if(!el||regLenRef.current===0)return;
+      const rect=el.getBoundingClientRect();
+      const sx=rect.left+rect.width/2;
+      const sy=rect.top+rect.height/2;
+      const{w:dw,h:dh}=dimsRef.current;
+      const[tx,ty]=snbPerimToXY(regLenRef.current,dw,dh);
+      const nid=++nuggetIdRef.current;
+      const ot=elapsedMinRef.current/60>=(cfg.overtimeThreshold||8.6);
+      setNuggets(prev=>[...prev,{id:nid,sx,sy,tx,ty,ot}]);
+      setTimeout(()=>setNuggets(prev=>prev.filter(n=>n.id!==nid)),1300);
+    },1000);
+    return()=>clearInterval(id);
+  },[cfg.overtimeThreshold]);
+
+  const tipSz=6;
+  const markerSz=5;
 
   return(
-    <svg style={{position:"fixed",inset:0,zIndex:60,pointerEvents:"none",overflow:"visible"}} width="100%" height="100%">
-      <defs>
-        <filter id="snb-gt"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-        <filter id="snb-gd"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-        <filter id="snb-gg"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-      </defs>
-      {/* Dim full-perimeter track */}
-      <rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fff" strokeWidth="1" strokeOpacity="0.06"/>
-      {/* Last-visit scan sweep (gold, animates from 0 to lvLen over 1.5s on mount) */}
-      {scanAnim&&lvLen>0&&(
-        <rect key="lv-scan" x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fbbf24" strokeWidth="2.5" strokeOpacity="0.55"
-          strokeDasharray={`${lvLen} ${perim+100}`} strokeDashoffset={`${-halfTop}`} filter="url(#snb-gg)">
-          <animate attributeName="stroke-dasharray" from={`0 ${perim+100}`} to={`${lvLen} ${perim+100}`} dur="1.5s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1"/>
-        </rect>
-      )}
-      {/* Permanent gold marker dot at last-visit position */}
-      {lvLen>0&&(
-        <rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#f59e0b" strokeWidth={markerSz}
-          strokeDasharray={`1 ${perim+100}`} strokeDashoffset={`${-halfTop-lvLen+1}`}
-          strokeLinecap="round" filter="url(#snb-gg)" strokeOpacity="0.9"/>
-      )}
-      {/* Accumulated regular trail */}
-      {regLen>0&&<rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#38bdf8" strokeWidth="2" strokeOpacity="0.5" strokeDasharray={`${regLen} ${perim+100}`} strokeDashoffset={`${-halfTop}`} filter="url(#snb-gt)"/>}
-      {/* Overtime trail */}
-      {otLen>0&&<rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fb923c" strokeWidth="2" strokeOpacity="0.7" strokeDasharray={`${otLen} ${perim+100}`} strokeDashoffset={`${-halfTop}`} filter="url(#snb-gt)"/>}
-      {/* Pulsing dot at the frontier of the trail */}
-      {regLen>0&&regLen<perim&&(
-        <rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#7dd3fc" strokeWidth="3"
-          strokeDasharray={`${tipSz} ${perim+100}`} strokeDashoffset={`${-halfTop-regLen+tipSz}`}
-          strokeLinecap="round" filter="url(#snb-gd)">
-          <animate attributeName="stroke-opacity" values="0.9;0.2;0.9" dur="2s" repeatCount="indefinite"/>
-          <animate attributeName="stroke-width" values="3;1.5;3" dur="2s" repeatCount="indefinite"/>
-        </rect>
-      )}
-      {/* Lightning flash on newly accumulated segment — fast and dramatic */}
-      {flash&&(
-        <rect key={flash.key} x="1.5" y="1.5" width={rw} height={rh} fill="none"
-          stroke="#ffffff" strokeWidth="3.5"
-          strokeDasharray={`${flash.len} ${perim+100}`} strokeDashoffset={`${-halfTop-flash.start}`}
-          filter="url(#snb-gd)">
-          <animate attributeName="stroke-opacity" values="0;1;1;0" keyTimes="0;0.05;0.25;1" dur="0.9s" fill="freeze"/>
-        </rect>
-      )}
-    </svg>
+    <>
+      <style>{`
+        @keyframes snb-fly{
+          0%{transform:translate(0,0) scale(1.4);opacity:1;}
+          70%{opacity:0.9;}
+          100%{transform:translate(var(--snb-tx),var(--snb-ty)) scale(0.3);opacity:0;}
+        }
+      `}</style>
+      <svg style={{position:"fixed",inset:0,zIndex:60,pointerEvents:"none",overflow:"visible"}} width="100%" height="100%">
+        <defs>
+          <filter id="snb-gt"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="snb-gd"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="snb-gg"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        {/* Dim track */}
+        <rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fff" strokeWidth="1" strokeOpacity="0.06"/>
+        {/* Last-visit gold scan sweep */}
+        {scanAnim&&lvLen>0&&(
+          <rect key="lv-scan" x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fbbf24" strokeWidth="2" strokeOpacity="0.4"
+            strokeDasharray={`${lvLen} ${perim+100}`} strokeDashoffset={`${-halfTop}`} filter="url(#snb-gg)">
+            <animate attributeName="stroke-dasharray" from={`0 ${perim+100}`} to={`${lvLen} ${perim+100}`} dur="1.5s" fill="freeze"/>
+          </rect>
+        )}
+        {/* Last-visit permanent marker */}
+        {lvLen>0&&(
+          <rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#f59e0b" strokeWidth={markerSz}
+            strokeDasharray={`1 ${perim+100}`} strokeDashoffset={`${-halfTop-lvLen+1}`}
+            strokeLinecap="round" filter="url(#snb-gg)" strokeOpacity="0.9"/>
+        )}
+        {/* Gold accumulated trail (regular time) */}
+        {regLen>0&&<rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fbbf24" strokeWidth="2.5" strokeOpacity="0.6" strokeDasharray={`${regLen} ${perim+100}`} strokeDashoffset={`${-halfTop}`} filter="url(#snb-gt)"/>}
+        {/* Gold frontier pulsing dot */}
+        {regLen>0&&regLen<perim&&(
+          <rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fef08a" strokeWidth="4"
+            strokeDasharray={`${tipSz} ${perim+100}`} strokeDashoffset={`${-halfTop-regLen+tipSz}`}
+            strokeLinecap="round" filter="url(#snb-gd)">
+            <animate attributeName="stroke-opacity" values="1;0.25;1" dur="1.8s" repeatCount="indefinite"/>
+            <animate attributeName="stroke-width" values="4;2;4" dur="1.8s" repeatCount="indefinite"/>
+          </rect>
+        )}
+        {/* OT inset blue border */}
+        {isOT&&otBorderLen>0&&(
+          <>
+            <rect x={1.5+otOff} y={1.5+otOff} width={oRW} height={oRH} fill="none" stroke="#fff" strokeWidth="0.8" strokeOpacity="0.08"/>
+            <rect x={1.5+otOff} y={1.5+otOff} width={oRW} height={oRH} fill="none" stroke="#7dd3fc" strokeWidth="2" strokeOpacity="0.7" strokeDasharray={`${otBorderLen} ${oPerim+100}`} strokeDashoffset={`${-oHalfTop}`} filter="url(#snb-gt)"/>
+            {otBorderLen<oPerim&&(
+              <rect x={1.5+otOff} y={1.5+otOff} width={oRW} height={oRH} fill="none" stroke="#e0f2fe" strokeWidth="3.5"
+                strokeDasharray={`${tipSz} ${oPerim+100}`} strokeDashoffset={`${-oHalfTop-otBorderLen+tipSz}`}
+                strokeLinecap="round" filter="url(#snb-gd)">
+                <animate attributeName="stroke-opacity" values="1;0.25;1" dur="1.8s" repeatCount="indefinite"/>
+                <animate attributeName="stroke-width" values="3.5;1.5;3.5" dur="1.8s" repeatCount="indefinite"/>
+              </rect>
+            )}
+          </>
+        )}
+        {/* Lightning flash on new gold segment */}
+        {flash&&(
+          <rect key={flash.key} x="1.5" y="1.5" width={rw} height={rh} fill="none"
+            stroke="#fef9c3" strokeWidth="4"
+            strokeDasharray={`${flash.len} ${perim+100}`} strokeDashoffset={`${-halfTop-flash.start}`}
+            filter="url(#snb-gd)">
+            <animate attributeName="stroke-opacity" values="0;1;1;0" keyTimes="0;0.05;0.25;1" dur="0.9s" fill="freeze"/>
+          </rect>
+        )}
+      </svg>
+      {/* Flying nuggets/diamonds */}
+      {nuggets.map(n=>(
+        <div key={n.id} style={{
+          position:"fixed",left:n.sx,top:n.sy,
+          "--snb-tx":`${n.tx-n.sx}px`,"--snb-ty":`${n.ty-n.sy}px`,
+          fontSize:"16px",lineHeight:1,pointerEvents:"none",zIndex:65,
+          animation:"snb-fly 1.3s cubic-bezier(0.4,0,0.2,1) forwards",
+          transformOrigin:"center",userSelect:"none",
+        }}>
+          {n.ot?"💎":"🪙"}
+        </div>
+      ))}
+    </>
   );
 }
 
