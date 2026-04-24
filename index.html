@@ -1743,7 +1743,6 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode,shifts}){
             <span style={{fontSize:"13px",fontWeight:"800",color:isOT150?"#f87171":isOT?"#fb923c":sty.color}}>{effectivePct}%</span>
           </div>
           <span style={{display:"flex",alignItems:"center",gap:"4px",filter:privacyMode?"blur(5px)":"none"}}>
-            <MinerAnim/>
             <span style={{fontSize:"12px",color:"#86efac",fontWeight:"600"}}>{fM(netRatePerHr)}/{uT("cl_per_hr")}</span>
           </span>
         </div>
@@ -4296,190 +4295,13 @@ function Onboarding({onDone,lang="he",setLang,theme="dark",setTheme}){
   );
 }
 
-// ════════════════════════════════════════
-// MINER ANIM — improved coal miner with pick swing
-// ════════════════════════════════════════
-function MinerAnim(){
-  const ref=useRef();
-  useEffect(()=>{
-    window.__minerEl=ref.current;
-    return()=>{window.__minerEl=null;};
-  },[]);
-  return(
-    <span ref={ref} style={{display:"inline-flex",alignItems:"center",flexShrink:0}}>
-      <svg width="34" height="34" viewBox="0 0 34 34" style={{display:"block",overflow:"visible"}}>
-        <style>{`
-          @keyframes mn-pick{
-            0%  {transform:rotate(-55deg);animation-timing-function:ease-in;}
-            22% {transform:rotate(-58deg);animation-timing-function:cubic-bezier(0.55,0,1,0.45);}
-            52% {transform:rotate(40deg); animation-timing-function:cubic-bezier(0,0.6,0.4,1);}
-            60% {transform:rotate(28deg); animation-timing-function:ease-in-out;}
-            76% {transform:rotate(-22deg);animation-timing-function:ease-in-out;}
-            100%{transform:rotate(-55deg);}
-          }
-          @keyframes mn-bob{
-            0%  {transform:translateY(0);  animation-timing-function:ease-in;}
-            22% {transform:translateY(-1px);animation-timing-function:cubic-bezier(0.55,0,1,0.45);}
-            56% {transform:translateY(3px); animation-timing-function:cubic-bezier(0,0.8,0.4,1);}
-            64% {transform:translateY(1.5px);animation-timing-function:ease-out;}
-            100%{transform:translateY(0);}
-          }
-          @keyframes mn-lean{
-            0%  {transform:rotate(0deg); animation-timing-function:ease-in;}
-            52% {transform:rotate(5deg); animation-timing-function:ease-out;}
-            100%{transform:rotate(0deg);}
-          }
-          @keyframes mn-lamp{
-            0%,100%{opacity:1;r:1.8;}
-            50%{opacity:0.5;}
-          }
-          @keyframes mn-spark1{
-            0%,55%{transform:translate(0,0) scale(0);opacity:0;}
-            60%{transform:translate(0,0) scale(1.4);opacity:1;}
-            100%{transform:translate(7px,-9px) scale(0);opacity:0;}
-          }
-          @keyframes mn-spark2{
-            0%,56%{transform:translate(0,0) scale(0);opacity:0;}
-            62%{transform:translate(0,0) scale(1.2);opacity:1;}
-            100%{transform:translate(11px,-4px) scale(0);opacity:0;}
-          }
-          @keyframes mn-spark3{
-            0%,57%{transform:translate(0,0) scale(0);opacity:0;}
-            63%{transform:translate(0,0) scale(1);opacity:0.9;}
-            100%{transform:translate(5px,-12px) scale(0);opacity:0;}
-          }
-          @keyframes mn-arm-l{
-            0%  {transform:rotate(0deg); animation-timing-function:ease-in;}
-            52% {transform:rotate(-8deg);animation-timing-function:ease-out;}
-            100%{transform:rotate(0deg);}
-          }
-          .mn2-body{animation:mn-bob 1.4s linear infinite;}
-          .mn2-lean{animation:mn-lean 1.4s linear infinite;transform-origin:15px 18px;}
-          .mn2-pick{transform-origin:20px 16px;animation:mn-pick 1.4s linear infinite;}
-          .mn2-lamp{animation:mn-lamp 2s ease-in-out infinite;}
-          .mn2-arml{transform-origin:10px 18px;animation:mn-arm-l 1.4s ease-in-out infinite;}
-          .mn2-s1{transform-origin:27px 21px;animation:mn-spark1 1.4s ease-out infinite;}
-          .mn2-s2{transform-origin:27px 21px;animation:mn-spark2 1.4s ease-out infinite;}
-          .mn2-s3{transform-origin:27px 21px;animation:mn-spark3 1.4s ease-out infinite;}
-        `}</style>
-
-        {/* body group (bobs up/down) */}
-        <g className="mn2-body">
-          {/* whole-body lean on impact */}
-          <g className="mn2-lean">
-            {/* helmet */}
-            <ellipse cx="15" cy="8" rx="6" ry="4" fill="#b45309"/>
-            <rect x="10" y="7" width="10" height="2.5" rx="1.2" fill="#d97706"/>
-            {/* lamp */}
-            <circle cx="15" cy="5.5" r="1.8" fill="#fef08a" className="mn2-lamp" filter="url(#mn-glow)"/>
-            {/* lamp beam */}
-            <ellipse cx="15" cy="4" rx="2.5" ry="1.2" fill="#fef08a" opacity="0.25" className="mn2-lamp"/>
-            {/* head */}
-            <circle cx="15" cy="12" r="4" fill="#c2794a"/>
-            {/* eyes */}
-            <circle cx="13.5" cy="11.5" r="0.7" fill="#1c1917"/>
-            <circle cx="16.5" cy="11.5" r="0.7" fill="#1c1917"/>
-            {/* eyebrow */}
-            <path d="M13 10.5 Q13.5 10 14 10.5" stroke="#7c4a1e" strokeWidth="0.7" fill="none"/>
-            <path d="M16 10.5 Q16.5 10 17 10.5" stroke="#7c4a1e" strokeWidth="0.7" fill="none"/>
-            {/* stubble */}
-            <path d="M13.5 13.5 Q15 14.8 16.5 13.5" stroke="#92400e" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
-            {/* body / overalls */}
-            <rect x="11" y="16" width="8" height="9" rx="2" fill="#1e3a5f"/>
-            {/* pocket */}
-            <rect x="12" y="17.5" width="3" height="2" rx="0.6" fill="#1d4ed8" opacity="0.6"/>
-            <rect x="12.4" y="17.8" width="2.2" height="0.6" rx="0.3" fill="#fff" opacity="0.15"/>
-            {/* belt */}
-            <rect x="10.5" y="21.5" width="9" height="1.5" rx="0.7" fill="#92400e"/>
-            <rect x="14" y="21.5" width="2" height="1.5" fill="#d97706"/>
-            {/* suspenders */}
-            <rect x="13" y="16" width="1" height="5.5" rx="0.4" fill="#2563eb" opacity="0.5"/>
-            <rect x="16" y="16" width="1" height="5.5" rx="0.4" fill="#2563eb" opacity="0.5"/>
-            {/* legs */}
-            <rect x="11.5" y="25" width="2.5" height="6" rx="1.2" fill="#1e3a5f"/>
-            <rect x="15.5" y="25" width="2.5" height="6" rx="1.2" fill="#1e3a5f"/>
-            {/* boots */}
-            <rect x="10.5" y="29" width="4" height="2.5" rx="1" fill="#1c1917"/>
-            <rect x="14.5" y="29" width="4" height="2.5" rx="1" fill="#1c1917"/>
-            {/* boot shine */}
-            <rect x="11" y="29.2" width="1.5" height="0.6" rx="0.3" fill="#374151" opacity="0.6"/>
-            <rect x="15" y="29.2" width="1.5" height="0.6" rx="0.3" fill="#374151" opacity="0.6"/>
-            {/* left arm (counter-swings) */}
-            <g className="mn2-arml">
-              <rect x="7.5" y="16.5" width="2.5" height="6.5" rx="1.2" fill="#c2794a"/>
-              {/* left hand */}
-              <circle cx="8.75" cy="23.5" r="1.4" fill="#b45309"/>
-            </g>
-          </g>
-        </g>
-
-        {/* pick arm (swings separately) */}
-        <g className="mn2-pick">
-          {/* right arm */}
-          <rect x="18.5" y="17" width="2.5" height="6" rx="1.2" fill="#c2794a"/>
-          {/* handle */}
-          <rect x="19" y="11" width="1.5" height="9" rx="0.7" fill="#92400e"/>
-          {/* pick head */}
-          <path d="M16 9 Q19.5 6.5 23 9 L22 11.5 Q19.5 10 17 11.5 Z" fill="#6b7280"/>
-          <path d="M23 9 L25.5 6.5" stroke="#9ca3af" strokeWidth="1.4" strokeLinecap="round"/>
-          <path d="M16 9 L13.5 11.5" stroke="#9ca3af" strokeWidth="1.4" strokeLinecap="round"/>
-        </g>
-
-        {/* sparks at pick impact point */}
-        <circle cx="27" cy="21" r="1.4" fill="#fbbf24" className="mn2-s1"/>
-        <circle cx="27" cy="21" r="1" fill="#fef08a" className="mn2-s2"/>
-        <circle cx="27" cy="21" r="0.8" fill="#f97316" className="mn2-s3"/>
-
-        <defs>
-          <filter id="mn-glow"><feGaussianBlur stdDeviation="1.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-        </defs>
-      </svg>
-    </span>
-  );
-}
-
-// Convert perimeter distance from top-center to screen XY
-function snbPerimToXY(pos,w,h){
-  const rw=w-3,rh=h-3,perim=2*rw+2*rh;
-  const halfTop=rw/2;
-  let p=((halfTop+pos)%perim+perim)%perim;
-  if(p<rw)return[1.5+p,1.5];
-  p-=rw;if(p<rh)return[w-1.5,1.5+p];
-  p-=rh;if(p<rw)return[w-1.5-p,h-1.5];
-  p-=rw;return[1.5,h-1.5-p];
-}
 
 // ════════════════════════════════════════
-// SHIFT NEON BORDER
+// SHIFT NEON BORDER — clean gold bar that grows
 // ════════════════════════════════════════
 function ShiftNeonBorder({clockIn,cfg}){
   const[elapsed,setElapsed]=useState(0);
   const[dims,setDims]=useState({w:window.innerWidth||390,h:window.innerHeight||800});
-  const[flash,setFlash]=useState(null);
-  const[scanAnim,setScanAnim]=useState(false);
-  const[nuggets,setNuggets]=useState([]);
-  const prevRegLenRef=useRef(-1);
-  const flashTimerRef=useRef(null);
-  const elapsedMinRef=useRef(0);
-  const nuggetIdRef=useRef(0);
-  const lastVisitLen=useRef(0);
-  // keep regLen accessible to the nugget interval without stale closure
-  const regLenRef=useRef(0);
-  const dimsRef=useRef(dims);
-
-  useEffect(()=>{dimsRef.current=dims;},[dims]);
-
-  // Load last visit on mount, save on hide/unmount
-  useEffect(()=>{
-    const raw=LS.get(K.lastVisit);
-    if(raw&&typeof raw.elapsedMin==="number"){
-      lastVisitLen.current=raw.elapsedMin;
-      setScanAnim(true);
-    }
-    const save=()=>{if(elapsedMinRef.current>0)LS.set(K.lastVisit,{elapsedMin:elapsedMinRef.current});};
-    document.addEventListener('visibilitychange',save);
-    return()=>{save();document.removeEventListener('visibilitychange',save);};
-  },[]);
 
   useEffect(()=>{
     const up=()=>setDims({w:window.innerWidth,h:window.innerHeight});
@@ -4488,160 +4310,74 @@ function ShiftNeonBorder({clockIn,cfg}){
   },[]);
 
   useEffect(()=>{
-    const tick=()=>{
-      const hr=Math.max(0,(Date.now()-new Date(clockIn.iso).getTime())/3600000);
-      setElapsed(hr);
-      elapsedMinRef.current=hr*60;
-    };
+    const tick=()=>setElapsed(Math.max(0,(Date.now()-new Date(clockIn.iso).getTime())/3600000));
     tick();
     const id=setInterval(tick,5000);
     return()=>clearInterval(id);
   },[clockIn.iso]);
 
   const threshold=cfg.overtimeThreshold||8.6;
-  const totalMin=Math.round(threshold*60);
   const{w,h}=dims;
   const rw=w-3,rh=h-3;
   const perim=2*rw+2*rh;
   const halfTop=Math.round(rw/2);
   const elapsedMin=elapsed*60;
+  const totalMin=Math.round(threshold*60);
   const regLen=Math.round((Math.min(elapsedMin,totalMin)/totalMin)*perim);
-  const otLen=Math.min(Math.round((Math.max(0,elapsedMin-totalMin)/totalMin)*perim),perim);
   const isOT=elapsed>=threshold;
 
-  useEffect(()=>{regLenRef.current=regLen;},[regLen]);
-
-  // OT border: inset rect dimensions
-  const otOff=6; // px inside gold border
-  const oRW=w-3-2*otOff,oRH=h-3-2*otOff;
+  // OT inset border
+  const otOff=5;
+  const oRW=rw-2*otOff,oRH=rh-2*otOff;
   const oPerim=2*oRW+2*oRH;
   const oHalfTop=Math.round(oRW/2);
-  const otBorderLen=Math.min(Math.round((Math.max(0,elapsedMin-totalMin)/totalMin)*oPerim),oPerim);
+  const otLen=Math.min(Math.round((Math.max(0,elapsedMin-totalMin)/totalMin)*oPerim),oPerim);
 
-  // Convert stored lastVisit minutes to perimeter pixels
-  const lvMin=lastVisitLen.current;
-  const lvLen=lvMin>0?Math.round((Math.min(lvMin,totalMin)/totalMin)*perim):0;
-
-  // Flash when trail grows
-  useEffect(()=>{
-    if(prevRegLenRef.current===-1){prevRegLenRef.current=regLen;return;}
-    if(regLen>prevRegLenRef.current){
-      const seg={start:prevRegLenRef.current,len:regLen-prevRegLenRef.current,key:Date.now()};
-      prevRegLenRef.current=regLen;
-      clearTimeout(flashTimerRef.current);
-      setFlash(seg);
-      flashTimerRef.current=setTimeout(()=>setFlash(null),900);
-    }
-  },[regLen]);
-
-  // Nugget spawner — every 5 seconds, fly a coin/diamond from miner to frontier
-  useEffect(()=>{
-    const id=setInterval(()=>{
-      const el=window.__minerEl;
-      if(!el||regLenRef.current===0)return;
-      const rect=el.getBoundingClientRect();
-      const sx=rect.left+rect.width/2;
-      const sy=rect.top+rect.height/2;
-      const{w:dw,h:dh}=dimsRef.current;
-      const[tx,ty]=snbPerimToXY(regLenRef.current,dw,dh);
-      const nid=++nuggetIdRef.current;
-      const ot=elapsedMinRef.current/60>=(cfg.overtimeThreshold||8.6);
-      setNuggets(prev=>[...prev,{id:nid,sx,sy,tx,ty,ot}]);
-      setTimeout(()=>setNuggets(prev=>prev.filter(n=>n.id!==nid)),2800);
-    },5000);
-    return()=>clearInterval(id);
-  },[cfg.overtimeThreshold]);
-
-  const tipSz=6;
-  const markerSz=5;
+  const tipSz=5;
 
   return(
-    <>
-      <style>{`
-        @keyframes snb-fly{
-          0%  {transform:translate(0,0) scale(1.5) rotate(0deg);opacity:1;}
-          10% {transform:translate(calc(var(--snb-tx)*0.07),calc(var(--snb-ty)*0.07 - 14px)) scale(1.45) rotate(36deg);opacity:1;}
-          20% {transform:translate(calc(var(--snb-tx)*0.16),calc(var(--snb-ty)*0.16 - 26px)) scale(1.35) rotate(72deg);opacity:1;}
-          30% {transform:translate(calc(var(--snb-tx)*0.27),calc(var(--snb-ty)*0.27 - 36px)) scale(1.22) rotate(108deg);opacity:1;}
-          40% {transform:translate(calc(var(--snb-tx)*0.4), calc(var(--snb-ty)*0.4  - 42px)) scale(1.08) rotate(144deg);opacity:1;}
-          50% {transform:translate(calc(var(--snb-tx)*0.5), calc(var(--snb-ty)*0.5  - 44px)) scale(0.95) rotate(180deg);opacity:0.95;}
-          60% {transform:translate(calc(var(--snb-tx)*0.62),calc(var(--snb-ty)*0.62 - 40px)) scale(0.82) rotate(216deg);opacity:0.88;}
-          70% {transform:translate(calc(var(--snb-tx)*0.75),calc(var(--snb-ty)*0.75 - 30px)) scale(0.68) rotate(252deg);opacity:0.75;}
-          80% {transform:translate(calc(var(--snb-tx)*0.86),calc(var(--snb-ty)*0.86 - 17px)) scale(0.52) rotate(288deg);opacity:0.55;}
-          90% {transform:translate(calc(var(--snb-tx)*0.95),calc(var(--snb-ty)*0.95 -  6px)) scale(0.36) rotate(324deg);opacity:0.3;}
-          100%{transform:translate(var(--snb-tx),var(--snb-ty)) scale(0.15) rotate(360deg);opacity:0;}
-        }
-      `}</style>
-      <svg style={{position:"fixed",inset:0,zIndex:60,pointerEvents:"none",overflow:"visible"}} width="100%" height="100%">
-        <defs>
-          <filter id="snb-gt"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-          <filter id="snb-gd"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-          <filter id="snb-gg"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-        </defs>
-        {/* Dim track */}
-        <rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fff" strokeWidth="1" strokeOpacity="0.06"/>
-        {/* Last-visit gold scan sweep */}
-        {scanAnim&&lvLen>0&&(
-          <rect key="lv-scan" x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fbbf24" strokeWidth="2" strokeOpacity="0.4"
-            strokeDasharray={`${lvLen} ${perim+100}`} strokeDashoffset={`${-halfTop}`} filter="url(#snb-gg)">
-            <animate attributeName="stroke-dasharray" from={`0 ${perim+100}`} to={`${lvLen} ${perim+100}`} dur="1.5s" fill="freeze"/>
-          </rect>
-        )}
-        {/* Last-visit permanent marker */}
-        {lvLen>0&&(
-          <rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#f59e0b" strokeWidth={markerSz}
-            strokeDasharray={`1 ${perim+100}`} strokeDashoffset={`${-halfTop-lvLen+1}`}
-            strokeLinecap="round" filter="url(#snb-gg)" strokeOpacity="0.9"/>
-        )}
-        {/* Gold accumulated trail (regular time) */}
-        {regLen>0&&<rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fbbf24" strokeWidth="2.5" strokeOpacity="0.6" strokeDasharray={`${regLen} ${perim+100}`} strokeDashoffset={`${-halfTop}`} filter="url(#snb-gt)"/>}
-        {/* Gold frontier pulsing dot */}
-        {regLen>0&&regLen<perim&&(
-          <rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fef08a" strokeWidth="4"
-            strokeDasharray={`${tipSz} ${perim+100}`} strokeDashoffset={`${-halfTop-regLen+tipSz}`}
-            strokeLinecap="round" filter="url(#snb-gd)">
-            <animate attributeName="stroke-opacity" values="1;0.25;1" dur="1.8s" repeatCount="indefinite"/>
-            <animate attributeName="stroke-width" values="4;2;4" dur="1.8s" repeatCount="indefinite"/>
-          </rect>
-        )}
-        {/* OT inset blue border */}
-        {isOT&&otBorderLen>0&&(
-          <>
-            <rect x={1.5+otOff} y={1.5+otOff} width={oRW} height={oRH} fill="none" stroke="#fff" strokeWidth="0.8" strokeOpacity="0.08"/>
-            <rect x={1.5+otOff} y={1.5+otOff} width={oRW} height={oRH} fill="none" stroke="#7dd3fc" strokeWidth="2" strokeOpacity="0.7" strokeDasharray={`${otBorderLen} ${oPerim+100}`} strokeDashoffset={`${-oHalfTop}`} filter="url(#snb-gt)"/>
-            {otBorderLen<oPerim&&(
-              <rect x={1.5+otOff} y={1.5+otOff} width={oRW} height={oRH} fill="none" stroke="#e0f2fe" strokeWidth="3.5"
-                strokeDasharray={`${tipSz} ${oPerim+100}`} strokeDashoffset={`${-oHalfTop-otBorderLen+tipSz}`}
-                strokeLinecap="round" filter="url(#snb-gd)">
-                <animate attributeName="stroke-opacity" values="1;0.25;1" dur="1.8s" repeatCount="indefinite"/>
-                <animate attributeName="stroke-width" values="3.5;1.5;3.5" dur="1.8s" repeatCount="indefinite"/>
-              </rect>
-            )}
-          </>
-        )}
-        {/* Lightning flash on new gold segment */}
-        {flash&&(
-          <rect key={flash.key} x="1.5" y="1.5" width={rw} height={rh} fill="none"
-            stroke="#fef9c3" strokeWidth="4"
-            strokeDasharray={`${flash.len} ${perim+100}`} strokeDashoffset={`${-halfTop-flash.start}`}
-            filter="url(#snb-gd)">
-            <animate attributeName="stroke-opacity" values="0;1;1;0" keyTimes="0;0.05;0.25;1" dur="0.9s" fill="freeze"/>
-          </rect>
-        )}
-      </svg>
-      {/* Flying nuggets/diamonds */}
-      {nuggets.map(n=>(
-        <div key={n.id} style={{
-          position:"fixed",left:n.sx,top:n.sy,
-          "--snb-tx":`${n.tx-n.sx}px`,"--snb-ty":`${n.ty-n.sy}px`,
-          fontSize:"16px",lineHeight:1,pointerEvents:"none",zIndex:65,
-          animation:"snb-fly 2.6s linear forwards",
-          transformOrigin:"center",userSelect:"none",
-        }}>
-          {n.ot?"💎":"🪙"}
-        </div>
-      ))}
-    </>
+    <svg style={{position:"fixed",inset:0,zIndex:60,pointerEvents:"none"}} width="100%" height="100%">
+      <defs>
+        <filter id="snb-g"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="snb-gs"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      {/* Ghost track */}
+      <rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fbbf24" strokeWidth="1" strokeOpacity="0.07"/>
+      {/* Gold bar */}
+      {regLen>0&&<rect x="1.5" y="1.5" width={rw} height={rh} fill="none"
+        stroke="#fbbf24" strokeWidth="2.5" strokeOpacity="0.65"
+        strokeDasharray={`${regLen} ${perim+100}`} strokeDashoffset={-halfTop}
+        filter="url(#snb-g)"/>}
+      {/* Tip glow */}
+      {regLen>0&&regLen<perim&&(
+        <rect x="1.5" y="1.5" width={rw} height={rh} fill="none"
+          stroke="#fef08a" strokeWidth="4" strokeLinecap="round"
+          strokeDasharray={`${tipSz} ${perim+100}`} strokeDashoffset={-(halfTop+regLen-tipSz)}
+          filter="url(#snb-gs)">
+          <animate attributeName="stroke-opacity" values="0.9;0.2;0.9" dur="2s" repeatCount="indefinite"/>
+          <animate attributeName="stroke-width" values="4;1.5;4" dur="2s" repeatCount="indefinite"/>
+        </rect>
+      )}
+      {/* OT inset blue bar */}
+      {isOT&&otLen>0&&(
+        <>
+          <rect x={1.5+otOff} y={1.5+otOff} width={oRW} height={oRH} fill="none" stroke="#7dd3fc" strokeWidth="0.8" strokeOpacity="0.1"/>
+          <rect x={1.5+otOff} y={1.5+otOff} width={oRW} height={oRH} fill="none"
+            stroke="#7dd3fc" strokeWidth="2" strokeOpacity="0.6"
+            strokeDasharray={`${otLen} ${oPerim+100}`} strokeDashoffset={-oHalfTop}
+            filter="url(#snb-g)"/>
+          {otLen<oPerim&&(
+            <rect x={1.5+otOff} y={1.5+otOff} width={oRW} height={oRH} fill="none"
+              stroke="#bae6fd" strokeWidth="3.5" strokeLinecap="round"
+              strokeDasharray={`${tipSz} ${oPerim+100}`} strokeDashoffset={-(oHalfTop+otLen-tipSz)}
+              filter="url(#snb-gs)">
+              <animate attributeName="stroke-opacity" values="0.9;0.2;0.9" dur="2s" repeatCount="indefinite"/>
+              <animate attributeName="stroke-width" values="3.5;1.5;3.5" dur="2s" repeatCount="indefinite"/>
+            </rect>
+          )}
+        </>
+      )}
+    </svg>
   );
 }
 
