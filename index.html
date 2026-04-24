@@ -2508,6 +2508,7 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
                 :isFri?"#fb923c"
                 :"var(--txt)";
               const specialPay=hasShift&&isSpecialDay(dayShifts[0].type)?getShiftTotal(dayShifts[0],cfg,als,wMap[dayShifts[0].id]):null;
+              const holEstimate=!hasShift&&isPaid?Math.round((cfg.baseRate||34.32)*(cfg.overtimeThreshold||8.6)):null;
               return(
                 <button key={d} onClick={()=>handleDayClick(d)} style={{
                   padding:"4px 2px 4px",borderRadius:"10px",border,cursor:"pointer",background:bg,
@@ -2526,6 +2527,7 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
                       : ""}
                   </span>
                   {specialPay!==null&&<span style={{fontSize:"9px",lineHeight:1,color:SPECIAL[dayShifts[0].type].color,fontWeight:"800"}}>{"₪"+Math.round(specialPay)}</span>}
+                  {holEstimate!==null&&<span style={{fontSize:"9px",lineHeight:1,color:"#fcd34d",fontWeight:"800"}}>{"₪"+holEstimate}</span>}
                 </button>
               );
             })}
