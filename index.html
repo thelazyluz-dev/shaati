@@ -2149,7 +2149,7 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode,payslips,onSavePaysl
   // חגים בתשלום אוטומטיים — חגים שאין עבורם אף משמרת מוגדרת
   const recordedDates=new Set(ms.map(s=>s.date));
   const autoHolDays=Object.entries(IL_HOLIDAYS).filter(([d,h])=>d.startsWith(selM)&&h.paid&&!recordedDates.has(d));
-  const holPay=autoHolDays.length*(cfg.baseRate||34.32)*(cfg.overtimeThreshold||8.6);
+  const holPay=autoHolDays.length*(cfg.baseRate||34.32)*8;
   tG+=holPay;tBase+=holPay;
   // חגים שהוזנו ידנית (type==="holiday") — לספירת ימי חג
   const manualHolDays=ms.filter(s=>s.type==="holiday");
@@ -2508,7 +2508,7 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
                 :isFri?"#fb923c"
                 :"var(--txt)";
               const specialPay=hasShift&&isSpecialDay(dayShifts[0].type)?getShiftTotal(dayShifts[0],cfg,als,wMap[dayShifts[0].id]):null;
-              const holEstimate=!hasShift&&isPaid?Math.round((cfg.baseRate||34.32)*(cfg.overtimeThreshold||8.6)):null;
+              const holEstimate=!hasShift&&isPaid?Math.round((cfg.baseRate||34.32)*8):null;
               return(
                 <button key={d} onClick={()=>handleDayClick(d)} style={{
                   padding:"4px 2px 4px",borderRadius:"10px",border,cursor:"pointer",background:bg,
@@ -2646,7 +2646,7 @@ function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode,form,on
     const isSpec=isSpecialDay(form.type);
     // ימים מיוחדים — שעות ברירת מחדל אם לא הוזנו
     const start=form.start||(isSpec?"08:00":"");
-    const end=form.end||(isSpec?`${String(Math.floor(8+cfg.overtimeThreshold)).padStart(2,"0")}:${String(Math.round((cfg.overtimeThreshold%1)*60)).padStart(2,"0")}`:"");
+    const end=form.end||(isSpec?"16:00":"");
     if(!isSpec&&(!start||!end)){setErr(uT("as_err_times"));return;}
     const h=ch(start,end);
     if(!isSpec&&h<0.1){setErr(uT("as_err_hours"));return;}
