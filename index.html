@@ -2507,13 +2507,14 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
                 :isSat?"#a78bfa"
                 :isFri?"#fb923c"
                 :"var(--txt)";
+              const specialPay=hasShift&&isSpecialDay(dayShifts[0].type)?getShiftTotal(dayShifts[0],cfg,als,wMap[dayShifts[0].id]):null;
               return(
                 <button key={d} onClick={()=>handleDayClick(d)} style={{
                   padding:"4px 2px 4px",borderRadius:"10px",border,cursor:"pointer",background:bg,
                   color:textColor,
                   fontWeight:isSelected||isToday||isPanelOpen||hasShift?"800":"600",
                   fontSize:"13px",display:"flex",flexDirection:"column",alignItems:"center",gap:"2px",
-                  minHeight:"48px",justifyContent:"flex-start",paddingTop:"7px",
+                  minHeight:"52px",justifyContent:"flex-start",paddingTop:"7px",
                 }}>
                   <span>{d}</span>
                   <span style={{fontSize:"11px",lineHeight:1}}>
@@ -2524,6 +2525,7 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
                       : holiday?<span style={{color:"#d4a017"}}>{holiday.icon}</span>
                       : ""}
                   </span>
+                  {specialPay!==null&&<span style={{fontSize:"9px",lineHeight:1,color:SPECIAL[dayShifts[0].type].color,fontWeight:"800"}}>{"₪"+Math.round(specialPay)}</span>}
                 </button>
               );
             })}
