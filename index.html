@@ -4324,7 +4324,8 @@ function ShiftNeonBorder({clockIn,cfg}){
 
   const threshold=cfg.overtimeThreshold||8.6;
   const{w,h}=dims;
-  const rw=w-3,rh=h-3;
+  const inset=4;
+  const rw=w-2*inset,rh=h-2*inset;
   const perim=2*rw+2*rh;
   const halfTop=Math.round(rw/2);
   const elapsedMin=elapsed*60;
@@ -4348,15 +4349,15 @@ function ShiftNeonBorder({clockIn,cfg}){
         <filter id="snb-gs"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
       </defs>
       {/* Ghost track */}
-      <rect x="1.5" y="1.5" width={rw} height={rh} fill="none" stroke="#fbbf24" strokeWidth="1" strokeOpacity="0.07"/>
+      <rect x={inset} y={inset} width={rw} height={rh} fill="none" stroke="#fbbf24" strokeWidth="1" strokeOpacity="0.07"/>
       {/* Gold bar */}
-      {regLen>0&&<rect x="1.5" y="1.5" width={rw} height={rh} fill="none"
+      {regLen>0&&<rect x={inset} y={inset} width={rw} height={rh} fill="none"
         stroke="#fbbf24" strokeWidth="2.5" strokeOpacity="0.65"
         strokeDasharray={`${regLen} ${perim+100}`} strokeDashoffset={-halfTop}
         filter="url(#snb-g)"/>}
       {/* Tip glow */}
       {regLen>0&&regLen<perim&&(
-        <rect x="1.5" y="1.5" width={rw} height={rh} fill="none"
+        <rect x={inset} y={inset} width={rw} height={rh} fill="none"
           stroke="#fef08a" strokeWidth="4" strokeLinecap="round"
           strokeDasharray={`${tipSz} ${perim+100}`} strokeDashoffset={-(halfTop+regLen-tipSz)}
           filter="url(#snb-gs)">
@@ -4367,13 +4368,13 @@ function ShiftNeonBorder({clockIn,cfg}){
       {/* OT inset blue bar */}
       {isOT&&otLen>0&&(
         <>
-          <rect x={1.5+otOff} y={1.5+otOff} width={oRW} height={oRH} fill="none" stroke="#7dd3fc" strokeWidth="0.8" strokeOpacity="0.1"/>
-          <rect x={1.5+otOff} y={1.5+otOff} width={oRW} height={oRH} fill="none"
+          <rect x={inset+otOff} y={inset+otOff} width={oRW} height={oRH} fill="none" stroke="#7dd3fc" strokeWidth="0.8" strokeOpacity="0.1"/>
+          <rect x={inset+otOff} y={inset+otOff} width={oRW} height={oRH} fill="none"
             stroke="#7dd3fc" strokeWidth="2" strokeOpacity="0.6"
             strokeDasharray={`${otLen} ${oPerim+100}`} strokeDashoffset={-oHalfTop}
             filter="url(#snb-g)"/>
           {otLen<oPerim&&(
-            <rect x={1.5+otOff} y={1.5+otOff} width={oRW} height={oRH} fill="none"
+            <rect x={inset+otOff} y={inset+otOff} width={oRW} height={oRH} fill="none"
               stroke="#bae6fd" strokeWidth="3.5" strokeLinecap="round"
               strokeDasharray={`${tipSz} ${oPerim+100}`} strokeDashoffset={-(oHalfTop+otLen-tipSz)}
               filter="url(#snb-gs)">
