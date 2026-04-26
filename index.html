@@ -2120,12 +2120,18 @@ function PayslipComp({ym,appGross,appDed,appNet,hasDed,payslip,onSave,onDelete,p
 // ════════════════════════════════════════
 // DASHBOARD
 // ════════════════════════════════════════
-function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode,payslips,onSavePayslip}){
+function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode,payslips,onSavePayslip,clockIn}){
   const t=useT();
   const[nowStr,setNowStr]=useState(nowTime());
   const[showNet,setShowNet]=useState(true);
   const[flipKey,setFlipKey]=useState(0);
+  const[liveNow,setLiveNow]=useState(()=>new Date());
   useEffect(()=>{const id=setInterval(()=>setNowStr(nowTime()),30000);return()=>clearInterval(id);},[]);
+  useEffect(()=>{
+    if(!clockIn)return;
+    const id=setInterval(()=>setLiveNow(new Date()),5000);
+    return()=>clearInterval(id);
+  },[clockIn?.iso]);
   const ms=shifts.filter(s=>s.date.startsWith(selM));
   const wMap=buildWeeklyThresholdMap(shifts,cfg);
   let tG=0,tA=0,tH=0,regH=0,aftH=0,ngtH=0,ot125=0,ot150=0,tBase=0;
@@ -2153,6 +2159,22 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode,payslips,onSavePaysl
   tG+=holPay;tBase+=holPay;
   // חגים שהוזנו ידנית (type==="holiday") — לספירת ימי חג
   const manualHolDays=ms.filter(s=>s.type==="holiday");
+  // Live earnings from active shift (if any, and in current month)
+  const liveGross=(()=>{
+    if(!clockIn||!clockIn.iso)return 0;
+    const ciMonth=clockIn.date?clockIn.date.slice(0,7):null;
+    if(ciMonth!==selM)return 0;
+    const startDate=new Date(clockIn.iso);
+    const p2=n=>String(n).padStart(2,"0");
+    const startStr=`${p2(startDate.getHours())}:${p2(startDate.getMinutes())}:${p2(startDate.getSeconds())}`;
+    const diffSec=Math.max(0,Math.floor((liveNow-startDate)/1000));
+    const hours=diffSec/3600;
+    const nowStr2=`${p2(liveNow.getHours())}:${p2(liveNow.getMinutes())}:${p2(liveNow.getSeconds())}`;
+    const wkKey=getWeekKey(clockIn.date,clockIn.time);
+    const wkHrsBefore=shifts.filter(s=>!isSpecialDay(s.type)&&getWeekKey(s.date,s.start)===wkKey).reduce((a,s)=>a+ch(s.start,s.end),0);
+    const effThresh=Math.min(cfg.overtimeThreshold||8.6,Math.max(0,(cfg.weeklyOTThreshold||42)-wkHrsBefore));
+    return clockIn.customMult?cp(hours,clockIn.type,cfg,clockIn.customMult,effThresh).gross:cpAuto(startStr,nowStr2,cfg,effThresh).gross;
+  })();
   const dedBase=tG+tA; // ברוטו כולל תוספות — בסיס לביטוח לאומי ומס הכנסה
   const ded=cfg.enableDeductions?cd(dedBase,cfg,tBase):null;
   const net=ded?dedBase-ded.tot:dedBase;
@@ -2241,16 +2263,18 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode,payslips,onSavePaysl
               </div>
             </div>
             {cfg.monthlyGoal>0&&(()=>{
-              const pct=Math.min(100,Math.round(net/cfg.monthlyGoal*100));
+              const liveNet=ded&&dedBase>0?liveGross*(1-ded.tot/dedBase):liveGross;
+              const totalNet=net+liveNet;
+              const pct=Math.min(100,Math.round(totalNet/cfg.monthlyGoal*100));
               return(
                 <div style={{marginTop:"14px",width:"100%"}}>
                   <div style={{display:"flex",justifyContent:"space-between",fontSize:"11px",color:"var(--txt-d)",marginBottom:"5px"}}>
-                    <span>{t("d_goal_net")}</span><span style={{color:pct>=100?"#4ade80":"var(--txt-d)",fontWeight:"700"}}>{pct}%</span>
+                    <span>{t("d_goal_net")}{liveGross>0&&<span style={{color:"#fbbf24",marginRight:"4px"}}> ●</span>}</span><span style={{color:pct>=100?"#4ade80":"var(--txt-d)",fontWeight:"700"}}>{pct}%</span>
                   </div>
                   <div style={{background:"#041f10",borderRadius:"6px",height:"8px",overflow:"hidden"}}>
-                    <div style={{width:`${pct}%`,height:"100%",background:pct>=100?"linear-gradient(90deg,#4ade80,#22d3ee)":"linear-gradient(90deg,#16a34a,#4ade80)",borderRadius:"6px",transition:"width 0.4s ease"}}/>
+                    <div style={{width:`${pct}%`,height:"100%",background:pct>=100?"linear-gradient(90deg,#4ade80,#22d3ee)":"linear-gradient(90deg,#16a34a,#4ade80)",borderRadius:"6px",transition:"width 1s ease"}}/>
                   </div>
-                  <div style={{fontSize:"10px",color:"var(--txt-d)",marginTop:"3px"}}>{prv(net,privacyMode)} {t("d_of")} {prv(cfg.monthlyGoal,privacyMode)}</div>
+                  <div style={{fontSize:"10px",color:"var(--txt-d)",marginTop:"3px"}}>{prv(totalNet,privacyMode)} {t("d_of")} {prv(cfg.monthlyGoal,privacyMode)}</div>
                 </div>
               );
             })()}
@@ -2259,15 +2283,18 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode,payslips,onSavePaysl
           <>
             <div style={{fontSize:"11px",color:"#86efac",letterSpacing:"1.5px",fontWeight:"700",marginBottom:"8px"}}>{t("d_est_salary")}</div>
             <div style={{fontSize:"40px",fontWeight:"900",color:"#4ade80",letterSpacing:"-2px",lineHeight:1}}>{prv(tG+tA,privacyMode)}</div>
-            {cfg.monthlyGoal>0&&(()=>{const pct=Math.min(100,Math.round((tG+tA)/cfg.monthlyGoal*100));return(
+            {cfg.monthlyGoal>0&&(()=>{
+              const totalGross=tG+tA+liveGross;
+              const pct=Math.min(100,Math.round(totalGross/cfg.monthlyGoal*100));
+              return(
               <div style={{marginTop:"10px",width:"100%"}}>
                 <div style={{display:"flex",justifyContent:"space-between",fontSize:"11px",color:"var(--txt-d)",marginBottom:"4px"}}>
-                  <span>{t("d_goal")}</span><span style={{color:pct>=100?"#4ade80":"var(--txt-d)"}}>{pct}%</span>
+                  <span>{t("d_goal")}{liveGross>0&&<span style={{color:"#fbbf24",marginRight:"4px"}}> ●</span>}</span><span style={{color:pct>=100?"#4ade80":"var(--txt-d)"}}>{pct}%</span>
                 </div>
                 <div style={{background:"#041f10",borderRadius:"6px",height:"8px",overflow:"hidden"}}>
-                  <div style={{width:`${pct}%`,height:"100%",background:pct>=100?"linear-gradient(90deg,#4ade80,#22d3ee)":"linear-gradient(90deg,#16a34a,#4ade80)",borderRadius:"6px",transition:"width 0.4s ease"}}/>
+                  <div style={{width:`${pct}%`,height:"100%",background:pct>=100?"linear-gradient(90deg,#4ade80,#22d3ee)":"linear-gradient(90deg,#16a34a,#4ade80)",borderRadius:"6px",transition:"width 1s ease"}}/>
                 </div>
-                <div style={{fontSize:"10px",color:"var(--txt-d)",marginTop:"3px"}}>{prv(tG+tA,privacyMode)} {t("d_of")} {prv(cfg.monthlyGoal,privacyMode)}</div>
+                <div style={{fontSize:"10px",color:"var(--txt-d)",marginTop:"3px"}}>{prv(totalGross,privacyMode)} {t("d_of")} {prv(cfg.monthlyGoal,privacyMode)}</div>
               </div>
             );})()}
           </>
@@ -4580,7 +4607,7 @@ function App(){
         </div>
         <div key={tabKey} className={slideClass(prevTab,tab)} style={{display:tab==="add"?"none":"block",width:"100%"}}>
           {tab==="clock"    &&<ClockScreen clockIn={clockIn} setClockIn={setClockIn} als={als} cfg={cfg} shifts={shifts} onShiftSaved={s=>{addSh(s);showToast(appT("as_saved"));}} privacyMode={privacyMode} togglePrivacy={togglePrivacy}/>}
-          {tab==="dashboard"&&<Dashboard shifts={shifts} cfg={cfg} als={als} selM={selM} setSelM={setSelM} privacyMode={privacyMode} payslips={payslips} onSavePayslip={savePayslip}/>}
+          {tab==="dashboard"&&<Dashboard shifts={shifts} cfg={cfg} als={als} selM={selM} setSelM={setSelM} privacyMode={privacyMode} payslips={payslips} onSavePayslip={savePayslip} clockIn={clockIn}/>}
           {tab==="shifts"   &&<ShiftsList shifts={shifts} cfg={cfg} als={als} onDelete={delSh} onEdit={editSh} privacyMode={privacyMode}/>}
           {tab==="graph"    &&<Graph shifts={shifts} cfg={cfg} als={als} privacyMode={privacyMode} manualMonths={manualMonths} onSaveManual={saveManualMonth}/>}
           {tab==="settings" &&<Settings cfg={cfg} tpls={tpls} als={als} shifts={shifts} vacCfg={vacCfg} onSaveCfg={saveCfg} onSaveTpls={saveTpls} onSaveAls={saveAls} onSaveVacCfg={saveVacCfg} privacyMode={privacyMode} togglePrivacy={togglePrivacy} onReset={()=>{LS.set(K.onboarded,false);setOnboarded(false);}} lang={lang} onSaveLang={saveLang} theme={theme} onSaveTheme={saveTheme}/>}
