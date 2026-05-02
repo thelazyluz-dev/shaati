@@ -1788,9 +1788,9 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode,shifts}){
 function ShiftBg({type}){
   const seeds=useMemo(()=>Array.from({length:type==="night"?22:type==="afternoon"?8:12},(_,i)=>({
     id:i,
-    x:Math.random()*60+20,
-    y:Math.random()*60+15,
-    size:Math.random()*14+6,
+    x:Math.random()*80+10,
+    y:Math.random()*75+8,
+    size:Math.random()*18+8,
     delay:Math.random()*4,
     dur:3+Math.random()*4,
   })),[type]);
