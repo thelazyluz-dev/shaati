@@ -3017,6 +3017,9 @@ function Graph({shifts,cfg,als,privacyMode,manualMonths,onSaveManual}){
       baseS+=(c.regH||0)*cfg.baseRate*baseMult;
     });
     if(count>0) allow+=cma(als);
+    const recDates=new Set(ms.map(s=>s.date));
+    const holPay=Object.entries(IL_HOLIDAYS).filter(([d,h])=>d.startsWith(ym)&&h.paid&&!recDates.has(d)).length*(cfg.baseRate||34.32)*8;
+    gross+=holPay;baseS+=holPay;
     const total=gross+allow;
     const ded=cfg.enableDeductions&&total>0?cd(total,cfg,baseS):null;
     const net=ded?total-ded.tot:total;
