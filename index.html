@@ -1953,8 +1953,10 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
     );
   }
 
+  const CIRC=220,R=104,PERIM=Math.round(2*Math.PI*R);
+
   return(
-    <div style={{padding:"12px 16px 16px",position:"relative",overflow:"hidden"}}>
+    <div style={{position:"relative",overflow:"hidden",minHeight:"calc(100dvh - 64px)",display:"flex",flexDirection:"column"}}>
       <ShiftBg type={curType}/>
       {confetti.map(p=>(
         <div key={p.id} style={{position:"fixed",top:0,left:`${p.x}%`,fontSize:"20px",pointerEvents:"none",zIndex:999,
@@ -1963,44 +1965,76 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
         </div>
       ))}
 
-      {/* Header: date + clock + badge */}
-      <div style={{textAlign:"center",marginBottom:"12px",position:"relative",zIndex:5}}>
-        <div style={{fontSize:"12px",color:"var(--txt-d)",marginBottom:"2px"}}>
-          {new Date().toLocaleDateString(uT("locale"),{weekday:"long",day:"numeric",month:"long"})}
-        </div>
-        <LiveClock/>
-        <div style={{display:"inline-flex",alignItems:"center",gap:"6px",background:sty.bg,border:`1px solid ${sty.color}`,borderRadius:"20px",padding:"3px 12px",marginTop:"6px"}}>
-          <span style={{fontSize:"13px"}}>{sty.icon}</span>
-          <span style={{fontSize:"12px",color:sty.color,fontWeight:"700"}}>{uT("cl_shift")} {uT("st_"+curType)}</span>
-        </div>
-      </div>
+      {/* ── IDLE STATE ── */}
+      {!clockIn&&(
+        <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"16px 16px 24px",position:"relative",zIndex:5,gap:"0px"}}>
 
-      {!clockIn?(
-        <div style={{position:"relative",zIndex:5}}>
-          <button onClick={handleClockIn} style={{
-            width:"100%",padding:"26px 0",borderRadius:"22px",cursor:"pointer",
-            background:"linear-gradient(145deg,#052e16,#14532d)",
-            border:"2px solid #22c55e",
-            display:"flex",flexDirection:"column",alignItems:"center",gap:"10px",
-            boxShadow:"0 0 40px #22c55e33",
-            animation:"glowPulse 2.5s ease-in-out infinite",
-          }}>
-            <div style={{fontSize:"48px"}}>▶</div>
-            <div style={{fontSize:"22px",fontWeight:"900",color:"#4ade80"}}>{uT("cl_in")}</div>
-            <div style={{fontSize:"12px",color:"#86efac"}}>{nowTime()}</div>
-          </button>
-          <div style={{marginTop:"12px",textAlign:"center",fontSize:"12px",color:"var(--divider2)"}}>
-            {uT("cl_in_hint")}
+          {/* Date + shift badge */}
+          <div style={{textAlign:"center",marginBottom:"28px"}}>
+            <div style={{fontSize:"13px",color:"var(--txt-m)",fontWeight:"500",marginBottom:"10px"}}>
+              {new Date().toLocaleDateString(uT("locale"),{weekday:"long",day:"numeric",month:"long"})}
+            </div>
+            <div style={{display:"inline-flex",alignItems:"center",gap:"7px",background:sty.bg,border:`1px solid ${sty.color}55`,borderRadius:"24px",padding:"5px 16px",backdropFilter:"blur(8px)"}}>
+              <span style={{fontSize:"14px"}}>{sty.icon}</span>
+              <span style={{fontSize:"13px",color:sty.color,fontWeight:"800"}}>{uT("st_"+curType)}</span>
+            </div>
           </div>
+
+          {/* Circular clock-in button */}
+          <div style={{position:"relative",marginBottom:"24px"}}>
+            {/* Outer ambient ring */}
+            <svg style={{position:"absolute",inset:"-16px",width:`${CIRC+32}px`,height:`${CIRC+32}px`,pointerEvents:"none",opacity:0.5}} viewBox={`0 0 ${CIRC+32} ${CIRC+32}`}>
+              <circle cx={(CIRC+32)/2} cy={(CIRC+32)/2} r={(CIRC+32)/2-2} fill="none" stroke="#22c55e" strokeWidth="1" strokeDasharray="6 12" strokeLinecap="round"
+                style={{transformOrigin:"center",animation:"spin 30s linear infinite"}}/>
+            </svg>
+            <button onClick={handleClockIn} style={{
+              width:`${CIRC}px`,height:`${CIRC}px`,borderRadius:"50%",
+              background:"radial-gradient(circle at 38% 32%, #0a3320 0%, #020d08 60%, #020617 100%)",
+              border:"1.5px solid #22c55e44",cursor:"pointer",
+              display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
+              boxShadow:"0 0 60px #22c55e22, 0 0 120px #22c55e0e, inset 0 1px 0 #ffffff0a",
+              animation:"glowPulse 2.5s ease-in-out infinite",
+              gap:"4px",position:"relative",overflow:"hidden",
+            }}>
+              {/* Spinning arc ring */}
+              <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",overflow:"visible"}} viewBox={`0 0 ${CIRC} ${CIRC}`}>
+                <circle cx={CIRC/2} cy={CIRC/2} r={R} fill="none" stroke="#22c55e0f" strokeWidth="2"/>
+                <circle cx={CIRC/2} cy={CIRC/2} r={R} fill="none" stroke="#22c55e" strokeWidth="1.5"
+                  strokeDasharray={`24 ${PERIM-24}`} strokeLinecap="round"
+                  style={{transformOrigin:"center",animation:"spin 5s linear infinite",filter:"drop-shadow(0 0 4px #22c55e)"}}/>
+              </svg>
+              {/* Icon + label + time */}
+              <div style={{fontSize:"44px",lineHeight:1,filter:"drop-shadow(0 0 10px #22c55e99)",pointerEvents:"none"}}>▶</div>
+              <div style={{fontSize:"17px",fontWeight:"900",color:"#4ade80",letterSpacing:"0.5px",pointerEvents:"none"}}>{uT("cl_in")}</div>
+              <div style={{fontSize:"20px",fontWeight:"700",color:"#86efac99",fontVariantNumeric:"tabular-nums",letterSpacing:"1px",marginTop:"2px",pointerEvents:"none"}}>{nowTime()}</div>
+            </button>
+          </div>
+
+          <LiveClock/>
+          <div style={{marginTop:"10px",fontSize:"12px",color:"var(--txt-dd)"}}>{uT("cl_in_hint")}</div>
+
+          {shiftAls.length>0&&(
+            <div style={{display:"flex",flexWrap:"wrap",gap:"6px",marginTop:"20px",justifyContent:"center"}}>
+              {shiftAls.map(a=>{const on=selAls.includes(a.id);return(
+                <button key={a.id} onClick={()=>toggleAl(a.id)} style={{padding:"7px 13px",borderRadius:"20px",cursor:"pointer",border:`1.5px solid ${on?"#34d399":"var(--inp-b)"}`,background:on?"#022c22":"var(--bg2)",color:on?"#34d399":"var(--txt-d)",fontWeight:"700",fontSize:"12px",backdropFilter:"blur(4px)"}}>
+                  🧾 {a.name} {fM(a.amount)}
+                </button>
+              );})}
+            </div>
+          )}
         </div>
-      ):(
-        <div style={{position:"relative",zIndex:5}}>
+      )}
+
+      {/* ── ACTIVE STATE ── */}
+      {clockIn&&(
+        <div style={{flex:1,display:"flex",flexDirection:"column",padding:"12px 16px 16px",position:"relative",zIndex:5,gap:"10px"}}>
+
           <LiveEarnings clockIn={clockIn} cfg={cfg} selAls={selAls} als={als} privacyMode={privacyMode} shifts={shifts}/>
 
           {shiftAls.length>0&&(
-            <div style={{display:"flex",flexWrap:"wrap",gap:"6px",marginBottom:"10px"}}>
+            <div style={{display:"flex",flexWrap:"wrap",gap:"6px"}}>
               {shiftAls.map(a=>{const on=selAls.includes(a.id);return(
-                <button key={a.id} onClick={()=>toggleAl(a.id)} style={{padding:"8px 12px",borderRadius:"10px",cursor:"pointer",border:`1.5px solid ${on?"#34d399":"var(--inp-b)"}`,background:on?"#022c22":"var(--bg2)",color:on?"#34d399":"var(--txt-d)",fontWeight:"700",fontSize:"12px"}}>
+                <button key={a.id} onClick={()=>toggleAl(a.id)} style={{padding:"8px 12px",borderRadius:"20px",cursor:"pointer",border:`1.5px solid ${on?"#34d399":"var(--inp-b)"}`,background:on?"#022c22":"var(--bg2)",color:on?"#34d399":"var(--txt-d)",fontWeight:"700",fontSize:"12px"}}>
                   🧾 {a.name} {fM(a.amount)}
                 </button>
               );})}
@@ -2009,17 +2043,21 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
 
           <input type="text" value={note} onChange={e=>setNote(e.target.value)}
             placeholder={uT("cl_note_ph")}
-            style={{...SI,fontSize:"13px",marginBottom:"10px",width:"100%",boxSizing:"border-box"}}/>
+            style={{...SI,fontSize:"13px",width:"100%",boxSizing:"border-box"}}/>
 
+          {/* Stop button */}
           <button onClick={handleClockOut} style={{
-            width:"100%",padding:"20px 0",borderRadius:"20px",cursor:"pointer",
-            background:"linear-gradient(145deg,#2d0505,#7f1d1d)",
-            border:"2px solid #ef4444",
-            display:"flex",flexDirection:"column",alignItems:"center",gap:"8px",
-            boxShadow:"0 0 24px #ef444433",
+            width:"100%",padding:"0",borderRadius:"20px",cursor:"pointer",
+            background:"linear-gradient(135deg,#1a0505,#2d0a0a)",
+            border:"1.5px solid #ef444455",
+            display:"flex",alignItems:"center",justifyContent:"center",gap:"14px",
+            boxShadow:"0 0 30px #ef444420, inset 0 1px 0 #ffffff06",
+            height:"72px",
+            position:"relative",overflow:"hidden",
           }}>
-            <div style={{fontSize:"36px"}}>⏹</div>
-            <div style={{fontSize:"19px",fontWeight:"900",color:"#f87171"}}>{uT("cl_out")}</div>
+            <div style={{position:"absolute",inset:0,background:"linear-gradient(90deg,transparent,#ef444408,transparent)",animation:"drift 4s ease-in-out infinite",pointerEvents:"none"}}/>
+            <div style={{fontSize:"28px",lineHeight:1,filter:"drop-shadow(0 0 6px #ef444499)"}}>⏹</div>
+            <div style={{fontSize:"20px",fontWeight:"900",color:"#f87171",letterSpacing:"0.5px"}}>{uT("cl_out")}</div>
           </button>
         </div>
       )}
@@ -2030,7 +2068,13 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
 function LiveClock(){
   const[time,setTime]=useState(nowTime());
   useEffect(()=>{const id=setInterval(()=>setTime(nowTime()),1000);return()=>clearInterval(id);},[]);
-  return <div style={{fontSize:"48px",fontWeight:"900",color:"var(--txt-hi)",letterSpacing:"2px",fontVariantNumeric:"tabular-nums"}}>{time}</div>;
+  const p=time.split(":");
+  return(
+    <div style={{display:"flex",alignItems:"flex-end",justifyContent:"center",gap:"0px",fontVariantNumeric:"tabular-nums",lineHeight:1}}>
+      <span style={{fontSize:"68px",fontWeight:"900",color:"var(--txt-hi)",letterSpacing:"-4px",textShadow:"0 0 30px rgba(248,250,252,0.15)"}}>{p[0]}:{p[1]}</span>
+      <span style={{fontSize:"24px",fontWeight:"600",color:"var(--txt-d)",marginBottom:"8px",marginRight:"2px",letterSpacing:"-0.5px"}}>{p[2]}</span>
+    </div>
+  );
 }
 
 // ════════════════════════════════════════
