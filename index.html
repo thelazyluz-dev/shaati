@@ -12,6 +12,7 @@
 <link rel="apple-touch-icon" sizes="192x192" href="./icon-192.png"/>
 <link rel="apple-touch-icon" sizes="512x512" href="./icon-512.png"/>
 <title>שעתי</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,200;9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@300;400;500;700;800;900&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;800;900&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;900&display=swap" rel="stylesheet"/>
@@ -1953,111 +1954,145 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
     );
   }
 
-  const CIRC=220,R=104,PERIM=Math.round(2*Math.PI*R);
+  const tmParts=nowTime().split(":");
 
   return(
-    <div style={{position:"relative",overflow:"hidden",minHeight:"calc(100dvh - 64px)",display:"flex",flexDirection:"column"}}>
-      <ShiftBg type={curType}/>
+    <div style={{position:"relative",overflow:"hidden",minHeight:"calc(100dvh - 64px)",display:"flex",flexDirection:"column",background:"#000"}}>
       {confetti.map(p=>(
         <div key={p.id} style={{position:"fixed",top:0,left:`${p.x}%`,fontSize:"20px",pointerEvents:"none",zIndex:999,
-          animation:`confettiFall ${p.dur}s ${p.delay}s ease-in forwards`}}>
-          {p.emoji}
-        </div>
+          animation:`confettiFall ${p.dur}s ${p.delay}s ease-in forwards`}}>{p.emoji}</div>
       ))}
 
       {/* ── IDLE STATE ── */}
       {!clockIn&&(
-        <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"16px 16px 24px",position:"relative",zIndex:5,gap:"0px"}}>
+        <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"space-between",padding:"28px 20px 32px",position:"relative",zIndex:5}}>
 
-          {/* Date + shift badge */}
-          <div style={{textAlign:"center",marginBottom:"28px"}}>
-            <div style={{fontSize:"13px",color:"var(--txt-m)",fontWeight:"500",marginBottom:"10px"}}>
+          {/* Ambient glow orbs */}
+          <div style={{position:"absolute",top:"-10%",left:"50%",transform:"translateX(-50%)",width:"340px",height:"340px",borderRadius:"50%",
+            background:"radial-gradient(circle,rgba(34,197,94,0.12) 0%,transparent 70%)",
+            filter:"blur(30px)",pointerEvents:"none",zIndex:0}}/>
+          <div style={{position:"absolute",bottom:"15%",right:"-10%",width:"220px",height:"220px",borderRadius:"50%",
+            background:"radial-gradient(circle,rgba(99,102,241,0.08) 0%,transparent 70%)",
+            filter:"blur(40px)",pointerEvents:"none",zIndex:0}}/>
+
+          {/* Top: date + shift */}
+          <div style={{textAlign:"center",position:"relative",zIndex:1,width:"100%"}}>
+            <div style={{fontSize:"13px",color:"rgba(255,255,255,0.35)",fontWeight:"400",letterSpacing:"0.3px",marginBottom:"10px",fontFamily:"'DM Sans',sans-serif"}}>
               {new Date().toLocaleDateString(uT("locale"),{weekday:"long",day:"numeric",month:"long"})}
             </div>
-            <div style={{display:"inline-flex",alignItems:"center",gap:"7px",background:sty.bg,border:`1px solid ${sty.color}55`,borderRadius:"24px",padding:"5px 16px",backdropFilter:"blur(8px)"}}>
-              <span style={{fontSize:"14px"}}>{sty.icon}</span>
-              <span style={{fontSize:"13px",color:sty.color,fontWeight:"800"}}>{uT("st_"+curType)}</span>
+            <div style={{display:"inline-flex",alignItems:"center",gap:"7px",
+              background:"rgba(255,255,255,0.07)",
+              backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",
+              border:"1px solid rgba(255,255,255,0.12)",
+              borderRadius:"100px",padding:"6px 16px"}}>
+              <div style={{width:"7px",height:"7px",borderRadius:"50%",background:sty.color,boxShadow:`0 0 6px ${sty.color}`}}/>
+              <span style={{fontSize:"13px",color:"rgba(255,255,255,0.75)",fontWeight:"500",fontFamily:"'DM Sans',sans-serif"}}>{uT("st_"+curType)}</span>
             </div>
           </div>
 
-          {/* Circular clock-in button */}
-          <div style={{position:"relative",marginBottom:"24px"}}>
-            {/* Outer ambient ring */}
-            <svg style={{position:"absolute",inset:"-16px",width:`${CIRC+32}px`,height:`${CIRC+32}px`,pointerEvents:"none",opacity:0.5}} viewBox={`0 0 ${CIRC+32} ${CIRC+32}`}>
-              <circle cx={(CIRC+32)/2} cy={(CIRC+32)/2} r={(CIRC+32)/2-2} fill="none" stroke="#22c55e" strokeWidth="1" strokeDasharray="6 12" strokeLinecap="round"
-                style={{transformOrigin:"center",animation:"spin 30s linear infinite"}}/>
-            </svg>
+          {/* Center: giant time */}
+          <div style={{textAlign:"center",position:"relative",zIndex:1}}>
+            <div style={{display:"flex",alignItems:"flex-start",justifyContent:"center",gap:"2px",lineHeight:1,fontVariantNumeric:"tabular-nums"}}>
+              <span style={{fontSize:"clamp(80px,24vw,108px)",fontWeight:"200",color:"#fff",letterSpacing:"-6px",fontFamily:"'DM Sans','Noto Sans Hebrew',sans-serif"}}>{tmParts[0]}:{tmParts[1]}</span>
+              <span style={{fontSize:"clamp(24px,7vw,32px)",fontWeight:"300",color:"rgba(255,255,255,0.3)",marginTop:"12px",letterSpacing:"1px",fontFamily:"'DM Sans',sans-serif"}}>{tmParts[2]}</span>
+            </div>
+          </div>
+
+          {/* Bottom: glass clock-in card */}
+          <div style={{width:"100%",position:"relative",zIndex:1}}>
             <button onClick={handleClockIn} style={{
-              width:`${CIRC}px`,height:`${CIRC}px`,borderRadius:"50%",
-              background:"radial-gradient(circle at 38% 32%, #0a3320 0%, #020d08 60%, #020617 100%)",
-              border:"1.5px solid #22c55e44",cursor:"pointer",
-              display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
-              boxShadow:"0 0 60px #22c55e22, 0 0 120px #22c55e0e, inset 0 1px 0 #ffffff0a",
-              animation:"glowPulse 2.5s ease-in-out infinite",
-              gap:"4px",position:"relative",overflow:"hidden",
+              width:"100%",padding:"26px 0",borderRadius:"28px",cursor:"pointer",
+              background:"rgba(255,255,255,0.06)",
+              backdropFilter:"blur(24px)",WebkitBackdropFilter:"blur(24px)",
+              border:"1px solid rgba(255,255,255,0.13)",
+              boxShadow:"0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.10)",
+              display:"flex",flexDirection:"column",alignItems:"center",gap:"12px",
+              position:"relative",overflow:"hidden",
             }}>
-              {/* Spinning arc ring */}
-              <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",overflow:"visible"}} viewBox={`0 0 ${CIRC} ${CIRC}`}>
-                <circle cx={CIRC/2} cy={CIRC/2} r={R} fill="none" stroke="#22c55e0f" strokeWidth="2"/>
-                <circle cx={CIRC/2} cy={CIRC/2} r={R} fill="none" stroke="#22c55e" strokeWidth="1.5"
-                  strokeDasharray={`24 ${PERIM-24}`} strokeLinecap="round"
-                  style={{transformOrigin:"center",animation:"spin 5s linear infinite",filter:"drop-shadow(0 0 4px #22c55e)"}}/>
-              </svg>
-              {/* Icon + label + time */}
-              <div style={{fontSize:"44px",lineHeight:1,filter:"drop-shadow(0 0 10px #22c55e99)",pointerEvents:"none"}}>▶</div>
-              <div style={{fontSize:"17px",fontWeight:"900",color:"#4ade80",letterSpacing:"0.5px",pointerEvents:"none"}}>{uT("cl_in")}</div>
-              <div style={{fontSize:"20px",fontWeight:"700",color:"#86efac99",fontVariantNumeric:"tabular-nums",letterSpacing:"1px",marginTop:"2px",pointerEvents:"none"}}>{nowTime()}</div>
+              {/* Subtle top shimmer */}
+              <div style={{position:"absolute",top:0,left:0,right:0,height:"1px",background:"linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent)",pointerEvents:"none"}}/>
+              {/* Play circle */}
+              <div style={{
+                width:"60px",height:"60px",borderRadius:"50%",
+                background:"linear-gradient(145deg,#22c55e,#16a34a)",
+                display:"flex",alignItems:"center",justifyContent:"center",
+                boxShadow:"0 4px 24px rgba(34,197,94,0.45)",
+              }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                  <path d="M8 5.5v13l10-6.5-10-6.5z" fill="#000"/>
+                </svg>
+              </div>
+              <div style={{fontSize:"19px",fontWeight:"600",color:"#fff",letterSpacing:"-0.3px",fontFamily:"'DM Sans','Noto Sans Hebrew',sans-serif"}}>{uT("cl_in")}</div>
+              <div style={{fontSize:"12px",color:"rgba(255,255,255,0.3)",fontFamily:"'DM Sans',sans-serif"}}>{uT("cl_in_hint")}</div>
             </button>
+
+            {shiftAls.length>0&&(
+              <div style={{display:"flex",flexWrap:"wrap",gap:"8px",marginTop:"12px",justifyContent:"center"}}>
+                {shiftAls.map(a=>{const on=selAls.includes(a.id);return(
+                  <button key={a.id} onClick={()=>toggleAl(a.id)} style={{
+                    padding:"8px 14px",borderRadius:"100px",cursor:"pointer",
+                    background:on?"rgba(34,197,94,0.15)":"rgba(255,255,255,0.05)",
+                    backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)",
+                    border:`1px solid ${on?"rgba(34,197,94,0.4)":"rgba(255,255,255,0.10)"}`,
+                    color:on?"#4ade80":"rgba(255,255,255,0.45)",
+                    fontWeight:"500",fontSize:"12px",fontFamily:"'DM Sans','Noto Sans Hebrew',sans-serif",
+                  }}>{a.name} {fM(a.amount)}</button>
+                );})}
+              </div>
+            )}
           </div>
-
-          <LiveClock/>
-          <div style={{marginTop:"10px",fontSize:"12px",color:"var(--txt-dd)"}}>{uT("cl_in_hint")}</div>
-
-          {shiftAls.length>0&&(
-            <div style={{display:"flex",flexWrap:"wrap",gap:"6px",marginTop:"20px",justifyContent:"center"}}>
-              {shiftAls.map(a=>{const on=selAls.includes(a.id);return(
-                <button key={a.id} onClick={()=>toggleAl(a.id)} style={{padding:"7px 13px",borderRadius:"20px",cursor:"pointer",border:`1.5px solid ${on?"#34d399":"var(--inp-b)"}`,background:on?"#022c22":"var(--bg2)",color:on?"#34d399":"var(--txt-d)",fontWeight:"700",fontSize:"12px",backdropFilter:"blur(4px)"}}>
-                  🧾 {a.name} {fM(a.amount)}
-                </button>
-              );})}
-            </div>
-          )}
         </div>
       )}
 
       {/* ── ACTIVE STATE ── */}
       {clockIn&&(
-        <div style={{flex:1,display:"flex",flexDirection:"column",padding:"12px 16px 16px",position:"relative",zIndex:5,gap:"10px"}}>
+        <div style={{flex:1,display:"flex",flexDirection:"column",padding:"12px 16px 20px",position:"relative",zIndex:5,gap:"10px"}}>
+
+          {/* Active ambient glow — red tint */}
+          <div style={{position:"absolute",top:"-5%",left:"50%",transform:"translateX(-50%)",width:"300px",height:"300px",borderRadius:"50%",
+            background:"radial-gradient(circle,rgba(34,197,94,0.10) 0%,transparent 70%)",
+            filter:"blur(30px)",pointerEvents:"none",zIndex:0}}/>
 
           <LiveEarnings clockIn={clockIn} cfg={cfg} selAls={selAls} als={als} privacyMode={privacyMode} shifts={shifts}/>
 
           {shiftAls.length>0&&(
-            <div style={{display:"flex",flexWrap:"wrap",gap:"6px"}}>
+            <div style={{display:"flex",flexWrap:"wrap",gap:"8px"}}>
               {shiftAls.map(a=>{const on=selAls.includes(a.id);return(
-                <button key={a.id} onClick={()=>toggleAl(a.id)} style={{padding:"8px 12px",borderRadius:"20px",cursor:"pointer",border:`1.5px solid ${on?"#34d399":"var(--inp-b)"}`,background:on?"#022c22":"var(--bg2)",color:on?"#34d399":"var(--txt-d)",fontWeight:"700",fontSize:"12px"}}>
-                  🧾 {a.name} {fM(a.amount)}
-                </button>
+                <button key={a.id} onClick={()=>toggleAl(a.id)} style={{
+                  padding:"8px 14px",borderRadius:"100px",cursor:"pointer",
+                  background:on?"rgba(34,197,94,0.15)":"rgba(255,255,255,0.05)",
+                  backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)",
+                  border:`1px solid ${on?"rgba(34,197,94,0.4)":"rgba(255,255,255,0.10)"}`,
+                  color:on?"#4ade80":"rgba(255,255,255,0.4)",
+                  fontWeight:"500",fontSize:"12px",fontFamily:"'DM Sans','Noto Sans Hebrew',sans-serif",
+                }}>{a.name} {fM(a.amount)}</button>
               );})}
             </div>
           )}
 
           <input type="text" value={note} onChange={e=>setNote(e.target.value)}
             placeholder={uT("cl_note_ph")}
-            style={{...SI,fontSize:"13px",width:"100%",boxSizing:"border-box"}}/>
+            style={{...SI,fontSize:"14px",width:"100%",boxSizing:"border-box",
+              background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.10)",borderRadius:"16px",
+              backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)"}}/>
 
-          {/* Stop button */}
+          {/* Clock-out button */}
           <button onClick={handleClockOut} style={{
-            width:"100%",padding:"0",borderRadius:"20px",cursor:"pointer",
-            background:"linear-gradient(135deg,#1a0505,#2d0a0a)",
-            border:"1.5px solid #ef444455",
+            width:"100%",padding:"22px 0",borderRadius:"28px",cursor:"pointer",
+            background:"rgba(239,68,68,0.10)",
+            backdropFilter:"blur(24px)",WebkitBackdropFilter:"blur(24px)",
+            border:"1px solid rgba(239,68,68,0.25)",
+            boxShadow:"0 8px 32px rgba(239,68,68,0.15), inset 0 1px 0 rgba(255,255,255,0.06)",
             display:"flex",alignItems:"center",justifyContent:"center",gap:"14px",
-            boxShadow:"0 0 30px #ef444420, inset 0 1px 0 #ffffff06",
-            height:"72px",
             position:"relative",overflow:"hidden",
           }}>
-            <div style={{position:"absolute",inset:0,background:"linear-gradient(90deg,transparent,#ef444408,transparent)",animation:"drift 4s ease-in-out infinite",pointerEvents:"none"}}/>
-            <div style={{fontSize:"28px",lineHeight:1,filter:"drop-shadow(0 0 6px #ef444499)"}}>⏹</div>
-            <div style={{fontSize:"20px",fontWeight:"900",color:"#f87171",letterSpacing:"0.5px"}}>{uT("cl_out")}</div>
+            <div style={{position:"absolute",top:0,left:0,right:0,height:"1px",background:"linear-gradient(90deg,transparent,rgba(239,68,68,0.3),transparent)",pointerEvents:"none"}}/>
+            <div style={{width:"44px",height:"44px",borderRadius:"50%",background:"rgba(239,68,68,0.20)",border:"1px solid rgba(239,68,68,0.35)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <rect x="5" y="5" width="14" height="14" rx="2" fill="#f87171"/>
+              </svg>
+            </div>
+            <span style={{fontSize:"18px",fontWeight:"600",color:"rgba(248,113,113,0.9)",letterSpacing:"-0.3px",fontFamily:"'DM Sans','Noto Sans Hebrew',sans-serif"}}>{uT("cl_out")}</span>
           </button>
         </div>
       )}
@@ -2070,9 +2105,9 @@ function LiveClock(){
   useEffect(()=>{const id=setInterval(()=>setTime(nowTime()),1000);return()=>clearInterval(id);},[]);
   const p=time.split(":");
   return(
-    <div style={{display:"flex",alignItems:"flex-end",justifyContent:"center",gap:"0px",fontVariantNumeric:"tabular-nums",lineHeight:1}}>
-      <span style={{fontSize:"68px",fontWeight:"900",color:"var(--txt-hi)",letterSpacing:"-4px",textShadow:"0 0 30px rgba(248,250,252,0.15)"}}>{p[0]}:{p[1]}</span>
-      <span style={{fontSize:"24px",fontWeight:"600",color:"var(--txt-d)",marginBottom:"8px",marginRight:"2px",letterSpacing:"-0.5px"}}>{p[2]}</span>
+    <div style={{display:"flex",alignItems:"flex-end",justifyContent:"center",fontVariantNumeric:"tabular-nums",lineHeight:1}}>
+      <span style={{fontSize:"68px",fontWeight:"200",color:"#fff",letterSpacing:"-4px",fontFamily:"'DM Sans',sans-serif"}}>{p[0]}:{p[1]}</span>
+      <span style={{fontSize:"24px",fontWeight:"300",color:"rgba(255,255,255,0.3)",marginBottom:"8px",letterSpacing:"1px",fontFamily:"'DM Sans',sans-serif"}}>{p[2]}</span>
     </div>
   );
 }
