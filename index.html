@@ -12,22 +12,27 @@
 <link rel="apple-touch-icon" sizes="192x192" href="./icon-192.png"/>
 <link rel="apple-touch-icon" sizes="512x512" href="./icon-512.png"/>
 <title>שעתי</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@300;400;500;700;800;900&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;800;900&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;900&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
 :root{
-  --bg:#090c14;--bg2:#0d1117;--card:#111827;
-  --divider:#1f2937;--divider2:#374151;--inp-b:#2a2d3e;
-  --txt:#e2e8f0;--txt-hi:#f1f5f9;--txt-m:#9ca3af;--txt-d:#6b7280;--txt-dd:#4b5563;
+  --bg:#020617;--bg2:#0a0f1e;--card:#0f172a;
+  --divider:#1e293b;--divider2:#334155;--inp-b:#1e293b;
+  --txt:#e2e8f0;--txt-hi:#f8fafc;--txt-m:#94a3b8;--txt-d:#64748b;--txt-dd:#475569;
+  --accent:#22c55e;--accent-dim:rgba(34,197,94,0.12);--accent-glow:rgba(34,197,94,0.25);
 }
 [data-theme="light"]{
   --bg:#ede9e3;--bg2:#f5f2ee;--card:#faf8f5;
   --divider:#ddd8d0;--divider2:#ccc7be;--inp-b:#ccc7be;
   --txt:#1c1917;--txt-hi:#0c0a09;--txt-m:#57534e;--txt-d:#78716c;--txt-dd:#a8a29e;
 }
-body{background:var(--bg);font-family:'Heebo','Noto Sans Arabic','Arial Hebrew',sans-serif;color:var(--txt);overscroll-behavior:none}
+body{background:var(--bg);font-family:'Noto Sans Hebrew','Heebo','Noto Sans Arabic','Arial Hebrew',sans-serif;color:var(--txt);overscroll-behavior:none}
+button{transition:opacity 0.15s ease,transform 0.15s ease,background 0.2s ease,color 0.2s ease,box-shadow 0.2s ease;cursor:pointer}
+button:active{transform:scale(0.96);opacity:0.85}
+input:focus,select:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 0 2px var(--accent-glow)!important}
 #root{height:100%;display:flex;flex-direction:column}
 input,select,button{font-family:inherit}
 input[type=date],input[type=time]{color-scheme:dark}
@@ -71,6 +76,8 @@ select option{background:var(--bg2);color:var(--txt)}
 .stagger-in{animation:staggerIn 0.25s ease-out both}
 .grow-bar{animation:growBar 0.5s cubic-bezier(0.34,1.56,0.64,1) both}
 .new-item{animation:slideInNew 0.3s ease-out}
+.card-primary{background:linear-gradient(135deg,#0f172a 0%,#0a1628 100%);border:1px solid #1e293b;border-radius:18px;box-shadow:0 4px 24px rgba(0,0,0,0.5),0 0 0 1px rgba(34,197,94,0.06)}
+.num-glow{text-shadow:0 0 20px rgba(74,222,128,0.4),0 0 40px rgba(74,222,128,0.15)}
 </style>
 </head>
 <body>
@@ -1272,8 +1279,8 @@ function elapsed(fromISO){
   return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
 }
 
-const SI={width:"100%",background:"var(--bg2)",border:"1px solid var(--inp-b)",borderRadius:"10px",padding:"12px 14px",color:"var(--txt)",fontSize:"16px",outline:"none",display:"block"};
-const CARD={background:"var(--card)",border:"1px solid var(--divider)",borderRadius:"14px",padding:"14px"};
+const SI={width:"100%",background:"var(--bg2)",border:"1px solid var(--inp-b)",borderRadius:"10px",padding:"12px 14px",color:"var(--txt)",fontSize:"16px",outline:"none",display:"block",transition:"border-color 0.15s ease,box-shadow 0.15s ease"};
+const CARD={background:"var(--card)",border:"1px solid var(--divider)",borderRadius:"16px",padding:"14px",boxShadow:"0 2px 16px rgba(0,0,0,0.4)"};
 const SEC={fontSize:"12px",color:"var(--txt-d)",fontWeight:"700",letterSpacing:"0.8px",marginBottom:"12px",textTransform:"uppercase"};
 const LBL={fontSize:"11px",color:"var(--txt-d)",marginBottom:"6px",fontWeight:"700",letterSpacing:"0.8px",textTransform:"uppercase"};
 
@@ -4547,7 +4554,7 @@ function App(){
 
   return(
   <LangCtx.Provider value={lang}>
-    <div dir={lang==="ru"?"ltr":"rtl"} style={{fontFamily:"'Heebo','Noto Sans Arabic','Arial Hebrew',sans-serif",minWidth:"100%",maxWidth:"430px",margin:"0 auto",height:"100%",display:"flex",flexDirection:"column",background:"var(--bg)",color:"var(--txt)",filter:nightMode?"brightness(0.82) saturate(0.9)":"none",transition:"filter 1s ease",position:"relative"}}>
+    <div dir={lang==="ru"?"ltr":"rtl"} style={{fontFamily:"'Noto Sans Hebrew','Heebo','Noto Sans Arabic','Arial Hebrew',sans-serif",minWidth:"100%",maxWidth:"430px",margin:"0 auto",height:"100%",display:"flex",flexDirection:"column",background:"var(--bg)",color:"var(--txt)",filter:nightMode?"brightness(0.82) saturate(0.9)":"none",transition:"filter 1s ease",position:"relative"}}>
 
       {/* Toast notification */}
       {toast&&(
@@ -4622,7 +4629,7 @@ function App(){
       </div>
 
       {/* Bottom nav — sliding pill indicator */}
-      <div style={{flexShrink:0,background:"var(--bg2)",borderTop:"1px solid #1f2937",zIndex:20,paddingBottom:"env(safe-area-inset-bottom, 4px)"}}>
+      <div style={{flexShrink:0,background:"rgba(2,6,23,0.92)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",borderTop:"1px solid #1e293b",zIndex:20,paddingBottom:"env(safe-area-inset-bottom, 4px)"}}>
         <div style={{display:"flex",width:"100%",position:"relative",padding:"4px"}}>
           {/* Sliding pill */}
           <div style={{
@@ -4630,10 +4637,11 @@ function App(){
             top:"4px",bottom:"4px",
             right:`calc(${tabs.findIndex(t=>t.id===tab)}*${100/tabs.length}% + 4px)`,
             width:`calc(${100/tabs.length}% - 8px)`,
-            background:"#052e16",
-            border:"1px solid #166534",
+            background:"var(--accent-dim)",
+            border:"1px solid rgba(34,197,94,0.35)",
             borderRadius:"10px",
-            transition:"right 0.25s cubic-bezier(0.4,0,0.2,1)",
+            boxShadow:"0 0 12px var(--accent-glow)",
+            transition:"right 0.28s cubic-bezier(0.4,0,0.2,1)",
             pointerEvents:"none",
             zIndex:0,
           }}/>
@@ -4644,7 +4652,7 @@ function App(){
               position:"relative",zIndex:1,
               transition:"color 0.2s ease",
             }}>
-              <div style={{fontSize:"18px"}}>{t.icon}</div>
+              <div style={{fontSize:"18px",filter:tab===t.id?"drop-shadow(0 0 5px rgba(74,222,128,0.7))":"none",transition:"filter 0.25s ease"}}>{t.icon}</div>
               <div style={{fontSize:"9px",fontWeight:tab===t.id?"800":"500",marginTop:"3px",letterSpacing:"-0.2px"}}>{t.label}</div>
             </button>
           ))}
