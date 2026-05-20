@@ -62,6 +62,12 @@ select option{background:var(--bg2);color:var(--txt)}
 @keyframes twinkle{0%,100%{opacity:0.15;transform:scale(0.8)}50%{opacity:0.7;transform:scale(1.3)}}
 @keyframes sunRise{0%,100%{opacity:0.12;transform:translateY(0) scale(1)}50%{opacity:0.28;transform:translateY(-10px) scale(1.1)}}
 @keyframes drift{0%{transform:translate(0,0)}33%{transform:translate(10px,-6px)}66%{transform:translate(-6px,-12px)}100%{transform:translate(0,0)}}
+@keyframes floatUp{0%{transform:translateY(0) scale(1);opacity:0.6}100%{transform:translateY(-80px) scale(0.6);opacity:0}}
+@keyframes floatDrift{0%{transform:translate(0,0) rotate(0deg)}25%{transform:translate(8px,-12px) rotate(8deg)}50%{transform:translate(-6px,-22px) rotate(-5deg)}75%{transform:translate(10px,-34px) rotate(6deg)}100%{transform:translate(2px,-46px) rotate(-3deg);opacity:0}}
+@keyframes sunPulse{0%,100%{opacity:0.55;transform:scale(1) rotate(0deg)}50%{opacity:0.85;transform:scale(1.08) rotate(8deg)}}
+@keyframes cloudDrift{0%{transform:translateX(0)}50%{transform:translateX(12px)}100%{transform:translateX(0)}}
+@keyframes starBlink{0%,100%{opacity:0.2;transform:scale(0.7)}50%{opacity:1;transform:scale(1.2)}}
+@keyframes moonGlow{0%,100%{opacity:0.6;filter:drop-shadow(0 0 4px rgba(167,139,250,0.4))}50%{opacity:1;filter:drop-shadow(0 0 12px rgba(167,139,250,0.8))}}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @keyframes buttonSuccess{0%{width:100%}40%{width:52px;border-radius:50%}60%{width:52px;border-radius:50%}100%{width:100%;border-radius:12px}}
 @keyframes slideInNew{from{opacity:0;transform:translateX(-24px) scaleY(0.8)}to{opacity:1;transform:translateX(0) scaleY(1)}}
@@ -1845,6 +1851,40 @@ function ShiftBg({type}){
   return null;
 }
 
+// Ambient floating particles for clock screen based on time of day
+function TimeParticles({type}){
+  const NIGHT=[
+    {e:"⭐",x:12,y:10,s:16,d:3.2,del:0},{e:"✨",x:78,y:18,s:13,d:4.1,del:0.8},
+    {e:"⭐",x:45,y:7,s:11,d:5.0,del:1.5},{e:"🌟",x:88,y:32,s:18,d:3.8,del:0.3},
+    {e:"⭐",x:25,y:42,s:12,d:4.4,del:2.1},{e:"✨",x:62,y:55,s:10,d:3.6,del:1.2},
+    {e:"⭐",x:8,y:68,s:14,d:5.2,del:0.6},{e:"🌙",x:82,y:14,s:22,d:6.0,del:0.1},
+  ];
+  const MORNING=[
+    {e:"☀️",x:80,y:8,s:32,d:6,del:0},{e:"✨",x:15,y:20,s:12,d:3.5,del:0.7},
+    {e:"🌸",x:55,y:55,s:16,d:4.2,del:1.3},{e:"✨",x:90,y:50,s:10,d:3.8,del:0.4},
+    {e:"🌿",x:8,y:65,s:15,d:5.0,del:1.8},{e:"✨",x:40,y:30,s:11,d:4.6,del:2.0},
+  ];
+  const AFTERNOON=[
+    {e:"🌤️",x:78,y:6,s:28,d:7,del:0},{e:"🌿",x:12,y:30,s:16,d:4.2,del:0.9},
+    {e:"🌼",x:50,y:60,s:18,d:5.0,del:1.6},{e:"✨",x:85,y:45,s:11,d:3.4,del:0.5},
+    {e:"🍃",x:25,y:72,s:15,d:4.8,del:2.2},{e:"🌿",x:68,y:38,s:13,d:3.9,del:1.1},
+  ];
+  const particles=type==="night"?NIGHT:type==="afternoon"?AFTERNOON:MORNING;
+  const anim=type==="night"?"starBlink":type==="afternoon"?"cloudDrift":"sunPulse";
+  return(
+    <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0,overflow:"hidden"}}>
+      {particles.map((p,i)=>(
+        <div key={i} style={{
+          position:"absolute",left:`${p.x}%`,top:`${p.y}%`,
+          fontSize:`${p.s}px`,lineHeight:1,
+          animation:`${anim} ${p.d}s ${p.del}s ease-in-out infinite`,
+          opacity:0.5,
+        }}>{p.e}</div>
+      ))}
+    </div>
+  );
+}
+
 // ════════════════════════════════════════
 // CLOCK IN/OUT SCREEN (main screen)
 // ════════════════════════════════════════
@@ -1957,7 +1997,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
   const tmParts=nowTime().split(":");
 
   return(
-    <div style={{position:"relative",overflow:"hidden",height:"calc(100dvh - 64px)",display:"flex",flexDirection:"column",background:"#000"}}>
+    <div style={{position:"relative",overflow:"hidden",flex:1,display:"flex",flexDirection:"column",background:"#000"}}>
       {confetti.map(p=>(
         <div key={p.id} style={{position:"fixed",top:0,left:`${p.x}%`,fontSize:"20px",pointerEvents:"none",zIndex:999,
           animation:`confettiFall ${p.dur}s ${p.delay}s ease-in forwards`}}>{p.emoji}</div>
@@ -1966,6 +2006,9 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
       {/* ── IDLE STATE ── */}
       {!clockIn&&(
         <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"space-between",padding:"16px 20px 20px",position:"relative",zIndex:5}}>
+
+          {/* Time-of-day ambient particles */}
+          <TimeParticles type={curType}/>
 
           {/* Ambient glow orbs */}
           <div style={{position:"absolute",top:"-10%",left:"50%",transform:"translateX(-50%)",width:"340px",height:"340px",borderRadius:"50%",
@@ -2037,7 +2080,10 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
       {clockIn&&(
         <div style={{flex:1,display:"flex",flexDirection:"column",padding:"10px 16px 16px",position:"relative",zIndex:5,gap:"8px",justifyContent:"space-between"}}>
 
-          {/* Active ambient glow — red tint */}
+          {/* Time-of-day ambient particles (active) */}
+          <TimeParticles type={curType}/>
+
+          {/* Active ambient glow */}
           <div style={{position:"absolute",top:"-5%",left:"50%",transform:"translateX(-50%)",width:"300px",height:"300px",borderRadius:"50%",
             background:"radial-gradient(circle,rgba(34,197,94,0.10) 0%,transparent 70%)",
             filter:"blur(30px)",pointerEvents:"none",zIndex:0}}/>
@@ -4675,22 +4721,20 @@ function App(){
       )}
 
       {/* Scrollable content */}
-      <div ref={scrollRef} style={{flex:1,overflowY:"auto",overflowX:"hidden",WebkitOverflowScrolling:"touch",minHeight:0}}>
+      <div ref={scrollRef} style={{flex:1,overflowY:tab==="clock"?"hidden":"auto",overflowX:"hidden",WebkitOverflowScrolling:"touch",minHeight:0,display:"flex",flexDirection:"column"}}>
         {/* AddShift: always mounted so form state (incl. allowances) never resets on tab switch */}
         <div style={{display:tab==="add"?"block":"none",width:"100%"}}>
           <AddShift cfg={cfg} tpls={tpls} als={als} shifts={shifts} form={addForm} onFormChange={setAddForm} onAdd={s=>{addSh(s);showToast(appT("as_saved"));scrollTop();}} onEdit={editSh} onDelete={delSh} privacyMode={privacyMode} onResetForm={()=>{const ids=als.filter(a=>a.active&&a.type==="per_shift").map(a=>a.id);setAddForm({date:null,start:"",end:"",type:"regular",note:"",templateName:"",allowanceIds:ids,customMult:null});}}/>
         </div>
-        <div key={tabKey} className={slideClass(prevTab,tab)} style={{display:tab==="add"?"none":"block",width:"100%"}}>
+        <div key={tabKey} className={slideClass(prevTab,tab)} style={{display:tab==="add"?"none":tab==="clock"?"flex":"block",flexDirection:"column",flex:tab==="clock"?1:undefined,width:"100%"}}>
           {tab==="clock"    &&<ClockScreen clockIn={clockIn} setClockIn={setClockIn} als={als} cfg={cfg} shifts={shifts} onShiftSaved={s=>{addSh(s);showToast(appT("as_saved"));}} privacyMode={privacyMode} togglePrivacy={togglePrivacy}/>}
           {tab==="dashboard"&&<Dashboard shifts={shifts} cfg={cfg} als={als} selM={selM} setSelM={setSelM} privacyMode={privacyMode} payslips={payslips} onSavePayslip={savePayslip} clockIn={clockIn}/>}
           {tab==="shifts"   &&<ShiftsList shifts={shifts} cfg={cfg} als={als} onDelete={delSh} onEdit={editSh} privacyMode={privacyMode}/>}
           {tab==="graph"    &&<Graph shifts={shifts} cfg={cfg} als={als} privacyMode={privacyMode} manualMonths={manualMonths} onSaveManual={saveManualMonth}/>}
           {tab==="settings" &&<Settings cfg={cfg} tpls={tpls} als={als} shifts={shifts} vacCfg={vacCfg} onSaveCfg={saveCfg} onSaveTpls={saveTpls} onSaveAls={saveAls} onSaveVacCfg={saveVacCfg} privacyMode={privacyMode} togglePrivacy={togglePrivacy} onReset={()=>{LS.set(K.onboarded,false);setOnboarded(false);}} lang={lang} onSaveLang={saveLang} theme={theme} onSaveTheme={saveTheme}/>}
         </div>
-        {/* Watermark — inside scroll, above nav padding */}
-        <div style={{textAlign:"center",padding:"12px 0 4px",fontSize:"10px",color:"var(--divider)",letterSpacing:"0.5px"}}>
-          made by illouzman
-        </div>
+        {/* Watermark — hidden on clock tab */}
+        {tab!=="clock"&&<div style={{textAlign:"center",padding:"12px 0 4px",fontSize:"10px",color:"var(--divider)",letterSpacing:"0.5px"}}>made by illouzman</div>}
       </div>
 
       {/* Bottom nav — sliding pill indicator */}
