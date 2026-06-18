@@ -83,28 +83,7 @@ select option{background:var(--bg2);color:var(--txt)}
 </head>
 <body>
 <div id="root"></div>
-<script>
-  if("serviceWorker"in navigator){
-    navigator.serviceWorker.register("./sw.js").then(reg=>{
-      // Force update check immediately
-      reg.update();
-      // If a new SW is waiting, activate it immediately
-      if(reg.waiting){reg.waiting.postMessage({type:"SKIP_WAITING"});}
-      reg.addEventListener("updatefound",()=>{
-        const nw=reg.installing;
-        nw.addEventListener("statechange",()=>{
-          if(nw.state==="installed"&&navigator.serviceWorker.controller){
-            nw.postMessage({type:"SKIP_WAITING"});
-          }
-        });
-      });
-    }).catch(()=>{});
-    // When SW sends RELOAD, hard-reload the page
-    navigator.serviceWorker.addEventListener("controllerchange",()=>window.location.reload());
-  }
-  window.__installPrompt=null;
-  window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();window.__installPrompt=e;});
-</script>
+<script>if("serviceWorker"in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{});}window.__installPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();window.__installPrompt=e;});</script>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -1978,7 +1957,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
   const tmParts=nowTime().split(":");
 
   return(
-    <div style={{position:"relative",overflow:"hidden",height:"calc(100dvh - 64px)",display:"flex",flexDirection:"column",background:"#000"}}>
+    <div style={{position:"relative",overflow:"hidden",minHeight:"calc(100dvh - 64px)",display:"flex",flexDirection:"column",background:"#000"}}>
       {confetti.map(p=>(
         <div key={p.id} style={{position:"fixed",top:0,left:`${p.x}%`,fontSize:"20px",pointerEvents:"none",zIndex:999,
           animation:`confettiFall ${p.dur}s ${p.delay}s ease-in forwards`}}>{p.emoji}</div>
@@ -1986,7 +1965,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
 
       {/* ── IDLE STATE ── */}
       {!clockIn&&(
-        <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"space-between",padding:"16px 20px 20px",position:"relative",zIndex:5}}>
+        <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"space-between",padding:"28px 20px 32px",position:"relative",zIndex:5}}>
 
           {/* Ambient glow orbs */}
           <div style={{position:"absolute",top:"-10%",left:"50%",transform:"translateX(-50%)",width:"340px",height:"340px",borderRadius:"50%",
@@ -2006,7 +1985,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
               backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",
               border:"1px solid rgba(255,255,255,0.12)",
               borderRadius:"100px",padding:"6px 16px"}}>
-              <span style={{fontSize:"17px",lineHeight:1}}>{sty.icon}</span>
+              <div style={{width:"7px",height:"7px",borderRadius:"50%",background:sty.color,boxShadow:`0 0 6px ${sty.color}`}}/>
               <span style={{fontSize:"13px",color:"rgba(255,255,255,0.75)",fontWeight:"500",fontFamily:"'DM Sans',sans-serif"}}>{uT("st_"+curType)}</span>
             </div>
           </div>
@@ -2014,15 +1993,15 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
           {/* Center: giant time */}
           <div style={{textAlign:"center",position:"relative",zIndex:1}}>
             <div style={{display:"flex",alignItems:"flex-start",justifyContent:"center",gap:"2px",lineHeight:1,fontVariantNumeric:"tabular-nums"}}>
-              <span style={{fontSize:"clamp(72px,21vw,96px)",fontWeight:"200",color:"#fff",letterSpacing:"-5px",fontFamily:"'DM Sans','Noto Sans Hebrew',sans-serif"}}>{tmParts[0]}:{tmParts[1]}</span>
-              <span style={{fontSize:"clamp(22px,6vw,28px)",fontWeight:"300",color:"rgba(255,255,255,0.3)",marginTop:"10px",letterSpacing:"1px",fontFamily:"'DM Sans',sans-serif"}}>{tmParts[2]}</span>
+              <span style={{fontSize:"clamp(80px,24vw,108px)",fontWeight:"200",color:"#fff",letterSpacing:"-6px",fontFamily:"'DM Sans','Noto Sans Hebrew',sans-serif"}}>{tmParts[0]}:{tmParts[1]}</span>
+              <span style={{fontSize:"clamp(24px,7vw,32px)",fontWeight:"300",color:"rgba(255,255,255,0.3)",marginTop:"12px",letterSpacing:"1px",fontFamily:"'DM Sans',sans-serif"}}>{tmParts[2]}</span>
             </div>
           </div>
 
           {/* Bottom: clock-in button */}
           <div style={{width:"100%",position:"relative",zIndex:1}}>
             <button onClick={handleClockIn} style={{
-              width:"100%",padding:"18px 0",borderRadius:"20px",cursor:"pointer",
+              width:"100%",padding:"22px 0",borderRadius:"20px",cursor:"pointer",
               background:"linear-gradient(160deg,#22c55e 0%,#16a34a 100%)",
               border:"none",
               boxShadow:"0 6px 32px rgba(34,197,94,0.45), 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.20)",
@@ -2056,7 +2035,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
 
       {/* ── ACTIVE STATE ── */}
       {clockIn&&(
-        <div style={{flex:1,display:"flex",flexDirection:"column",padding:"10px 16px 16px",position:"relative",zIndex:5,gap:"8px",justifyContent:"space-between"}}>
+        <div style={{flex:1,display:"flex",flexDirection:"column",padding:"12px 16px 20px",position:"relative",zIndex:5,gap:"10px"}}>
 
           {/* Active ambient glow — red tint */}
           <div style={{position:"absolute",top:"-5%",left:"50%",transform:"translateX(-50%)",width:"300px",height:"300px",borderRadius:"50%",
@@ -2088,7 +2067,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
 
           {/* Clock-out button */}
           <button onClick={handleClockOut} style={{
-            width:"100%",padding:"17px 0",borderRadius:"20px",cursor:"pointer",
+            width:"100%",padding:"20px 0",borderRadius:"20px",cursor:"pointer",
             background:"linear-gradient(160deg,#ef4444 0%,#dc2626 100%)",
             border:"none",
             boxShadow:"0 6px 32px rgba(239,68,68,0.40), 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.18)",
@@ -4696,7 +4675,7 @@ function App(){
       )}
 
       {/* Scrollable content */}
-      <div ref={scrollRef} style={{flex:1,overflowY:tab==="clock"?"hidden":"auto",overflowX:"hidden",WebkitOverflowScrolling:"touch",minHeight:0}}>
+      <div ref={scrollRef} style={{flex:1,overflowY:"auto",overflowX:"hidden",WebkitOverflowScrolling:"touch",minHeight:0}}>
         {/* AddShift: always mounted so form state (incl. allowances) never resets on tab switch */}
         <div style={{display:tab==="add"?"block":"none",width:"100%"}}>
           <AddShift cfg={cfg} tpls={tpls} als={als} shifts={shifts} form={addForm} onFormChange={setAddForm} onAdd={s=>{addSh(s);showToast(appT("as_saved"));scrollTop();}} onEdit={editSh} onDelete={delSh} privacyMode={privacyMode} onResetForm={()=>{const ids=als.filter(a=>a.active&&a.type==="per_shift").map(a=>a.id);setAddForm({date:null,start:"",end:"",type:"regular",note:"",templateName:"",allowanceIds:ids,customMult:null});}}/>
@@ -4708,7 +4687,10 @@ function App(){
           {tab==="graph"    &&<Graph shifts={shifts} cfg={cfg} als={als} privacyMode={privacyMode} manualMonths={manualMonths} onSaveManual={saveManualMonth}/>}
           {tab==="settings" &&<Settings cfg={cfg} tpls={tpls} als={als} shifts={shifts} vacCfg={vacCfg} onSaveCfg={saveCfg} onSaveTpls={saveTpls} onSaveAls={saveAls} onSaveVacCfg={saveVacCfg} privacyMode={privacyMode} togglePrivacy={togglePrivacy} onReset={()=>{LS.set(K.onboarded,false);setOnboarded(false);}} lang={lang} onSaveLang={saveLang} theme={theme} onSaveTheme={saveTheme}/>}
         </div>
-        {tab!=="clock"&&<div style={{textAlign:"center",padding:"12px 0 4px",fontSize:"10px",color:"var(--divider)",letterSpacing:"0.5px"}}>made by illouzman</div>}
+        {/* Watermark — inside scroll, above nav padding */}
+        <div style={{textAlign:"center",padding:"12px 0 4px",fontSize:"10px",color:"var(--divider)",letterSpacing:"0.5px"}}>
+          made by illouzman
+        </div>
       </div>
 
       {/* Bottom nav — sliding pill indicator */}
