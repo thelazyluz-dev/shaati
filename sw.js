@@ -1,4 +1,4 @@
-const CACHE = "shaati-v24";
+const CACHE = "shaati-v25";
 const STATIC = ["./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", e => {
