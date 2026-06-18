@@ -83,7 +83,14 @@ select option{background:var(--bg2);color:var(--txt)}
 </head>
 <body>
 <div id="root"></div>
-<script>if("serviceWorker"in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{});}window.__installPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();window.__installPrompt=e;});</script>
+<script>
+// SW temporarily disabled for debugging — re-enable after confirming app loads
+if("serviceWorker"in navigator){
+  navigator.serviceWorker.getRegistrations().then(regs=>{regs.forEach(r=>r.unregister());});
+}
+window.__installPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();window.__installPrompt=e;});
+</script>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
