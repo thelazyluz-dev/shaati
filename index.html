@@ -1982,7 +1982,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
   const tmParts=nowTime().split(":");
 
   return(
-    <div style={{position:"relative",overflow:"hidden",height:"100%",display:"flex",flexDirection:"column",background:"#000"}}>
+    <div style={{position:"relative",overflow:"hidden",height:"calc(100dvh - 64px)",display:"flex",flexDirection:"column",background:"#000"}}>
       {confetti.map(p=>(
         <div key={p.id} style={{position:"fixed",top:0,left:`${p.x}%`,fontSize:"20px",pointerEvents:"none",zIndex:999,
           animation:`confettiFall ${p.dur}s ${p.delay}s ease-in forwards`}}>{p.emoji}</div>
@@ -4711,7 +4711,7 @@ function App(){
         <div style={{display:tab==="add"?"block":"none",width:"100%"}}>
           <AddShift cfg={cfg} tpls={tpls} als={als} shifts={shifts} form={addForm} onFormChange={setAddForm} onAdd={s=>{addSh(s);showToast(appT("as_saved"));scrollTop();}} onEdit={editSh} onDelete={delSh} privacyMode={privacyMode} onResetForm={()=>{const ids=als.filter(a=>a.active&&a.type==="per_shift").map(a=>a.id);setAddForm({date:null,start:"",end:"",type:"regular",note:"",templateName:"",allowanceIds:ids,customMult:null});}}/>
         </div>
-        <div key={tabKey} className={slideClass(prevTab,tab)} style={{display:tab==="add"?"none":"block",width:"100%",height:tab==="clock"?"100%":"auto"}}>
+        <div key={tabKey} className={slideClass(prevTab,tab)} style={{display:tab==="add"?"none":"block",width:"100%"}}>
           {tab==="clock"    &&<ClockScreen clockIn={clockIn} setClockIn={setClockIn} als={als} cfg={cfg} shifts={shifts} onShiftSaved={s=>{addSh(s);showToast(appT("as_saved"));}} privacyMode={privacyMode} togglePrivacy={togglePrivacy}/>}
           {tab==="dashboard"&&<Dashboard shifts={shifts} cfg={cfg} als={als} selM={selM} setSelM={setSelM} privacyMode={privacyMode} payslips={payslips} onSavePayslip={savePayslip} clockIn={clockIn}/>}
           {tab==="shifts"   &&<ShiftsList shifts={shifts} cfg={cfg} als={als} onDelete={delSh} onEdit={editSh} privacyMode={privacyMode}/>}
