@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>שעתי – איפוס</title>
+<style>
+body{margin:0;background:#020617;color:#e2e8f0;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:24px}
+.box{max-width:320px}
+.spin{width:48px;height:48px;border:4px solid #1e293b;border-top-color:#22c55e;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 24px}
+@keyframes spin{to{transform:rotate(360deg)}}
+h2{margin:0 0 8px;font-size:22px}
+p{color:#94a3b8;font-size:14px;margin:0 0 24px}
+a{color:#22c55e;font-size:15px}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="spin" id="spin"></div>
+  <h2 id="msg">מאפס...</h2>
+  <p id="sub">מוחק קאש ישן ועדכון שירות רקע</p>
+  <a id="link" href="./index.html" style="display:none">לחץ כאן אם לא הועבר אוטומטית</a>
+</div>
+<script>
+(function(){
+  var done=false;
+  function finish(){
+    if(done)return;
+    done=true;
+    document.getElementById("spin").style.display="none";
+    document.getElementById("msg").textContent="✓ איפוס הושלם";
+    document.getElementById("sub").textContent="מעביר לאפליקציה...";
+    document.getElementById("link").style.display="block";
+    setTimeout(function(){window.location.replace("./index.html?bust="+Date.now());},1500);
+  }
+
+  var tasks=[];
+
+  // 1. Unregister all service workers
+  if("serviceWorker"in navigator){
+    tasks.push(
+      navigator.serviceWorker.getRegistrations().then(function(regs){
+        return Promise.all(regs.map(function(r){return r.unregister();}));
+      })
+    );
+  }
+
+  // 2. Clear all caches
+  if("caches"in window){
+    tasks.push(
+      caches.keys().then(function(keys){
+        return Promise.all(keys.map(function(k){return caches.delete(k);}));
+      })
+    );
+  }
+
+  Promise.all(tasks).then(finish).catch(finish);
+
+  // Safety timeout — finish no matter what
+  setTimeout(finish,5000);
+})();
+</script>
+</body>
+</html>
