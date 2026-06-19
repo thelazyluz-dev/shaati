@@ -20,7 +20,7 @@ self.addEventListener("fetch", e => {
   const url = new URL(e.request.url);
   // index.html — always network, no cache fallback (force fresh)
   if (url.pathname.endsWith("/") || url.pathname.endsWith("/index.html")) {
-    e.respondWith(fetch(e.request.url + "?v=32", { cache: "no-store" }));
+    e.respondWith(fetch(e.request, { cache: "no-store" }));
     return;
   }
   // other files — cache-first
