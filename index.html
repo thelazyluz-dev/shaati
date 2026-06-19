@@ -83,32 +83,7 @@ select option{background:var(--bg2);color:var(--txt)}
 </head>
 <body>
 <div id="root"></div>
-<script>
-// Unregister old broken SW + self-heal if app fails to render
-(function(){
-  if("serviceWorker"in navigator){
-    navigator.serviceWorker.getRegistrations().then(function(regs){
-      regs.forEach(function(r){r.unregister();});
-    });
-    navigator.serviceWorker.register("./sw.js").catch(function(){});
-  }
-  window.__installPrompt=null;
-  window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();window.__installPrompt=e;});
-  // Self-heal: if React hasn't rendered after 4 seconds, clear caches and hard-reload
-  setTimeout(function(){
-    var root=document.getElementById("root");
-    if(!root||!root.firstChild){
-      if("caches"in window){
-        caches.keys().then(function(keys){
-          return Promise.all(keys.map(function(k){return caches.delete(k);}));
-        }).then(function(){window.location.replace(window.location.pathname+"?bust="+Date.now());});
-      } else {
-        window.location.replace(window.location.pathname+"?bust="+Date.now());
-      }
-    }
-  },4000);
-})();
-</script>
+<script>if("serviceWorker"in navigator){navigator.serviceWorker.register("./sw.js").catch(function(){});}window.__installPrompt=null;window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();window.__installPrompt=e;});</script>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
