@@ -1,4 +1,4 @@
-const CACHE = "shaati-v32";
+const CACHE = "shaati-v33";
 const STATIC = ["./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", e => {
@@ -17,12 +17,24 @@ self.addEventListener("activate", e => {
 });
 
 self.addEventListener("fetch", e => {
+  if (e.request.method !== "GET") return;
   const url = new URL(e.request.url);
   // index.html — always network, no cache fallback (force fresh)
   if (url.pathname.endsWith("/") || url.pathname.endsWith("/index.html")) {
     e.respondWith(fetch(e.request, { cache: "no-store" }));
     return;
   }
-  // other files — cache-first
-  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+  // other files — cache-first with runtime backfill (app.js is versioned by URL)
+  e.respondWith(
+    caches.match(e.request).then(r => {
+      if (r) return r;
+      return fetch(e.request).then(res => {
+        if (res.ok && url.origin === self.location.origin) {
+          const clone = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
+        }
+        return res;
+      });
+    })
+  );
 });

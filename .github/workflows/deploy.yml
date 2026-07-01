@@ -22,9 +22,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Precompile JSX
+        run: |
+          npm install --no-save --no-package-lock @babel/core @babel/preset-react
+          node build.mjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: 'dist'
       - uses: actions/deploy-pages@v4
         id: deployment

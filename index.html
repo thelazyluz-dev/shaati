@@ -151,6 +151,8 @@ const TR={
     cl_shift:"משמרת",cl_active:"פעילה",cl_start:"התחלה",cl_elapsed:"זמן עבודה",
     cl_net:"שכר נטו",cl_gross_pfx:"ברוטו",cl_calc:"פירוט חישוב",cl_gross_lbl:"ברוטו",cl_net_lbl:"נטו",cl_per_min:"נטו/דקה",cl_per_hr:"נטו/שעה",
     cl_in:"כניסה למשמרת",cl_in_hint:"לחץ כניסה כשמתחיל המשמרת · השעה תירשם אוטומטית",
+    cl_forgot_t:"שכחת להחתים יציאה?",cl_forgot_s:"המשמרת פעילה כבר",cl_forgot_fix:"קבע שעת סיום ידנית",cl_forgot_save:"שמור משמרת",cl_forgot_cancel:"בטל משמרת",cl_forgot_cancel_c:"לבטל את המשמרת לגמרי? היא לא תישמר.",
+    cl_edit_start:"עריכת שעת כניסה",cl_month_sum:"החודש",cl_note_btn:"הוסף הערה",
     cl_note_ph:"הערה אופציונלית (חג, שעות מיוחדות...)",cl_out:"סיום משמרת",
     cl_short_t:"כבר סיימת משמרת??",cl_short_s:"על מי את/ה עובד/ת",cl_no_rec:"לא מתעד",
     cl_recording:"מתחיל לרשום...",cl_saved:"משמרת נשמרה ✓",
@@ -193,6 +195,12 @@ const TR={
     sg_saved:"✓ ההגדרות נשמרו!",sg_save:"שמור הגדרות",
     sg_privacy:"מצב פרטיות",sg_privacy_h:"מסתיר את כל הסכומים בכל המסכים",
     sg_reset:"🔄 הפעל מחדש את אשף ההגדרות",sg_reset_c:"לאפס את האשף הראשוני ולהגדיר מחדש?",
+    sg_shabbat:"🕯️ תוספת שבת",sg_shabbat_h:"זיהוי אוטומטי של משמרות שבת — התוספת תחול על השעות שבתוך חלון השבת",
+    sg_shabbat_from:"כניסת שבת (שישי)",sg_shabbat_to:"צאת שבת (מוצ״ש)",sg_shabbat_pct:"אחוז תוספת שבת",
+    sg_backup:"גיבוי ושחזור",sg_backup_h:"הנתונים נשמרים רק במכשיר הזה — מומלץ לגבות מדי פעם",
+    sg_exp_json:"⬇️ ייצוא גיבוי מלא",sg_imp_json:"⬆️ שחזור מגיבוי",sg_exp_csv:"📊 ייצוא משמרות (CSV)",
+    sg_imp_c:"שחזור יחליף את כל הנתונים הקיימים באפליקציה. להמשיך?",
+    sg_imp_ok:"✓ הגיבוי שוחזר! טוען מחדש...",sg_imp_err:"⚠ קובץ גיבוי לא תקין",
     sg_lang:"🌐 שפה",
     sg_theme:"🎨 ערכת נושא",sg_theme_dark:"🌙 חשוך",sg_theme_light:"☀️ בהיר",
     ob_theme_h:"בחר ערכת נושא",
@@ -365,6 +373,8 @@ const TR={
     cl_shift:"Смена",cl_active:"активна",cl_start:"Начало",cl_elapsed:"Время работы",
     cl_net:"Чистая",cl_gross_pfx:"Брутто",cl_calc:"Детали расчёта",cl_gross_lbl:"Брутто",cl_net_lbl:"Нетто",cl_per_min:"нетто/мин",cl_per_hr:"нетто/час",
     cl_in:"Начать смену",cl_in_hint:"Нажмите начало · время запишется автоматически",
+    cl_forgot_t:"Забыли отметить выход?",cl_forgot_s:"Смена активна уже",cl_forgot_fix:"Указать время окончания",cl_forgot_save:"Сохранить смену",cl_forgot_cancel:"Отменить смену",cl_forgot_cancel_c:"Полностью отменить смену? Она не будет сохранена.",
+    cl_edit_start:"Изменить время начала",cl_month_sum:"В этом месяце",cl_note_btn:"Добавить заметку",
     cl_note_ph:"Необязательная заметка...",cl_out:"Закончить смену",
     cl_short_t:"Уже закончил смену??",cl_short_s:"Кого ты пытаешься обмануть",cl_no_rec:"Не записываю",
     cl_recording:"Начинаю запись...",cl_saved:"Смена сохранена ✓",
@@ -407,6 +417,12 @@ const TR={
     sg_saved:"✓ Настройки сохранены!",sg_save:"Сохранить настройки",
     sg_privacy:"Режим приватности",sg_privacy_h:"Скрывает все суммы на всех экранах",
     sg_reset:"🔄 Перезапустить мастер настроек",sg_reset_c:"Сбросить мастер и настроить заново?",
+    sg_shabbat:"🕯️ Шаббатная надбавка",sg_shabbat_h:"Автоопределение смен в шаббат — надбавка на часы внутри окна шаббата",
+    sg_shabbat_from:"Начало шаббата (пятница)",sg_shabbat_to:"Конец шаббата (суббота)",sg_shabbat_pct:"Процент надбавки",
+    sg_backup:"Резервное копирование",sg_backup_h:"Данные хранятся только на этом устройстве — делайте резервные копии",
+    sg_exp_json:"⬇️ Экспорт полной копии",sg_imp_json:"⬆️ Восстановить из копии",sg_exp_csv:"📊 Экспорт смен (CSV)",
+    sg_imp_c:"Восстановление заменит все текущие данные. Продолжить?",
+    sg_imp_ok:"✓ Копия восстановлена! Перезагрузка...",sg_imp_err:"⚠ Неверный файл резервной копии",
     sg_lang:"🌐 Язык",
     sg_theme:"🎨 Тема",sg_theme_dark:"🌙 Тёмная",sg_theme_light:"☀️ Светлая",
     ob_theme_h:"Выберите тему",
@@ -576,6 +592,12 @@ const TR={
     sg_tpl_save:"حفظ القوالب",sg_tpl_err_n:"يرجى إدخال اسم",sg_tpl_err_h:"ساعات غير صحيحة",
     sg_privacy:"وضع الخصوصية",sg_privacy_h:"إخفاء جميع المبالغ في كل الشاشات",
     sg_reset:"🔄 إعادة تشغيل معالج الإعداد",sg_reset_c:"إعادة تعيين المعالج والإعداد من جديد؟",
+    sg_shabbat:"🕯️ علاوة السبت",sg_shabbat_h:"كشف تلقائي لورديات السبت — العلاوة على الساعات ضمن نافذة السبت",
+    sg_shabbat_from:"بداية السبت (الجمعة)",sg_shabbat_to:"نهاية السبت",sg_shabbat_pct:"نسبة العلاوة",
+    sg_backup:"النسخ الاحتياطي",sg_backup_h:"البيانات محفوظة على هذا الجهاز فقط — يُنصح بالنسخ الاحتياطي",
+    sg_exp_json:"⬇️ تصدير نسخة كاملة",sg_imp_json:"⬆️ استعادة من نسخة",sg_exp_csv:"📊 تصدير الورديات (CSV)",
+    sg_imp_c:"الاستعادة ستستبدل جميع البيانات الحالية. متابعة؟",
+    sg_imp_ok:"✓ تمت الاستعادة! جارٍ إعادة التحميل...",sg_imp_err:"⚠ ملف نسخة احتياطية غير صالح",
     sg_lang:"🌐 اللغة",sg_theme:"🎨 السمة",sg_theme_dark:"🌙 داكن",sg_theme_light:"☀️ فاتح",
     sg_shift_cfg:"إعداد أنواع الورديات",sg_sh_enabled:"مفعّل",sg_sh_start:"وقت البداية",
     sg_sh_pct:"نسبة الراتب (%)",sg_sh_unknown:"لا أعرف — حدد وفق الحد القانوني",
@@ -608,6 +630,8 @@ const TR={
     cl_shift:"وردية",cl_active:"نشطة",cl_start:"البداية",cl_elapsed:"وقت العمل",
     cl_net:"صافي الراتب",cl_gross_pfx:"إجمالي",cl_calc:"تفاصيل الحساب",cl_gross_lbl:"إجمالي",cl_net_lbl:"صافي",cl_per_min:"صافي/دقيقة",cl_per_hr:"صافي/ساعة",
     cl_in:"بدء الوردية",cl_in_hint:"اضغط البداية عند بدء الوردية · سيُسجَّل الوقت تلقائياً",
+    cl_forgot_t:"نسيت تسجيل الخروج؟",cl_forgot_s:"الوردية نشطة منذ",cl_forgot_fix:"تحديد وقت الانتهاء يدوياً",cl_forgot_save:"حفظ الوردية",cl_forgot_cancel:"إلغاء الوردية",cl_forgot_cancel_c:"إلغاء الوردية نهائياً؟ لن يتم حفظها.",
+    cl_edit_start:"تعديل وقت الدخول",cl_month_sum:"هذا الشهر",cl_note_btn:"إضافة ملاحظة",
     cl_note_ph:"ملاحظة اختيارية (عطلة، ساعات خاصة...)",cl_out:"إنهاء الوردية",
     cl_short_t:"انتهيت من الوردية بالفعل؟",cl_short_s:"على من تعمل؟",cl_no_rec:"لا أسجل",
     cl_recording:"جارٍ التسجيل...",cl_saved:"تم حفظ الوردية ✓",
@@ -804,6 +828,8 @@ const DEF_CFG={
   morningStart:"06:00",afternoonStart:"14:00",nightStart:"22:00",
   morningMult:100,afternoonMult:117,nightMult:140,
   morningMultKnown:true,afternoonMultKnown:true,nightMultKnown:true,
+  // Shabbat premium: Friday evening → Saturday night
+  shabbatEnabled:false,shabbatStart:"18:00",shabbatEnd:"20:00",shabbatMult:150,
 };
 const DEF_ALS=[];
 const ST={
@@ -1167,9 +1193,32 @@ function buildWeeklyThresholdMap(allShifts,cfg){
   return map;
 }
 
+// ── Shabbat window helpers ──
+// Returns Shabbat intervals in minutes relative to midnight of the shift-start day.
+// dateStr = shift start date; covers windows overlapping [0, 2880] (shift start day + next day).
+function shabbatIntervals(dateStr,cfg){
+  if(!cfg||!cfg.shabbatEnabled||!dateStr)return[];
+  const dow=new Date(dateStr+"T12:00:00").getDay();
+  const ss=pt(cfg.shabbatStart||"18:00");
+  const se=pt(cfg.shabbatEnd||"20:00");
+  const out=[];
+  for(let k=-1;k<=2;k++){
+    if(((dow+k+7)%7)===5)out.push([k*1440+ss,(k+1)*1440+se]); // Friday k → Shabbat until Saturday
+  }
+  return out;
+}
+function isShabbatAt(d,cfg){
+  if(!cfg||!cfg.shabbatEnabled)return false;
+  const pad=n=>String(n).padStart(2,"0");
+  const ds=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const m=d.getHours()*60+d.getMinutes();
+  return shabbatIntervals(ds,cfg).some(([a,b])=>m>=a&&m<b);
+}
+
 // חישוב שכר אוטומטי לפי גבולות שעה (רגיל 06-14, צהריים 14-22, לילה 22-06)
 // מחלק את שעות המשמרת לפי התקופות שנכחו בהן ומחשב שכר נכון לכל קטע
-function cpAuto(startTime,endTime,cfg,thresholdOverride){
+// dateStr (אופציונלי): תאריך תחילת המשמרת — לזיהוי שבת אוטומטי
+function cpAuto(startTime,endTime,cfg,thresholdOverride,dateStr){
   const startM=pt(startTime);
   const totalH=ch(startTime,endTime);
   const endM=startM+totalH*60;
@@ -1198,6 +1247,29 @@ function cpAuto(startTime,endTime,cfg,thresholdOverride){
     }
   }
   segs.sort((a,b)=>a.from-b.from);
+  // Shabbat premium: raise segment multiplier inside the Shabbat window
+  const shab=shabbatIntervals(dateStr,cfg);
+  let shabbatH=0;
+  if(shab.length){
+    const sMult=(cfg.shabbatMult||150)/100;
+    const split=[];
+    for(const seg of segs){
+      let cuts=[seg.from,seg.from+seg.hours*60];
+      for(const[a,b]of shab){
+        if(a>cuts[0]&&a<seg.from+seg.hours*60)cuts.push(a);
+        if(b>cuts[0]&&b<seg.from+seg.hours*60)cuts.push(b);
+      }
+      cuts=[...new Set(cuts)].sort((x,y)=>x-y);
+      for(let i=0;i<cuts.length-1;i++){
+        const f=cuts[i],t=cuts[i+1];
+        const mid=(f+t)/2;
+        const inShab=shab.some(([a,b])=>mid>=a&&mid<b);
+        if(inShab)shabbatH+=(t-f)/60;
+        split.push({from:f,hours:(t-f)/60,mult:inShab?Math.max(seg.mult,sMult):seg.mult});
+      }
+    }
+    segs.length=0;segs.push(...split);
+  }
   let cumH=0,regH=0,ot125H=0,ot150H=0,regPay=0,ot125Pay=0,ot150Pay=0;
   const periodH={regular:0,afternoon:0,night:0};
   for(const seg of segs){
@@ -1214,7 +1286,7 @@ function cpAuto(startTime,endTime,cfg,thresholdOverride){
     ot150Pay+=o2*br*seg.mult*1.50;
     cumH=next;
   }
-  return{regH,ot125H,ot150H,regPay,ot125Pay,ot150Pay,gross:regPay+ot125Pay+ot150Pay,hours:totalH,periodH};
+  return{regH,ot125H,ot150H,regPay,ot125Pay,ot150Pay,gross:regPay+ot125Pay+ot150Pay,hours:totalH,periodH,shabbatH};
 }
 
 // Fixed: overtime on night shifts = 140% * 125% = 175%, afternoon = 117% * 125% = 146.25%
@@ -1241,7 +1313,7 @@ function getShiftPay(s,cfg,thresholdOverride){
   const h=ch(s.start,s.end);
   if(isSpecialDay(s.type)) return {...calcSpecialPay(h,s.type,cfg), ot125H:0,ot150H:0};
   if(s.customMult) return cp(h,s.type,cfg,s.customMult,thresholdOverride);
-  return cpAuto(s.start,s.end,cfg,thresholdOverride);
+  return cpAuto(s.start,s.end,cfg,thresholdOverride,s.date);
 }
 function getShiftTotal(s,cfg,als,thresholdOverride){
   const c=getShiftPay(s,cfg,thresholdOverride);
@@ -1284,6 +1356,30 @@ const SI={width:"100%",background:"var(--bg2)",border:"1px solid var(--inp-b)",b
 const CARD={background:"var(--card)",border:"1px solid var(--divider)",borderRadius:"16px",padding:"14px",boxShadow:"0 2px 16px rgba(0,0,0,0.4)"};
 const SEC={fontSize:"12px",color:"var(--txt-d)",fontWeight:"700",letterSpacing:"0.8px",marginBottom:"12px",textTransform:"uppercase"};
 const LBL={fontSize:"11px",color:"var(--txt-d)",marginBottom:"6px",fontWeight:"700",letterSpacing:"0.8px",textTransform:"uppercase"};
+
+// Animated money counter — counts from previous value to new value
+function CountUp({value,hidden,format=fM}){
+  const[disp,setDisp]=useState(value);
+  const prevRef=useRef(value);
+  const rafRef=useRef(null);
+  useEffect(()=>{
+    const from=prevRef.current,to=value;
+    if(from===to)return;
+    prevRef.current=to;
+    const t0=performance.now(),dur=550;
+    cancelAnimationFrame(rafRef.current);
+    const step=(t)=>{
+      const p=Math.min(1,(t-t0)/dur);
+      const e=1-Math.pow(1-p,3); // easeOutCubic
+      setDisp(from+(to-from)*e);
+      if(p<1)rafRef.current=requestAnimationFrame(step);
+    };
+    rafRef.current=requestAnimationFrame(step);
+    return()=>cancelAnimationFrame(rafRef.current);
+  },[value]);
+  if(hidden)return <>{"••••"}</>;
+  return <>{format(disp)}</>;
+}
 
 function Btn({onClick,color="#22c55e",textColor="#000",children,style={}}){
   return <button onClick={onClick} style={{width:"100%",padding:"14px",background:color,border:"none",borderRadius:"12px",color:textColor,fontSize:"15px",fontWeight:"800",cursor:"pointer",...style}}>{children}</button>;
@@ -1619,10 +1715,12 @@ function playSound(type){
 // ════════════════════════════════════════
 // LIVE EARNINGS DURING SHIFT
 // ════════════════════════════════════════
-function LiveEarnings({clockIn,cfg,selAls,als,privacyMode,shifts}){
+function LiveEarnings({clockIn,cfg,selAls,als,privacyMode,shifts,onStartChange}){
   const uT=useT();
   const[now,setNow]=useState(()=>new Date());
   const[showDetails,setShowDetails]=useState(false);
+  const[editStart,setEditStart]=useState(false);
+  const[startVal,setStartVal]=useState(clockIn.time);
   const[coins,setCoins]=useState([]);
   const coinRef=useRef(0);
   const otNotifRef=useRef(null);
@@ -1656,7 +1754,7 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode,shifts}){
   const wkHoursBefore=(shifts||[]).filter(s=>!isSpecialDay(s.type)&&getWeekKey(s.date,s.start)===wkKey).reduce((a,s)=>a+ch(s.start,s.end),0);
   const wkRemaining=Math.max(0,(cfg.weeklyOTThreshold||42)-wkHoursBefore);
   const effectiveDailyThresh=Math.min(cfg.overtimeThreshold||8.6,wkRemaining);
-  const c=clockIn.customMult?cp(hours,clockIn.type,cfg,clockIn.customMult,effectiveDailyThresh):cpAuto(startStr,nowStr2,cfg,effectiveDailyThresh);
+  const c=clockIn.customMult?cp(hours,clockIn.type,cfg,clockIn.customMult,effectiveDailyThresh):cpAuto(startStr,nowStr2,cfg,effectiveDailyThresh,clockIn.date);
   const gross=c.gross;
   const baseSalary=c.regPay!==undefined?c.regPay:(c.regH||0)*cfg.baseRate;
   const ded=cfg.enableDeductions?cd(gross,cfg,baseSalary):null;
@@ -1676,7 +1774,8 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode,shifts}){
   const afMin=pt(cfg.afternoonStart||"14:00");
   const nfMin=pt(cfg.nightStart||"22:00");
   const curPeriod=nowM>=mfMin&&nowM<afMin?"regular":nowM>=afMin&&nowM<nfMin?"afternoon":"night";
-  const curMult=clockIn.customMult?clockIn.customMult/100:getShiftMult(curPeriod,cfg);
+  const shabNow=!clockIn.customMult&&isShabbatAt(new Date(now),cfg);
+  const curMult=clockIn.customMult?clockIn.customMult/100:Math.max(getShiftMult(curPeriod,cfg),shabNow?(cfg.shabbatMult||150)/100:0);
   const effectivePct=Math.round(curMult*otMult*100);
   const netRatio=(ded&&gross>0)?net/gross:1;
   const netRatePerMin=cfg.baseRate*curMult*otMult/60*netRatio;
@@ -1716,31 +1815,46 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode,shifts}){
             <span style={{fontSize:"14px"}}>{sty.icon}</span>
             <span style={{fontSize:"12px",color:sty.color,fontWeight:"700"}}>{uT("cl_shift")} {uT("st_"+curShiftType)} {uT("cl_active")}</span>
           </div>
-          <span style={{fontSize:"11px",color:"var(--txt-dd)"}}>{uT("cl_start")} {clockIn.time}</span>
+          {!editStart?(
+            <span style={{fontSize:"11px",color:"var(--txt-dd)",display:"inline-flex",alignItems:"center",gap:"5px"}}>
+              {uT("cl_start")} {clockIn.time}
+              {onStartChange&&(
+                <button onClick={()=>{setStartVal(clockIn.time);setEditStart(true);}} aria-label={uT("cl_edit_start")}
+                  style={{background:"none",border:"none",cursor:"pointer",padding:"2px",display:"inline-flex",color:"var(--txt-dd)"}}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                </button>
+              )}
+            </span>
+          ):(
+            <span style={{display:"inline-flex",alignItems:"center",gap:"6px"}}>
+              <input type="time" value={startVal} onChange={e=>setStartVal(e.target.value)}
+                style={{background:"var(--bg2)",border:"1px solid var(--inp-b)",borderRadius:"8px",padding:"4px 8px",color:"var(--txt)",fontSize:"13px"}}/>
+              <button onClick={()=>{onStartChange(startVal);setEditStart(false);}}
+                style={{background:"#22c55e",border:"none",borderRadius:"8px",padding:"4px 10px",color:"#000",fontSize:"12px",fontWeight:"800",cursor:"pointer"}}>✓</button>
+              <button onClick={()=>setEditStart(false)}
+                style={{background:"none",border:"1px solid var(--divider2)",borderRadius:"8px",padding:"4px 8px",color:"var(--txt-d)",fontSize:"12px",cursor:"pointer"}}>✕</button>
+            </span>
+          )}
         </div>
 
-        {/* Row 2: timer (right) + net earnings (left) */}
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <div>
-            <div style={{fontSize:"10px",color:"var(--txt-d)",marginBottom:"2px"}}>{uT("cl_elapsed")}</div>
-            <div style={{fontSize:"26px",fontWeight:"900",color:"var(--txt-hi)",letterSpacing:"2px",fontVariantNumeric:"tabular-nums"}}>{elapsedStr}</div>
-            <div style={{fontSize:"10px",color:"var(--txt-dd)",marginTop:"1px"}}>{fH(hours)} {uT("hr")}</div>
+        {/* Hero: giant net earnings, centered */}
+        <div style={{textAlign:"center",padding:"6px 0 2px"}}>
+          <div style={{fontSize:"11px",color:"#86efac",marginBottom:"2px",letterSpacing:"1px",fontWeight:"600"}}>{uT("cl_net")}</div>
+          <div style={{
+            fontSize:"clamp(48px,14vw,60px)",fontWeight:"900",color:"#4ade80",
+            fontVariantNumeric:"tabular-nums",letterSpacing:"-2px",lineHeight:1.05,
+            textShadow:"0 0 24px #4ade8055, 0 0 60px #4ade8022",
+            filter:privacyMode?"blur(12px)":"none",
+            transition:"filter 0.25s ease",
+            userSelect:privacyMode?"none":"auto",
+          }}>{fM(net)}</div>
+          <div style={{display:"flex",justifyContent:"center",alignItems:"center",gap:"5px",marginTop:"4px"}}>
+            <span style={{fontSize:"11px",color:"var(--txt-dd)",filter:privacyMode?"blur(6px)":"none"}}>{uT("cl_gross_pfx")} {fM(gross)}</span>
+            <button onClick={()=>setShowDetails(!showDetails)} style={{width:"16px",height:"16px",borderRadius:"50%",background:"var(--divider)",border:"1px solid #374151",color:"var(--txt-d)",fontSize:"10px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>ℹ</button>
           </div>
-          <div style={{textAlign:"left"}}>
-            <div style={{fontSize:"10px",color:"#86efac",marginBottom:"2px"}}>{uT("cl_net")}</div>
-            <div style={{
-              fontSize:"38px",fontWeight:"900",color:"#4ade80",
-              fontVariantNumeric:"tabular-nums",letterSpacing:"-1px",
-              animation:"pulse 2s ease-in-out infinite",
-              textShadow:"0 0 16px #4ade8044",
-              filter:privacyMode?"blur(10px)":"none",
-              transition:"filter 0.25s ease",
-              userSelect:privacyMode?"none":"auto",
-            }}>{fM(net)}</div>
-            <div style={{display:"flex",justifyContent:"flex-end",alignItems:"center",gap:"5px",marginTop:"1px"}}>
-              <span style={{fontSize:"10px",color:"var(--txt-dd)",filter:privacyMode?"blur(6px)":"none"}}>{uT("cl_gross_pfx")} {fM(gross)}</span>
-              <button onClick={()=>setShowDetails(!showDetails)} style={{width:"16px",height:"16px",borderRadius:"50%",background:"var(--divider)",border:"1px solid #374151",color:"var(--txt-d)",fontSize:"10px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>ℹ</button>
-            </div>
+          <div style={{display:"flex",justifyContent:"center",alignItems:"baseline",gap:"8px",marginTop:"10px"}}>
+            <span style={{fontSize:"22px",fontWeight:"800",color:"var(--txt-hi)",letterSpacing:"2px",fontVariantNumeric:"tabular-nums"}}>{elapsedStr}</span>
+            <span style={{fontSize:"11px",color:"var(--txt-dd)"}}>{fH(hours)} {uT("hr")}</span>
           </div>
         </div>
 
@@ -1858,6 +1972,9 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
   const[outMsg,setOutMsg]=useState(null);
   const[shortMsg,setShortMsg]=useState(null);
   const[confetti,setConfetti]=useState([]);
+  const[showFix,setShowFix]=useState(false);
+  const[fixEnd,setFixEnd]=useState("");
+  const[showNote,setShowNote]=useState(false);
 
   useEffect(()=>{
     if(!clockIn) return;
@@ -1898,7 +2015,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
     onShiftSaved(shift);
     setClockIn(null);
     LS.set(K.clockin,null);
-    setSelAls([]);LS.set(K.clockAlsIds,null);setNote("");
+    setSelAls([]);LS.set(K.clockAlsIds,null);setNote("");setShowNote(false);
     haptic("out");
     playSound("out");
     const msg=randMsg(OUT_MSGS[lang]||OUT_MSGS.he);
@@ -1914,6 +2031,40 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
   };
 
   const toggleAl=(id)=>setSelAls(s=>s.includes(id)?s.filter(x=>x!==id):[...s,id]);
+
+  // Recovery: save shift with manually chosen end time (forgot to clock out)
+  const saveFixedShift=()=>{
+    if(!clockIn||!fixEnd)return;
+    const hours=ch(clockIn.time,fixEnd);
+    if(hours<0.05)return;
+    const shift={id:Date.now(),date:clockIn.date,start:clockIn.time,end:fixEnd,type:dominantShiftType(clockIn.time,fixEnd,cfg),allowanceIds:selAls,note,templateName:""};
+    onShiftSaved(shift);
+    setClockIn(null);LS.set(K.clockin,null);
+    setSelAls([]);LS.set(K.clockAlsIds,null);setNote("");setShowNote(false);
+    setShowFix(false);setFixEnd("");
+    haptic("out");
+    const msg=randMsg(OUT_MSGS[lang]||OUT_MSGS.he);
+    setOutMsg(msg);
+    setTimeout(()=>setOutMsg(null),3000);
+  };
+  const cancelShift=()=>{
+    if(!window.confirm(uT("cl_forgot_cancel_c")))return;
+    setClockIn(null);LS.set(K.clockin,null);
+    setSelAls([]);LS.set(K.clockAlsIds,null);setNote("");setShowNote(false);
+    setShowFix(false);setFixEnd("");
+  };
+  // Correct clock-in time during an active shift
+  const changeStartTime=(t)=>{
+    if(!clockIn||!t)return;
+    let d=new Date(`${clockIn.date}T${t}:00`);
+    if(d.getTime()>Date.now())d=new Date(d.getTime()-86400e3);
+    const pad=n=>String(n).padStart(2,"0");
+    const ci={...clockIn,
+      date:`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`,
+      time:`${pad(d.getHours())}:${pad(d.getMinutes())}`,
+      iso:d.toISOString()};
+    setClockIn(ci);LS.set(K.clockin,ci);
+  };
 
   const now=new Date();
   const curType=detectShiftType(now.getHours(),cfg);
@@ -1996,6 +2147,24 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
               <span style={{fontSize:"clamp(80px,24vw,108px)",fontWeight:"200",color:"#fff",letterSpacing:"-6px",fontFamily:"'DM Sans','Noto Sans Hebrew',sans-serif"}}>{tmParts[0]}:{tmParts[1]}</span>
               <span style={{fontSize:"clamp(24px,7vw,32px)",fontWeight:"300",color:"rgba(255,255,255,0.3)",marginTop:"12px",letterSpacing:"1px",fontFamily:"'DM Sans',sans-serif"}}>{tmParts[2]}</span>
             </div>
+            {(()=>{
+              const ym=tdy().slice(0,7);
+              const monthShifts=(shifts||[]).filter(s=>s.date.startsWith(ym));
+              if(!monthShifts.length)return null;
+              const mh=monthShifts.reduce((a,s)=>a+ch(s.start,s.end),0);
+              const mg=monthShifts.reduce((a,s)=>a+getShiftTotal(s,cfg,als),0);
+              return(
+                <div style={{marginTop:"18px",display:"inline-flex",alignItems:"center",gap:"8px",
+                  background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.09)",
+                  backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)",
+                  borderRadius:"100px",padding:"7px 16px",fontFamily:"'DM Sans','Noto Sans Hebrew',sans-serif"}}>
+                  <span style={{fontSize:"12px",color:"rgba(255,255,255,0.4)"}}>{uT("cl_month_sum")}</span>
+                  <span style={{fontSize:"12px",color:"rgba(255,255,255,0.7)",fontWeight:"600",fontVariantNumeric:"tabular-nums"}}>{fH(mh)} {uT("hr")}</span>
+                  <span style={{width:"3px",height:"3px",borderRadius:"50%",background:"rgba(255,255,255,0.25)"}}/>
+                  <span style={{fontSize:"12px",color:"#4ade80",fontWeight:"700",fontVariantNumeric:"tabular-nums",filter:privacyMode?"blur(6px)":"none"}}>{fM(mg)}</span>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Bottom: clock-in button */}
@@ -2042,7 +2211,32 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
             background:"radial-gradient(circle,rgba(34,197,94,0.10) 0%,transparent 70%)",
             filter:"blur(30px)",pointerEvents:"none",zIndex:0}}/>
 
-          <LiveEarnings clockIn={clockIn} cfg={cfg} selAls={selAls} als={als} privacyMode={privacyMode} shifts={shifts}/>
+          {(Date.now()-new Date(clockIn.iso).getTime())/3600e3>12&&(
+            <div style={{background:"linear-gradient(145deg,#431407,#7c2d12)",border:"1px solid #f97316",borderRadius:"14px",padding:"12px 14px"}}>
+              <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"6px"}}>
+                <span style={{fontSize:"18px"}}>⏰</span>
+                <span style={{fontSize:"14px",fontWeight:"800",color:"#fed7aa"}}>{uT("cl_forgot_t")}</span>
+              </div>
+              <div style={{fontSize:"12px",color:"#fdba74",marginBottom:"10px"}}>
+                {uT("cl_forgot_s")} {fH((Date.now()-new Date(clockIn.iso).getTime())/3600e3)} {uT("hr")}
+              </div>
+              {!showFix?(
+                <button onClick={()=>{setShowFix(true);setFixEnd(nowTime());}} style={{width:"100%",padding:"10px",background:"#f97316",border:"none",borderRadius:"10px",color:"#000",fontSize:"13px",fontWeight:"800",cursor:"pointer"}}>
+                  {uT("cl_forgot_fix")}
+                </button>
+              ):(
+                <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
+                  <input type="time" value={fixEnd} onChange={e=>setFixEnd(e.target.value)} style={{...SI,fontSize:"16px"}}/>
+                  <div style={{display:"flex",gap:"8px"}}>
+                    <button onClick={saveFixedShift} style={{flex:1,padding:"10px",background:"#22c55e",border:"none",borderRadius:"10px",color:"#000",fontSize:"13px",fontWeight:"800",cursor:"pointer"}}>{uT("cl_forgot_save")}</button>
+                    <button onClick={cancelShift} style={{flex:1,padding:"10px",background:"none",border:"1px solid #7f1d1d",borderRadius:"10px",color:"#f87171",fontSize:"13px",fontWeight:"700",cursor:"pointer"}}>{uT("cl_forgot_cancel")}</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <LiveEarnings clockIn={clockIn} cfg={cfg} selAls={selAls} als={als} privacyMode={privacyMode} shifts={shifts} onStartChange={changeStartTime}/>
 
           {shiftAls.length>0&&(
             <div style={{display:"flex",flexWrap:"wrap",gap:"8px"}}>
@@ -2059,11 +2253,23 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
             </div>
           )}
 
-          <input type="text" value={note} onChange={e=>setNote(e.target.value)}
-            placeholder={uT("cl_note_ph")}
-            style={{...SI,fontSize:"14px",width:"100%",boxSizing:"border-box",
-              background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.10)",borderRadius:"16px",
-              backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)"}}/>
+          {(showNote||note)?(
+            <input type="text" value={note} onChange={e=>setNote(e.target.value)} autoFocus={showNote&&!note}
+              placeholder={uT("cl_note_ph")}
+              style={{...SI,fontSize:"14px",width:"100%",boxSizing:"border-box",
+                background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.10)",borderRadius:"16px",
+                backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)"}}/>
+          ):(
+            <button onClick={()=>setShowNote(true)} style={{
+              alignSelf:"flex-start",display:"inline-flex",alignItems:"center",gap:"7px",
+              padding:"8px 14px",borderRadius:"100px",cursor:"pointer",
+              background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.10)",
+              backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)",
+              color:"rgba(255,255,255,0.45)",fontSize:"12px",fontWeight:"500"}}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              {uT("cl_note_btn")}
+            </button>
+          )}
 
           {/* Clock-out button */}
           <button onClick={handleClockOut} style={{
@@ -2315,8 +2521,8 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode,payslips,onSavePaysl
         ):ded?(
           <>
             <div style={{fontSize:"11px",color:"#86efac99",letterSpacing:"1px",fontWeight:"700",marginBottom:"6px"}}>{t("d_taxable")}</div>
-            <div style={{fontSize:"40px",fontWeight:"900",color:"#4ade80",letterSpacing:"-2px",lineHeight:1}}>
-              {prv(dedBase,privacyMode)}
+            <div style={{fontSize:"40px",fontWeight:"900",color:"#4ade80",letterSpacing:"-2px",lineHeight:1,fontVariantNumeric:"tabular-nums"}}>
+              <CountUp value={dedBase} hidden={privacyMode}/>
             </div>
             <div style={{fontSize:"11px",color:"#86efac55",marginTop:"6px",marginBottom:"14px"}}>
               {prv(tG,privacyMode)} {t("d_salary")} + {prv(tA,privacyMode)} {t("d_allowances")}
@@ -2325,12 +2531,12 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode,payslips,onSavePaysl
             <div style={{display:"flex",justifyContent:"space-around",textAlign:"center"}}>
               <div>
                 <div style={{fontSize:"11px",color:"#86efac99",fontWeight:"700",marginBottom:"4px"}}>{t("d_net")}</div>
-                <div style={{fontSize:"22px",fontWeight:"900",color:"#4ade80",letterSpacing:"-1px"}}>{prv(net,privacyMode)}</div>
+                <div style={{fontSize:"22px",fontWeight:"900",color:"#4ade80",letterSpacing:"-1px",fontVariantNumeric:"tabular-nums"}}><CountUp value={net} hidden={privacyMode}/></div>
               </div>
               <div style={{width:"1px",background:"#166534"}}/>
               <div>
                 <div style={{fontSize:"11px",color:"#f8717199",fontWeight:"700",marginBottom:"4px"}}>{t("d_deductions")}</div>
-                <div style={{fontSize:"22px",fontWeight:"900",color:"#f87171",letterSpacing:"-1px"}}>-{prv(ded.tot,privacyMode)}</div>
+                <div style={{fontSize:"22px",fontWeight:"900",color:"#f87171",letterSpacing:"-1px",fontVariantNumeric:"tabular-nums"}}>-<CountUp value={ded.tot} hidden={privacyMode}/></div>
                 <div style={{fontSize:"10px",color:"#f8717166",marginTop:"2px"}}>{Math.round(ded.tot/dedBase*100)}{t("d_pct_income")}</div>
               </div>
             </div>
@@ -2354,7 +2560,7 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode,payslips,onSavePaysl
         ):(
           <>
             <div style={{fontSize:"11px",color:"#86efac",letterSpacing:"1.5px",fontWeight:"700",marginBottom:"8px"}}>{t("d_est_salary")}</div>
-            <div style={{fontSize:"40px",fontWeight:"900",color:"#4ade80",letterSpacing:"-2px",lineHeight:1}}>{prv(tG+tA,privacyMode)}</div>
+            <div style={{fontSize:"40px",fontWeight:"900",color:"#4ade80",letterSpacing:"-2px",lineHeight:1,fontVariantNumeric:"tabular-nums"}}><CountUp value={tG+tA} hidden={privacyMode}/></div>
             {cfg.monthlyGoal>0&&(()=>{
               const totalGross=tG+tA+liveGross;
               const pct=Math.min(100,Math.round(totalGross/cfg.monthlyGoal*100));
@@ -3607,6 +3813,79 @@ function IncomeTaxHelper({form,setForm}){
 // ════════════════════════════════════════
 // SETTINGS
 // ════════════════════════════════════════
+function downloadFile(name,content,mime){
+  const blob=new Blob([content],{type:mime});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download=name;
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},100);
+}
+
+function BackupSection({shifts,cfg,als}){
+  const uT=useT();
+  const fileRef=useRef(null);
+  const[msg,setMsg]=useState(null);
+
+  const exportJSON=()=>{
+    const data={};
+    Object.values(K).forEach(k=>{
+      const v=localStorage.getItem(k);
+      if(v!==null)data[k]=v;
+    });
+    const payload=JSON.stringify({app:"shaati",version:1,exportedAt:new Date().toISOString(),data},null,1);
+    downloadFile(`shaati-backup-${tdy()}.json`,payload,"application/json");
+  };
+
+  const importJSON=(file)=>{
+    const reader=new FileReader();
+    reader.onload=()=>{
+      try{
+        const obj=JSON.parse(reader.result);
+        if(obj.app!=="shaati"||!obj.data||typeof obj.data!=="object")throw new Error("bad");
+        if(!window.confirm(uT("sg_imp_c")))return;
+        Object.entries(obj.data).forEach(([k,v])=>{
+          if(Object.values(K).includes(k))localStorage.setItem(k,v);
+        });
+        setMsg({ok:true,text:uT("sg_imp_ok")});
+        setTimeout(()=>window.location.reload(),1200);
+      }catch{
+        setMsg({ok:false,text:uT("sg_imp_err")});
+        setTimeout(()=>setMsg(null),3000);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const exportCSV=()=>{
+    const rows=[["תאריך","כניסה","יציאה","שעות","סוג","ברוטו","תוספות","הערה"]];
+    [...shifts].sort((a,b)=>a.date.localeCompare(b.date)).forEach(s=>{
+      const h=ch(s.start,s.end);
+      const pay=getShiftPay(s,cfg);
+      const alw=isSpecialDay(s.type)?0:csa(s.allowanceIds||[],als);
+      const typeLabel=(SPECIAL[s.type]||ST[s.type]||ST.regular).label;
+      rows.push([s.date,s.start||"",s.end||"",h.toFixed(2),typeLabel,pay.gross.toFixed(2),alw.toFixed(2),(s.note||"").replace(/"/g,'""')]);
+    });
+    const csv="﻿"+rows.map(r=>r.map(c=>`"${c}"`).join(",")).join("\r\n");
+    downloadFile(`shaati-shifts-${tdy()}.csv`,csv,"text/csv;charset=utf-8");
+  };
+
+  return(
+    <div style={{...CARD,marginTop:"16px",background:"var(--bg2)",border:"1px solid #1f2937"}}>
+      <div style={{fontSize:"13px",fontWeight:"700",color:"var(--txt)",marginBottom:"2px"}}>💾 {uT("sg_backup")}</div>
+      <div style={{fontSize:"11px",color:"var(--txt-dd)",marginBottom:"12px"}}>{uT("sg_backup_h")}</div>
+      <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
+        <button onClick={exportJSON} style={{width:"100%",padding:"11px",background:"var(--card)",border:"1px solid var(--divider2)",borderRadius:"10px",color:"var(--txt)",fontSize:"13px",fontWeight:"700",cursor:"pointer"}}>{uT("sg_exp_json")}</button>
+        <button onClick={()=>fileRef.current&&fileRef.current.click()} style={{width:"100%",padding:"11px",background:"var(--card)",border:"1px solid var(--divider2)",borderRadius:"10px",color:"var(--txt)",fontSize:"13px",fontWeight:"700",cursor:"pointer"}}>{uT("sg_imp_json")}</button>
+        <button onClick={exportCSV} style={{width:"100%",padding:"11px",background:"var(--card)",border:"1px solid var(--divider2)",borderRadius:"10px",color:"var(--txt)",fontSize:"13px",fontWeight:"700",cursor:"pointer"}}>{uT("sg_exp_csv")}</button>
+      </div>
+      <input ref={fileRef} type="file" accept=".json,application/json" style={{display:"none"}}
+        onChange={e=>{const f=e.target.files[0];if(f)importJSON(f);e.target.value="";}}/>
+      {msg&&<div style={{marginTop:"10px",fontSize:"13px",fontWeight:"700",color:msg.ok?"#4ade80":"#f87171"}}>{msg.text}</div>}
+    </div>
+  );
+}
+
 function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onSaveVacCfg,privacyMode,togglePrivacy,onReset,lang,onSaveLang,theme,onSaveTheme}){
   const uT=useT();
   const[form,setForm]=useState({...cfg});
@@ -3710,6 +3989,32 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
               )}
             </div>
           ))}
+          <div style={{...CARD,marginBottom:"12px",opacity:form.shabbatEnabled?1:0.6}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"6px"}}>
+              <div style={{fontSize:"14px",fontWeight:"800",color:"var(--txt)"}}>{uT("sg_shabbat")}</div>
+              <Toggle on={!!form.shabbatEnabled} onToggle={()=>setForm(f=>({...f,shabbatEnabled:!f.shabbatEnabled}))}/>
+            </div>
+            <div style={{fontSize:"11px",color:"var(--txt-dd)",marginBottom:form.shabbatEnabled?"12px":"0"}}>{uT("sg_shabbat_h")}</div>
+            {form.shabbatEnabled&&(
+              <>
+                <div style={{display:"flex",gap:"10px",marginBottom:"12px"}}>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:"11px",color:"var(--txt-d)",fontWeight:"700",marginBottom:"6px"}}>{uT("sg_shabbat_from")}</div>
+                    <input type="time" value={form.shabbatStart||"18:00"} onChange={e=>setForm(f=>({...f,shabbatStart:e.target.value}))} style={SI}/>
+                  </div>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:"11px",color:"var(--txt-d)",fontWeight:"700",marginBottom:"6px"}}>{uT("sg_shabbat_to")}</div>
+                    <input type="time" value={form.shabbatEnd||"20:00"} onChange={e=>setForm(f=>({...f,shabbatEnd:e.target.value}))} style={SI}/>
+                  </div>
+                </div>
+                <div style={{fontSize:"11px",color:"var(--txt-d)",fontWeight:"700",marginBottom:"6px"}}>{uT("sg_shabbat_pct")}</div>
+                <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                  <NumInput value={form.shabbatMult??150} onChange={v=>setForm(f=>({...f,shabbatMult:v}))} step={1} min={100} max={300}/>
+                  <span style={{color:"var(--txt)",fontWeight:"800",fontSize:"16px"}}>%</span>
+                </div>
+              </>
+            )}
+          </div>
           <Btn onClick={()=>{onSaveCfg(form);setSaved(true);setTimeout(()=>setSaved(false),2000);}} color={saved?"#15803d":"#22c55e"} textColor={saved?"#dcfce7":"#000"} style={{marginTop:"4px"}}>{saved?uT("sg_saved"):uT("sg_save")}</Btn>
         </>
       )}
@@ -3953,6 +4258,7 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
               <Toggle on={privacyMode} onToggle={togglePrivacy}/>
             </div>
           </div>
+          <BackupSection shifts={shifts} cfg={cfg} als={aList}/>
           <InstallSettingsBtn/>
           <button onClick={()=>{if(window.confirm(uT("sg_reset_c")))onReset();}}
             style={{width:"100%",padding:"12px",background:"none",border:"1px solid #1f2937",borderRadius:"12px",color:"var(--txt-dd)",fontSize:"13px",fontWeight:"700",cursor:"pointer",marginTop:"10px"}}>
@@ -4599,13 +4905,19 @@ function App(){
 
   const appT=k=>TR[lang]?.[k]??TR.he[k]??k;
 
+  const TabIcon=({d,live})=>(
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{display:"block",margin:"0 auto"}}>
+      {d}
+      {live&&<circle cx="19" cy="5" r="4" fill="#ef4444" stroke="none"><animate attributeName="opacity" values="1;0.3;1" dur="1.4s" repeatCount="indefinite"/></circle>}
+    </svg>
+  );
   const tabs=[
-    {id:"clock",    icon:clockIn?"🔴":"🟢", label:clockIn?appT("tab_active"):appT("tab_clock")},
-    {id:"dashboard",icon:"📊",label:appT("tab_dash")},
-    {id:"add",      icon:"➕",label:appT("tab_add")},
-    {id:"shifts",   icon:"📋",label:appT("tab_shifts")},
-    {id:"graph",    icon:"📈",label:appT("tab_graph")},
-    {id:"settings", icon:"⚙️",label:appT("tab_cfg")},
+    {id:"clock",    icon:<TabIcon live={!!clockIn} d={<><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></>}/>, label:clockIn?appT("tab_active"):appT("tab_clock")},
+    {id:"dashboard",icon:<TabIcon d={<><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></>}/>,label:appT("tab_dash")},
+    {id:"add",      icon:<TabIcon d={<><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></>}/>,label:appT("tab_add")},
+    {id:"shifts",   icon:<TabIcon d={<><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="0.8" fill="currentColor"/><circle cx="3.5" cy="12" r="0.8" fill="currentColor"/><circle cx="3.5" cy="18" r="0.8" fill="currentColor"/></>}/>,label:appT("tab_shifts")},
+    {id:"graph",    icon:<TabIcon d={<><path d="M3 21h18"/><path d="M6 17v-5M11 17V7M16 17v-3M21 17V4" strokeWidth="2.2"/></>}/>,label:appT("tab_graph")},
+    {id:"settings", icon:<TabIcon d={<><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/></>}/>,label:appT("tab_cfg")},
   ];
 
   if(!loaded)return(
