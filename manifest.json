@@ -13,5 +13,14 @@
   "icons": [
     { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
     { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "כניסה למשמרת",
+      "short_name": "כניסה",
+      "description": "החתמת כניסה מיידית",
+      "url": "./index.html?action=clockin",
+      "icons": [{ "src": "./icon-192.png", "sizes": "192x192" }]
+    }
   ]
 }
