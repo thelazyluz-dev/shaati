@@ -1,4 +1,4 @@
-const CACHE = "shaati-v36";
+const CACHE = "shaati-v37";
 const STATIC = ["./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", e => {
@@ -13,6 +13,20 @@ self.addEventListener("activate", e => {
       .then(() => self.clients.claim())
       .then(() => self.clients.matchAll({ type: "window", includeUncontrolled: true }))
       .then(ws => Promise.all(ws.map(w => w.navigate(w.url).catch(() => {}))))
+  );
+});
+
+// Notification action buttons: "clock out" from the notification shade
+self.addEventListener("notificationclick", e => {
+  e.notification.close();
+  const url = e.action === "clockout" ? "./index.html?action=clockout" : "./index.html";
+  e.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(ws => {
+      if (ws.length) {
+        return ws[0].focus().then(w => w.navigate(url)).catch(() => self.clients.openWindow(url));
+      }
+      return self.clients.openWindow(url);
+    })
   );
 });
 

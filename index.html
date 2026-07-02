@@ -151,6 +151,7 @@ const TR={
     cl_in:"כניסה למשמרת",cl_in_hint:"לחץ כניסה כשמתחיל המשמרת · השעה תירשם אוטומטית",
     cl_forgot_t:"שכחת להחתים יציאה?",cl_forgot_s:"המשמרת פעילה כבר",cl_forgot_fix:"קבע שעת סיום ידנית",cl_forgot_save:"שמור משמרת",cl_forgot_cancel:"בטל משמרת",cl_forgot_cancel_c:"לבטל את המשמרת לגמרי? היא לא תישמר.",
     cl_edit_start:"עריכת שעת כניסה",cl_month_sum:"החודש",cl_note_btn:"הוסף הערה",
+    ntf_title:"שעתי — במשמרת 🟢",ntf_body:"התחלת ב-",ntf_body2:"החלק ולחץ לסיום המשמרת",ntf_end:"סיום משמרת",
     gr_morning:"בוקר טוב",gr_noon:"צהריים טובים",gr_evening:"ערב טוב",gr_night:"לילה טוב",
     cl_note_ph:"הערה אופציונלית (חג, שעות מיוחדות...)",cl_out:"סיום משמרת",
     cl_short_t:"כבר סיימת משמרת??",cl_short_s:"על מי את/ה עובד/ת",cl_no_rec:"לא מתעד",
@@ -374,6 +375,7 @@ const TR={
     cl_in:"Начать смену",cl_in_hint:"Нажмите начало · время запишется автоматически",
     cl_forgot_t:"Забыли отметить выход?",cl_forgot_s:"Смена активна уже",cl_forgot_fix:"Указать время окончания",cl_forgot_save:"Сохранить смену",cl_forgot_cancel:"Отменить смену",cl_forgot_cancel_c:"Полностью отменить смену? Она не будет сохранена.",
     cl_edit_start:"Изменить время начала",cl_month_sum:"В этом месяце",cl_note_btn:"Добавить заметку",
+    ntf_title:"Shaati — на смене 🟢",ntf_body:"Начало в ",ntf_body2:"Нажмите, чтобы закончить смену",ntf_end:"Закончить смену",
     gr_morning:"Доброе утро",gr_noon:"Добрый день",gr_evening:"Добрый вечер",gr_night:"Доброй ночи",
     cl_note_ph:"Необязательная заметка...",cl_out:"Закончить смену",
     cl_short_t:"Уже закончил смену??",cl_short_s:"Кого ты пытаешься обмануть",cl_no_rec:"Не записываю",
@@ -632,6 +634,7 @@ const TR={
     cl_in:"بدء الوردية",cl_in_hint:"اضغط البداية عند بدء الوردية · سيُسجَّل الوقت تلقائياً",
     cl_forgot_t:"نسيت تسجيل الخروج؟",cl_forgot_s:"الوردية نشطة منذ",cl_forgot_fix:"تحديد وقت الانتهاء يدوياً",cl_forgot_save:"حفظ الوردية",cl_forgot_cancel:"إلغاء الوردية",cl_forgot_cancel_c:"إلغاء الوردية نهائياً؟ لن يتم حفظها.",
     cl_edit_start:"تعديل وقت الدخول",cl_month_sum:"هذا الشهر",cl_note_btn:"إضافة ملاحظة",
+    ntf_title:"شعاتي — في الوردية 🟢",ntf_body:"البداية في ",ntf_body2:"اضغط لإنهاء الوردية",ntf_end:"إنهاء الوردية",
     gr_morning:"صباح الخير",gr_noon:"طاب يومك",gr_evening:"مساء الخير",gr_night:"ليلة سعيدة",
     cl_note_ph:"ملاحظة اختيارية (عطلة، ساعات خاصة...)",cl_out:"إنهاء الوردية",
     cl_short_t:"انتهيت من الوردية بالفعل؟",cl_short_s:"على من تعمل؟",cl_no_rec:"لا أسجل",
@@ -1358,6 +1361,29 @@ const CARD={background:"var(--card)",border:"1px solid var(--divider)",borderRad
 const SEC={fontSize:"12px",color:"var(--txt-d)",fontWeight:"700",letterSpacing:"0.8px",marginBottom:"12px",textTransform:"uppercase"};
 const LBL={fontSize:"11px",color:"var(--txt-d)",marginBottom:"6px",fontWeight:"700",letterSpacing:"0.8px",textTransform:"uppercase"};
 
+// Persistent shift notification — "widget-like" clock-out from the notification shade
+function showShiftNotification(ci,uT){
+  if(!("serviceWorker"in navigator)||!("Notification"in window)||Notification.permission!=="granted")return;
+  navigator.serviceWorker.ready.then(reg=>{
+    reg.showNotification(uT("ntf_title"),{
+      body:`${uT("ntf_body")}${ci.time} · ${uT("ntf_body2")}`,
+      icon:"./icon-192.png",
+      badge:"./icon-192.png",
+      tag:"active-shift",
+      requireInteraction:true,
+      silent:true,
+      actions:[{action:"clockout",title:uT("ntf_end")}],
+    }).catch(()=>{});
+  }).catch(()=>{});
+}
+function closeShiftNotification(){
+  if(!("serviceWorker"in navigator))return;
+  navigator.serviceWorker.ready
+    .then(reg=>reg.getNotifications({tag:"active-shift"}))
+    .then(ns=>ns.forEach(n=>n.close()))
+    .catch(()=>{});
+}
+
 // Minimal empty-state illustration: calendar with faint rows
 function EmptyCalendar({size=72}){
   return(
@@ -2048,6 +2074,19 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
   };
 
   const toggleAl=(id)=>setSelAls(s=>s.includes(id)?s.filter(x=>x!==id):[...s,id]);
+
+  // Persistent notification while a shift is active ("widget" in the shade)
+  useEffect(()=>{
+    if(clockIn){
+      if("Notification"in window&&Notification.permission==="default"){
+        Notification.requestPermission().then(p=>{if(p==="granted")showShiftNotification(clockIn,uT);}).catch(()=>{});
+      }else{
+        showShiftNotification(clockIn,uT);
+      }
+    }else{
+      closeShiftNotification();
+    }
+  },[clockIn]);
 
   // PWA shortcuts: launched from the app icon → clock in/out immediately
   useEffect(()=>{
