@@ -33,6 +33,10 @@ let outHtml =
 // Babel standalone no longer needed in the built page
 outHtml = outHtml.replace(/<script src="[^"]*babel[^"]*"><\/script>\s*/g, '');
 
+// Version the manifest URL so HTTP caches (GitHub Pages 10-min cache, Google's
+// WebAPK minter) never serve a stale manifest after a deploy
+outHtml = outHtml.replace('href="./manifest.json"', `href="./manifest.json?v=${VERSION}"`);
+
 fs.rmSync(DIST, { recursive: true, force: true });
 fs.mkdirSync(DIST, { recursive: true });
 fs.writeFileSync(path.join(DIST, 'index.html'), outHtml);

@@ -24,11 +24,13 @@ html,body{height:100%;overflow:hidden}
   --divider:#1e293b;--divider2:#334155;--inp-b:#1e293b;
   --txt:#e2e8f0;--txt-hi:#f8fafc;--txt-m:#94a3b8;--txt-d:#64748b;--txt-dd:#475569;
   --accent:#22c55e;--accent-dim:rgba(34,197,94,0.12);--accent-glow:rgba(34,197,94,0.25);
+  --card-shadow:0 2px 16px rgba(0,0,0,0.4);
 }
 [data-theme="light"]{
   --bg:#ede9e3;--bg2:#f5f2ee;--card:#faf8f5;
   --divider:#ddd8d0;--divider2:#ccc7be;--inp-b:#ccc7be;
   --txt:#1c1917;--txt-hi:#0c0a09;--txt-m:#57534e;--txt-d:#78716c;--txt-dd:#a8a29e;
+  --card-shadow:0 2px 10px rgba(0,0,0,0.08);
 }
 body{background:var(--bg);font-family:'Noto Sans Hebrew','Heebo','Noto Sans Arabic','Arial Hebrew',sans-serif;color:var(--txt);overscroll-behavior:none}
 button{transition:opacity 0.15s ease,transform 0.15s ease,background 0.2s ease,color 0.2s ease,box-shadow 0.2s ease;cursor:pointer}
@@ -153,6 +155,7 @@ const TR={
     cl_in:"כניסה למשמרת",cl_in_hint:"לחץ כניסה כשמתחיל המשמרת · השעה תירשם אוטומטית",
     cl_forgot_t:"שכחת להחתים יציאה?",cl_forgot_s:"המשמרת פעילה כבר",cl_forgot_fix:"קבע שעת סיום ידנית",cl_forgot_save:"שמור משמרת",cl_forgot_cancel:"בטל משמרת",cl_forgot_cancel_c:"לבטל את המשמרת לגמרי? היא לא תישמר.",
     cl_edit_start:"עריכת שעת כניסה",cl_month_sum:"החודש",cl_note_btn:"הוסף הערה",
+    gr_morning:"בוקר טוב",gr_noon:"צהריים טובים",gr_evening:"ערב טוב",gr_night:"לילה טוב",
     cl_note_ph:"הערה אופציונלית (חג, שעות מיוחדות...)",cl_out:"סיום משמרת",
     cl_short_t:"כבר סיימת משמרת??",cl_short_s:"על מי את/ה עובד/ת",cl_no_rec:"לא מתעד",
     cl_recording:"מתחיל לרשום...",cl_saved:"משמרת נשמרה ✓",
@@ -194,15 +197,15 @@ const TR={
     sg_tpl_err_n:"יש להזין שם",sg_tpl_err_h:"שעות לא תקינות",
     sg_saved:"✓ ההגדרות נשמרו!",sg_save:"שמור הגדרות",
     sg_privacy:"מצב פרטיות",sg_privacy_h:"מסתיר את כל הסכומים בכל המסכים",
-    sg_reset:"🔄 הפעל מחדש את אשף ההגדרות",sg_reset_c:"לאפס את האשף הראשוני ולהגדיר מחדש?",
-    sg_shabbat:"🕯️ תוספת שבת",sg_shabbat_h:"זיהוי אוטומטי של משמרות שבת — התוספת תחול על השעות שבתוך חלון השבת",
+    sg_reset:"הפעל מחדש את אשף ההגדרות",sg_reset_c:"לאפס את האשף הראשוני ולהגדיר מחדש?",
+    sg_shabbat:"תוספת שבת",sg_shabbat_h:"זיהוי אוטומטי של משמרות שבת — התוספת תחול על השעות שבתוך חלון השבת",
     sg_shabbat_from:"כניסת שבת (שישי)",sg_shabbat_to:"צאת שבת (מוצ״ש)",sg_shabbat_pct:"אחוז תוספת שבת",
     sg_backup:"גיבוי ושחזור",sg_backup_h:"הנתונים נשמרים רק במכשיר הזה — מומלץ לגבות מדי פעם",
     sg_exp_json:"⬇️ ייצוא גיבוי מלא",sg_imp_json:"⬆️ שחזור מגיבוי",sg_exp_csv:"📊 ייצוא משמרות (CSV)",
     sg_imp_c:"שחזור יחליף את כל הנתונים הקיימים באפליקציה. להמשיך?",
     sg_imp_ok:"✓ הגיבוי שוחזר! טוען מחדש...",sg_imp_err:"⚠ קובץ גיבוי לא תקין",
     sg_lang:"🌐 שפה",
-    sg_theme:"🎨 ערכת נושא",sg_theme_dark:"🌙 חשוך",sg_theme_light:"☀️ בהיר",
+    sg_theme:"ערכת נושא",sg_theme_dark:"🌙 חשוך",sg_theme_light:"☀️ בהיר",
     ob_theme_h:"בחר ערכת נושא",
     pwa_install:"התקן כאפליקציה",pwa_install_btn:"התקן",
     pwa_how:"כיצד להתקין:",pwa_ios:"לחץ על 📤 שתף ← 'הוסף למסך הבית'",pwa_android:"1. סגור ופתח מחדש את Chrome\n2. תפריט ⋮ ← 'התקן אפליקציה'",pwa_installed:"מותקנת ✓",pwa_not_ready:"סגור ופתח מחדש את Chrome",
@@ -375,6 +378,7 @@ const TR={
     cl_in:"Начать смену",cl_in_hint:"Нажмите начало · время запишется автоматически",
     cl_forgot_t:"Забыли отметить выход?",cl_forgot_s:"Смена активна уже",cl_forgot_fix:"Указать время окончания",cl_forgot_save:"Сохранить смену",cl_forgot_cancel:"Отменить смену",cl_forgot_cancel_c:"Полностью отменить смену? Она не будет сохранена.",
     cl_edit_start:"Изменить время начала",cl_month_sum:"В этом месяце",cl_note_btn:"Добавить заметку",
+    gr_morning:"Доброе утро",gr_noon:"Добрый день",gr_evening:"Добрый вечер",gr_night:"Доброй ночи",
     cl_note_ph:"Необязательная заметка...",cl_out:"Закончить смену",
     cl_short_t:"Уже закончил смену??",cl_short_s:"Кого ты пытаешься обмануть",cl_no_rec:"Не записываю",
     cl_recording:"Начинаю запись...",cl_saved:"Смена сохранена ✓",
@@ -416,15 +420,15 @@ const TR={
     sg_tpl_err_n:"Укажите название",sg_tpl_err_h:"Некорректное время",
     sg_saved:"✓ Настройки сохранены!",sg_save:"Сохранить настройки",
     sg_privacy:"Режим приватности",sg_privacy_h:"Скрывает все суммы на всех экранах",
-    sg_reset:"🔄 Перезапустить мастер настроек",sg_reset_c:"Сбросить мастер и настроить заново?",
-    sg_shabbat:"🕯️ Шаббатная надбавка",sg_shabbat_h:"Автоопределение смен в шаббат — надбавка на часы внутри окна шаббата",
+    sg_reset:"Перезапустить мастер настроек",sg_reset_c:"Сбросить мастер и настроить заново?",
+    sg_shabbat:"Шаббатная надбавка",sg_shabbat_h:"Автоопределение смен в шаббат — надбавка на часы внутри окна шаббата",
     sg_shabbat_from:"Начало шаббата (пятница)",sg_shabbat_to:"Конец шаббата (суббота)",sg_shabbat_pct:"Процент надбавки",
     sg_backup:"Резервное копирование",sg_backup_h:"Данные хранятся только на этом устройстве — делайте резервные копии",
     sg_exp_json:"⬇️ Экспорт полной копии",sg_imp_json:"⬆️ Восстановить из копии",sg_exp_csv:"📊 Экспорт смен (CSV)",
     sg_imp_c:"Восстановление заменит все текущие данные. Продолжить?",
     sg_imp_ok:"✓ Копия восстановлена! Перезагрузка...",sg_imp_err:"⚠ Неверный файл резервной копии",
     sg_lang:"🌐 Язык",
-    sg_theme:"🎨 Тема",sg_theme_dark:"🌙 Тёмная",sg_theme_light:"☀️ Светлая",
+    sg_theme:"Тема",sg_theme_dark:"🌙 Тёмная",sg_theme_light:"☀️ Светлая",
     ob_theme_h:"Выберите тему",
     pwa_install:"Установить приложение",pwa_install_btn:"Установить",
     pwa_how:"Как установить:",pwa_ios:"Нажмите 📤 → 'На экран Домой'",pwa_android:"Нажмите ⋮ → 'Добавить на главный экран'",pwa_installed:"Установлено ✓",
@@ -591,14 +595,14 @@ const TR={
     sg_tpl_name:"اسم القالب",sg_tpl_add:"+ إضافة قالب",sg_tpl_saved:"✓ تم حفظ القوالب",
     sg_tpl_save:"حفظ القوالب",sg_tpl_err_n:"يرجى إدخال اسم",sg_tpl_err_h:"ساعات غير صحيحة",
     sg_privacy:"وضع الخصوصية",sg_privacy_h:"إخفاء جميع المبالغ في كل الشاشات",
-    sg_reset:"🔄 إعادة تشغيل معالج الإعداد",sg_reset_c:"إعادة تعيين المعالج والإعداد من جديد؟",
-    sg_shabbat:"🕯️ علاوة السبت",sg_shabbat_h:"كشف تلقائي لورديات السبت — العلاوة على الساعات ضمن نافذة السبت",
+    sg_reset:"إعادة تشغيل معالج الإعداد",sg_reset_c:"إعادة تعيين المعالج والإعداد من جديد؟",
+    sg_shabbat:"علاوة السبت",sg_shabbat_h:"كشف تلقائي لورديات السبت — العلاوة على الساعات ضمن نافذة السبت",
     sg_shabbat_from:"بداية السبت (الجمعة)",sg_shabbat_to:"نهاية السبت",sg_shabbat_pct:"نسبة العلاوة",
     sg_backup:"النسخ الاحتياطي",sg_backup_h:"البيانات محفوظة على هذا الجهاز فقط — يُنصح بالنسخ الاحتياطي",
     sg_exp_json:"⬇️ تصدير نسخة كاملة",sg_imp_json:"⬆️ استعادة من نسخة",sg_exp_csv:"📊 تصدير الورديات (CSV)",
     sg_imp_c:"الاستعادة ستستبدل جميع البيانات الحالية. متابعة؟",
     sg_imp_ok:"✓ تمت الاستعادة! جارٍ إعادة التحميل...",sg_imp_err:"⚠ ملف نسخة احتياطية غير صالح",
-    sg_lang:"🌐 اللغة",sg_theme:"🎨 السمة",sg_theme_dark:"🌙 داكن",sg_theme_light:"☀️ فاتح",
+    sg_lang:"🌐 اللغة",sg_theme:"السمة",sg_theme_dark:"🌙 داكن",sg_theme_light:"☀️ فاتح",
     sg_shift_cfg:"إعداد أنواع الورديات",sg_sh_enabled:"مفعّل",sg_sh_start:"وقت البداية",
     sg_sh_pct:"نسبة الراتب (%)",sg_sh_unknown:"لا أعرف — حدد وفق الحد القانوني",
     sg_sh_known:"يدوي",sg_sh_legal:"الحد القانوني",
@@ -632,6 +636,7 @@ const TR={
     cl_in:"بدء الوردية",cl_in_hint:"اضغط البداية عند بدء الوردية · سيُسجَّل الوقت تلقائياً",
     cl_forgot_t:"نسيت تسجيل الخروج؟",cl_forgot_s:"الوردية نشطة منذ",cl_forgot_fix:"تحديد وقت الانتهاء يدوياً",cl_forgot_save:"حفظ الوردية",cl_forgot_cancel:"إلغاء الوردية",cl_forgot_cancel_c:"إلغاء الوردية نهائياً؟ لن يتم حفظها.",
     cl_edit_start:"تعديل وقت الدخول",cl_month_sum:"هذا الشهر",cl_note_btn:"إضافة ملاحظة",
+    gr_morning:"صباح الخير",gr_noon:"طاب يومك",gr_evening:"مساء الخير",gr_night:"ليلة سعيدة",
     cl_note_ph:"ملاحظة اختيارية (عطلة، ساعات خاصة...)",cl_out:"إنهاء الوردية",
     cl_short_t:"انتهيت من الوردية بالفعل؟",cl_short_s:"على من تعمل؟",cl_no_rec:"لا أسجل",
     cl_recording:"جارٍ التسجيل...",cl_saved:"تم حفظ الوردية ✓",
@@ -1353,9 +1358,25 @@ function elapsed(fromISO){
 }
 
 const SI={width:"100%",background:"var(--bg2)",border:"1px solid var(--inp-b)",borderRadius:"10px",padding:"12px 14px",color:"var(--txt)",fontSize:"16px",outline:"none",display:"block",transition:"border-color 0.15s ease,box-shadow 0.15s ease"};
-const CARD={background:"var(--card)",border:"1px solid var(--divider)",borderRadius:"16px",padding:"14px",boxShadow:"0 2px 16px rgba(0,0,0,0.4)"};
+const CARD={background:"var(--card)",border:"1px solid var(--divider)",borderRadius:"16px",padding:"14px",boxShadow:"var(--card-shadow)"};
 const SEC={fontSize:"12px",color:"var(--txt-d)",fontWeight:"700",letterSpacing:"0.8px",marginBottom:"12px",textTransform:"uppercase"};
 const LBL={fontSize:"11px",color:"var(--txt-d)",marginBottom:"6px",fontWeight:"700",letterSpacing:"0.8px",textTransform:"uppercase"};
+
+// Minimal empty-state illustration: calendar with faint rows
+function EmptyCalendar({size=72}){
+  return(
+    <svg width={size} height={size} viewBox="0 0 72 72" fill="none" style={{display:"block",margin:"0 auto"}}>
+      <rect x="10" y="14" width="52" height="46" rx="8" stroke="var(--divider2)" strokeWidth="2.5"/>
+      <path d="M10 27h52" stroke="var(--divider2)" strokeWidth="2.5"/>
+      <path d="M24 9v9M48 9v9" stroke="var(--divider2)" strokeWidth="2.5" strokeLinecap="round"/>
+      <rect x="18" y="34" width="12" height="4" rx="2" fill="var(--divider)"/>
+      <rect x="34" y="34" width="20" height="4" rx="2" fill="var(--divider)"/>
+      <rect x="18" y="44" width="24" height="4" rx="2" fill="var(--divider)"/>
+      <circle cx="52" cy="50" r="9" stroke="#22c55e" strokeWidth="2.5"/>
+      <path d="M52 46v4l3 2" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round"/>
+    </svg>
+  );
+}
 
 // Animated money counter — counts from previous value to new value
 function CountUp({value,hidden,format=fM}){
@@ -1847,7 +1868,7 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode,shifts,onStartChange})
             filter:privacyMode?"blur(12px)":"none",
             transition:"filter 0.25s ease",
             userSelect:privacyMode?"none":"auto",
-          }}>{fM(net)}</div>
+          }}><CountUp value={net}/></div>
           <div style={{display:"flex",justifyContent:"center",alignItems:"center",gap:"5px",marginTop:"4px"}}>
             <span style={{fontSize:"11px",color:"var(--txt-dd)",filter:privacyMode?"blur(6px)":"none"}}>{uT("cl_gross_pfx")} {fM(gross)}</span>
             <button onClick={()=>setShowDetails(!showDetails)} style={{width:"16px",height:"16px",borderRadius:"50%",background:"var(--divider)",border:"1px solid #374151",color:"var(--txt-d)",fontSize:"10px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>ℹ</button>
@@ -2140,8 +2161,11 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
             background:"radial-gradient(circle,rgba(99,102,241,0.08) 0%,transparent 70%)",
             filter:"blur(40px)",pointerEvents:"none",zIndex:0}}/>
 
-          {/* Top: date + shift */}
+          {/* Top: greeting + date + shift */}
           <div style={{textAlign:"center",position:"relative",zIndex:1,width:"100%"}}>
+            <div style={{fontSize:"16px",color:"rgba(255,255,255,0.9)",fontWeight:"600",letterSpacing:"-0.2px",marginBottom:"4px",fontFamily:"'DM Sans','Noto Sans Hebrew',sans-serif"}}>
+              {(()=>{const h=now.getHours();return uT(h>=5&&h<11?"gr_morning":h>=11&&h<16?"gr_noon":h>=16&&h<21?"gr_evening":"gr_night");})()}
+            </div>
             <div style={{fontSize:"13px",color:"rgba(255,255,255,0.6)",fontWeight:"400",letterSpacing:"0.3px",marginBottom:"10px",fontFamily:"'DM Sans',sans-serif"}}>
               {new Date().toLocaleDateString(uT("locale"),{weekday:"long",day:"numeric",month:"long"})}
             </div>
@@ -2528,7 +2552,7 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode,payslips,onSavePaysl
 
         {ms.length===0&&holPay===0?(
           <div style={{padding:"10px 0"}}>
-            <div style={{fontSize:"36px",marginBottom:"10px"}}>📭</div>
+            <div style={{marginBottom:"10px"}}><EmptyCalendar size={64}/></div>
             <div style={{fontSize:"14px",fontWeight:"700",color:"#86efac",marginBottom:"4px"}}>{t("d_no_shifts")}</div>
             <div style={{fontSize:"11px",color:"#4ade8055"}}>{t("d_add_hint")}</div>
           </div>
@@ -3213,7 +3237,7 @@ function ShiftsList({shifts,cfg,als,onDelete,onEdit,privacyMode}){
       <div style={{fontSize:"18px",fontWeight:"800",marginBottom:"20px",color:"var(--txt-hi)"}}>{uT("sl_title")}</div>
       {months.length===0&&(
         <div style={{textAlign:"center",padding:"60px 20px"}}>
-          <div style={{fontSize:"52px",marginBottom:"14px"}}>📭</div>
+          <div style={{marginBottom:"14px"}}><EmptyCalendar size={88}/></div>
           <div style={{fontSize:"16px",fontWeight:"800",color:"var(--txt-dd)",marginBottom:"6px"}}>{uT("sl_empty")}</div>
           <div style={{fontSize:"12px",color:"var(--divider2)"}}>{uT("sl_empty_hint")}</div>
         </div>
@@ -3407,7 +3431,7 @@ function Graph({shifts,cfg,als,privacyMode,manualMonths,onSaveManual}){
             const isSel=selBar===i;
             const hasData=m.count>0||m.isManual;
             const isEditing=editingManual===m.ym;
-            const barColor=isPeak?"#4ade80":isLow?"#f87171":isCur?"#60a5fa":"#22c55e88";
+            const barColor=isPeak?"linear-gradient(180deg,#4ade80,#15803d)":isLow?"linear-gradient(180deg,#f87171,#991b1b)":isCur?"linear-gradient(180deg,#60a5fa,#1d4ed8)":"linear-gradient(180deg,#22c55eaa,#15803d55)";
             return(
               <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:"2px",cursor:"pointer"}}
                 onClick={()=>{
@@ -3416,8 +3440,8 @@ function Graph({shifts,cfg,als,privacyMode,manualMonths,onSaveManual}){
                 }}>
                 <div style={{
                   width:"100%",height:`${barH}px`,
-                  background:isEditing?"#4ade80":isSel?"#4ade80":barColor,
-                  borderRadius:"4px 4px 0 0",
+                  background:isEditing?"#4ade80":isSel?"linear-gradient(180deg,#4ade80,#16a34a)":barColor,
+                  borderRadius:"6px 6px 2px 2px",
                   border:isEditing?"2px solid #4ade80":isSel?"2px solid #fff":"2px solid transparent",
                   transition:"all 0.35s cubic-bezier(0.34,1.56,0.64,1)",
                   minHeight:"4px",
@@ -3886,7 +3910,10 @@ function BackupSection({shifts,cfg,als}){
 
   return(
     <div style={{...CARD,marginTop:"16px",background:"var(--bg2)",border:"1px solid #1f2937"}}>
-      <div style={{fontSize:"13px",fontWeight:"700",color:"var(--txt)",marginBottom:"2px"}}>💾 {uT("sg_backup")}</div>
+      <div style={{fontSize:"13px",fontWeight:"700",color:"var(--txt)",marginBottom:"2px",display:"flex",alignItems:"center",gap:"7px"}}>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+        {uT("sg_backup")}
+      </div>
       <div style={{fontSize:"11px",color:"var(--txt-dd)",marginBottom:"12px"}}>{uT("sg_backup_h")}</div>
       <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
         <button onClick={exportJSON} style={{width:"100%",padding:"11px",background:"var(--card)",border:"1px solid var(--divider2)",borderRadius:"10px",color:"var(--txt)",fontSize:"13px",fontWeight:"700",cursor:"pointer"}}>{uT("sg_exp_json")}</button>
@@ -4005,7 +4032,10 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
           ))}
           <div style={{...CARD,marginBottom:"12px",opacity:form.shabbatEnabled?1:0.6}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"6px"}}>
-              <div style={{fontSize:"14px",fontWeight:"800",color:"var(--txt)"}}>{uT("sg_shabbat")}</div>
+              <div style={{fontSize:"14px",fontWeight:"800",color:"var(--txt)",display:"flex",alignItems:"center",gap:"7px"}}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" strokeWidth="1.6" strokeLinejoin="round"><path d="M12 2l2.4 4.2H21l-3.3 5.8 3.3 5.8h-6.6L12 22l-2.4-4.2H3l3.3-5.8L3 6.2h6.6L12 2z"/></svg>
+                {uT("sg_shabbat")}
+              </div>
               <Toggle on={!!form.shabbatEnabled} onToggle={()=>setForm(f=>({...f,shabbatEnabled:!f.shabbatEnabled}))}/>
             </div>
             <div style={{fontSize:"11px",color:"var(--txt-dd)",marginBottom:form.shabbatEnabled?"12px":"0"}}>{uT("sg_shabbat_h")}</div>
@@ -4243,7 +4273,10 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
           {/* Theme selector */}
           {onSaveTheme&&(
             <div style={{...CARD,marginTop:"16px",background:"var(--bg2)",border:"1px solid #1f2937"}}>
-              <div style={{fontSize:"12px",color:"var(--txt-d)",fontWeight:"700",marginBottom:"10px"}}>{uT("sg_theme")}</div>
+              <div style={{fontSize:"12px",color:"var(--txt-d)",fontWeight:"700",marginBottom:"10px",display:"flex",alignItems:"center",gap:"6px"}}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.4 5.4 0 0 1-9.1-3.95A5.4 5.4 0 0 1 13.36 3.1 9.06 9.06 0 0 0 12 3z"/></svg>
+                {uT("sg_theme")}
+              </div>
               <div style={{display:"flex",gap:"8px"}}>
                 {[{v:"dark",label:uT("sg_theme_dark")},{v:"light",label:uT("sg_theme_light")}].map(opt=>(
                   <button key={opt.v} onClick={()=>onSaveTheme(opt.v)}
@@ -4262,8 +4295,13 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
           <div style={{...CARD,marginTop:"16px",background:"var(--bg2)",border:"1px solid #1f2937"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
               <div>
-                <div style={{fontSize:"13px",fontWeight:"700",color:"var(--txt)"}}>
-                  {privacyMode?"🙈":"👁"} {uT("sg_privacy")}
+                <div style={{fontSize:"13px",fontWeight:"700",color:"var(--txt)",display:"flex",alignItems:"center",gap:"7px"}}>
+                  {privacyMode?(
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                  ):(
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  )}
+                  {uT("sg_privacy")}
                 </div>
                 <div style={{fontSize:"11px",color:"var(--txt-dd)",marginTop:"2px"}}>
                   {uT("sg_privacy_h")}
@@ -4275,7 +4313,8 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
           <BackupSection shifts={shifts} cfg={cfg} als={aList}/>
           <InstallSettingsBtn/>
           <button onClick={()=>{if(window.confirm(uT("sg_reset_c")))onReset();}}
-            style={{width:"100%",padding:"12px",background:"none",border:"1px solid #1f2937",borderRadius:"12px",color:"var(--txt-dd)",fontSize:"13px",fontWeight:"700",cursor:"pointer",marginTop:"10px"}}>
+            style={{width:"100%",padding:"12px",background:"none",border:"1px solid #1f2937",borderRadius:"12px",color:"var(--txt-dd)",fontSize:"13px",fontWeight:"700",cursor:"pointer",marginTop:"10px",display:"flex",alignItems:"center",justifyContent:"center",gap:"7px"}}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 1 2.64 6.36M3 22v-6h6"/></svg>
             {uT("sg_reset")}
           </button>
         </>
@@ -4883,12 +4922,12 @@ function App(){
     const ob=LS.get(K.onboarded);if(ob)setOnboarded(true);
     const pr=LS.get(K.privacy);if(pr)setPrivacyMode(true);
     const ln=LS.get(K.lang);if(ln){setLang(ln);document.documentElement.lang=ln;}
-    const th=LS.get(K.theme);if(th){setTheme(th);document.documentElement.dataset.theme=th;}
+    const th=LS.get(K.theme);if(th){setTheme(th);document.documentElement.dataset.theme=th;document.querySelector('meta[name=theme-color]')?.setAttribute("content",th==="light"?"#ede9e3":"#090c14");}
     setLoaded(true);
   },[]);
 
   useEffect(()=>{LS.set(K.addAlsIds,addForm.allowanceIds);},[addForm.allowanceIds]);
-  const saveTheme=t=>{setTheme(t);LS.set(K.theme,t);document.documentElement.dataset.theme=t;};
+  const saveTheme=t=>{setTheme(t);LS.set(K.theme,t);document.documentElement.dataset.theme=t;document.querySelector('meta[name=theme-color]')?.setAttribute("content",t==="light"?"#ede9e3":"#090c14");};
   const saveLang=l=>{setLang(l);LS.set(K.lang,l);document.documentElement.lang=l;};
   const togglePrivacy=()=>{
     const next=!privacyMode;
@@ -4961,7 +5000,21 @@ function App(){
       {/* Header - sticky at top */}
       <div style={{paddingTop:"env(safe-area-inset-top, 28px)",background:"var(--bg)",borderBottom:"1px solid #1f2937",flexShrink:0,zIndex:10,position:"relative"}}>
         <div style={{padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-        <div style={{fontSize:"17px",fontWeight:"900",color:"var(--txt-hi)"}}>שעתי ⏱</div>
+        <div style={{display:"flex",alignItems:"center",gap:"7px"}}>
+          <span style={{
+            width:"24px",height:"24px",borderRadius:"7px",
+            background:"linear-gradient(135deg,#22c55e,#0d9488)",
+            display:"inline-flex",alignItems:"center",justifyContent:"center",
+            color:"#031007",fontWeight:"900",fontSize:"14px",
+            boxShadow:"0 2px 8px rgba(34,197,94,0.35)",
+          }}>₪</span>
+          <span style={{
+            fontSize:"18px",fontWeight:"900",letterSpacing:"-0.5px",
+            background:"linear-gradient(90deg,#4ade80,#22d3ee)",
+            WebkitBackgroundClip:"text",backgroundClip:"text",
+            WebkitTextFillColor:"transparent",color:"transparent",
+          }}>שעתי</span>
+        </div>
         <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
           {/* Privacy toggle */}
           <button onClick={togglePrivacy} style={{
@@ -4971,7 +5024,11 @@ function App(){
             fontSize:"14px",cursor:"pointer",
             transition:"all 0.2s ease",
           }} title={privacyMode?appT("app_privacy_show"):appT("app_privacy_hide")}>
-            {privacyMode?"🙈":"👁"}
+            {privacyMode?(
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" style={{display:"block"}}><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            ):(
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{display:"block",color:"var(--txt-m)"}}><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            )}
           </button>
           {clockIn&&<div style={{background:"#2d0505",border:"1px solid #ef4444",borderRadius:"8px",padding:"3px 10px",fontSize:"11px",color:"#f87171",fontWeight:"700",display:"flex",alignItems:"center",gap:"4px"}}>
             <span style={{animation:"blink 1s ease-in-out infinite"}}>●</span>
