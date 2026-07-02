@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="statusBar">#000000</color>
+    <color name="widgetBg">#0F172A</color>
+    <color name="btnIn">#22C55E</color>
+    <color name="btnOut">#EF4444</color>
+</resources>

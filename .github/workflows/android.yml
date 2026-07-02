@@ -1,0 +1,49 @@
+name: Build Android AAB
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Decode signing keystore
+        env:
+          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+        run: echo "$ANDROID_KEYSTORE_B64" | base64 -d > /tmp/upload.jks
+
+      - name: Build signed AAB
+        working-directory: android
+        env:
+          KEYSTORE_FILE: /tmp/upload.jks
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          VERSION_CODE: ${{ github.run_number }}
+          VERSION_NAME: "2.0.${{ github.run_number }}"
+        run: gradle :app:bundleRelease
+
+      - name: Build signed APK (for direct install/testing)
+        working-directory: android
+        env:
+          KEYSTORE_FILE: /tmp/upload.jks
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          VERSION_CODE: ${{ github.run_number }}
+          VERSION_NAME: "2.0.${{ github.run_number }}"
+        run: gradle :app:assembleRelease
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: shaati-android
+          path: |
+            android/app/build/outputs/bundle/release/app-release.aab
+            android/app/build/outputs/apk/release/app-release.apk

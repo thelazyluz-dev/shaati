@@ -47,4 +47,11 @@ for (const f of ['sw.js', 'manifest.json', 'icon-192.png', 'icon-512.png', 'rese
   if (fs.existsSync(src)) fs.copyFileSync(src, path.join(DIST, f));
 }
 
+// Digital Asset Links — lets the Play Store TWA claim the origin (full-screen, no URL bar)
+const wk = path.join(ROOT, '.well-known', 'assetlinks.json');
+if (fs.existsSync(wk)) {
+  fs.mkdirSync(path.join(DIST, '.well-known'), { recursive: true });
+  fs.copyFileSync(wk, path.join(DIST, '.well-known', 'assetlinks.json'));
+}
+
 console.log(`built dist/ (app.js ${(code.length / 1024).toFixed(0)}kb, v=${VERSION})`);

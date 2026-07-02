@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "dev.thelazyluz.shaati",
+      "sha256_cert_fingerprints": [
+        "F3:45:84:5E:A5:8D:E3:73:4A:D5:6F:4A:B1:6E:63:9D:73:00:4E:59:40:AA:88:3C:AF:57:2E:94:12:0F:5A:F7"
+      ]
+    }
+  }
+]

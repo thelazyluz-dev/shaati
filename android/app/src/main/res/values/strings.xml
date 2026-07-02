@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">שעתי</string>
+    <string name="widget_label">שעתי — כניסה/יציאה</string>
+    <string name="widget_in">▶ כניסה</string>
+    <string name="widget_out">■ יציאה</string>
+    <!-- Digital Asset Links: delegate url handling to the PWA origin -->
+    <string name="asset_statements">
+        [{
+            \"relation\": [\"delegate_permission/common.handle_all_urls\"],
+            \"target\": {
+                \"namespace\": \"web\",
+                \"site\": \"https://thelazyluz-dev.github.io\"
+            }
+        }]
+    </string>
+</resources>
