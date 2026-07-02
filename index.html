@@ -67,10 +67,6 @@ select option{background:var(--bg2);color:var(--txt)}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @keyframes buttonSuccess{0%{width:100%}40%{width:52px;border-radius:50%}60%{width:52px;border-radius:50%}100%{width:100%;border-radius:12px}}
 @keyframes slideInNew{from{opacity:0;transform:translateX(-24px) scaleY(0.8)}to{opacity:1;transform:translateX(0) scaleY(1)}}
-@keyframes cometTop{0%{transform:translateX(-120px);opacity:1}22%{opacity:1}25%{transform:translateX(calc(100vw + 120px));opacity:0}25.5%{transform:translateX(-120px)}100%{transform:translateX(-120px);opacity:0}}
-@keyframes cometRight{0%{transform:translateY(-120px);opacity:1}22%{opacity:1}25%{transform:translateY(calc(100vh + 120px));opacity:0}25.5%{transform:translateY(-120px)}100%{transform:translateY(-120px);opacity:0}}
-@keyframes cometBottom{0%{transform:translateX(calc(100vw + 120px));opacity:1}22%{opacity:1}25%{transform:translateX(-120px);opacity:0}25.5%{transform:translateX(calc(100vw + 120px))}100%{transform:translateX(calc(100vw + 120px));opacity:0}}
-@keyframes cometLeft{0%{transform:translateY(calc(100vh + 120px));opacity:1}22%{opacity:1}25%{transform:translateY(-120px);opacity:0}25.5%{transform:translateY(calc(100vh + 120px))}100%{transform:translateY(calc(100vh + 120px));opacity:0}}
 
 .tab-slide-right{animation:slideInRight 0.22s ease-out}
 .tab-slide-left{animation:slideInLeft 0.22s ease-out}
@@ -4823,7 +4819,7 @@ function ShiftNeonBorder({clockIn,cfg}){
       {regLen>0&&regLen<perim&&(
         <path d={borderPath} fill="none"
           stroke="#fef08a" strokeWidth="4" strokeLinecap="round"
-          strokeDasharray={`${tipSz} ${perim+100}`} strokeDashoffset={regLen-tipSz}
+          strokeDasharray={`${tipSz} ${perim+100}`} strokeDashoffset={-(regLen-tipSz)}
           filter="url(#snb-gs)">
           <animate attributeName="stroke-opacity" values="0.9;0.2;0.9" dur="2s" repeatCount="indefinite"/>
           <animate attributeName="stroke-width" values="4;1.5;4" dur="2s" repeatCount="indefinite"/>
@@ -4840,7 +4836,7 @@ function ShiftNeonBorder({clockIn,cfg}){
           {otLen<oPerim&&(
             <path d={otPath} fill="none"
               stroke="#bae6fd" strokeWidth="3.5" strokeLinecap="round"
-              strokeDasharray={`${tipSz} ${oPerim+100}`} strokeDashoffset={otLen-tipSz}
+              strokeDasharray={`${tipSz} ${oPerim+100}`} strokeDashoffset={-(otLen-tipSz)}
               filter="url(#snb-gs)">
               <animate attributeName="stroke-opacity" values="0.9;0.2;0.9" dur="2s" repeatCount="indefinite"/>
               <animate attributeName="stroke-width" values="3.5;1.5;3.5" dur="2s" repeatCount="indefinite"/>
