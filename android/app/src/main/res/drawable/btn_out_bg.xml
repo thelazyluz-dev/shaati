@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
-    <solid android:color="@color/btnOut" />
-    <corners android:radius="14dp" />
+    <gradient
+        android:angle="270"
+        android:startColor="#F87171"
+        android:endColor="#DC2626" />
+    <corners android:radius="16dp" />
+    <stroke android:width="1dp" android:color="#40FFFFFF" />
 </shape>

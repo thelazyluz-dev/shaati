@@ -23,8 +23,18 @@ public class ShiftWidget extends AppWidgetProvider {
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_shift);
             views.setOnClickPendingIntent(R.id.btn_in, actionIntent(context, "clockin", 1));
             views.setOnClickPendingIntent(R.id.btn_out, actionIntent(context, "clockout", 2));
+            views.setOnClickPendingIntent(R.id.brand, openAppIntent(context));
             manager.updateAppWidget(id, views);
         }
+    }
+
+    private PendingIntent openAppIntent(Context context) {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(BASE_URL));
+        intent.setPackage(context.getPackageName());
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        return PendingIntent.getActivity(
+                context, 3, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
     private PendingIntent actionIntent(Context context, String action, int requestCode) {
