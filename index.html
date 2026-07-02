@@ -2032,12 +2032,14 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
 
   const toggleAl=(id)=>setSelAls(s=>s.includes(id)?s.filter(x=>x!==id):[...s,id]);
 
-  // PWA shortcut: launched via "כניסה למשמרת" from the app icon → clock in immediately
+  // PWA shortcuts: launched from the app icon → clock in/out immediately
   useEffect(()=>{
     const usp=new URLSearchParams(window.location.search);
-    if(usp.get("action")==="clockin"){
+    const act=usp.get("action");
+    if(act){
       window.history.replaceState(null,"",window.location.pathname);
-      if(!clockIn)handleClockIn();
+      if(act==="clockin"&&!clockIn)handleClockIn();
+      if(act==="clockout"&&clockIn)handleClockOut();
     }
   },[]);
 

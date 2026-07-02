@@ -21,6 +21,13 @@
       "description": "החתמת כניסה מיידית",
       "url": "./index.html?action=clockin",
       "icons": [{ "src": "./icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "סיום משמרת",
+      "short_name": "סיום",
+      "description": "החתמת יציאה ושמירת המשמרת",
+      "url": "./index.html?action=clockout",
+      "icons": [{ "src": "./icon-192.png", "sizes": "192x192" }]
     }
   ]
 }
