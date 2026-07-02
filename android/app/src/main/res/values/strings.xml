@@ -2,8 +2,9 @@
 <resources>
     <string name="app_name">שעתי</string>
     <string name="widget_label">שעתי — כניסה/יציאה</string>
-    <string name="widget_in">▶ כניסה</string>
-    <string name="widget_out">■ יציאה</string>
+    <string name="widget_tagline">מעקב משמרות</string>
+    <string name="widget_in">▶  כניסה למשמרת</string>
+    <string name="widget_out">■  סיום משמרת</string>
     <!-- Digital Asset Links: delegate url handling to the PWA origin -->
     <string name="asset_statements">
         [{
