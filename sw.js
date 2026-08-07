@@ -1,5 +1,5 @@
-const CACHE = "shaati-v37";
-const STATIC = ["./manifest.json", "./icon-192.png", "./icon-512.png"];
+const CACHE = "shaati-v38";
+const STATIC = ["./manifest.json", "./icon-192.png", "./icon-512.png", "./vendor/react.production.min.js", "./vendor/react-dom.production.min.js"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(STATIC)));

@@ -47,6 +47,16 @@ for (const f of ['sw.js', 'manifest.json', 'icon-192.png', 'icon-512.png', 'rese
   if (fs.existsSync(src)) fs.copyFileSync(src, path.join(DIST, f));
 }
 
+// Vendored React/ReactDOM — served same-origin (no external CDN), so the SW can
+// cache them and the app loads fully offline / survives a CDN outage.
+const vendorSrc = path.join(ROOT, 'vendor');
+if (fs.existsSync(vendorSrc)) {
+  fs.mkdirSync(path.join(DIST, 'vendor'), { recursive: true });
+  for (const f of fs.readdirSync(vendorSrc)) {
+    fs.copyFileSync(path.join(vendorSrc, f), path.join(DIST, 'vendor', f));
+  }
+}
+
 // Digital Asset Links — lets the Play Store TWA claim the origin (full-screen, no URL bar)
 const wk = path.join(ROOT, '.well-known', 'assetlinks.json');
 if (fs.existsSync(wk)) {

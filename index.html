@@ -82,8 +82,8 @@ select option{background:var(--bg2);color:var(--txt)}
 <body>
 <div id="root"><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:16px"><div style="width:40px;height:40px;border:3px solid #1e293b;border-top-color:#22c55e;border-radius:50%;animation:spin 1s linear infinite"></div><div style="color:#64748b;font-size:14px;font-family:sans-serif">טוען שעתי...</div></div></div>
 <script>if("serviceWorker"in navigator){navigator.serviceWorker.register("./sw.js").catch(function(){});}window.__installPrompt=null;window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();window.__installPrompt=e;});</script>
-<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="./vendor/react.production.min.js"></script>
+<script src="./vendor/react-dom.production.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.27.5/babel.min.js"></script>
 <script type="text/babel" data-presets="react">
 const {useState,useEffect,useCallback,useRef,useMemo} = React;
@@ -100,10 +100,27 @@ function slideClass(from,to){
 }
 
 const LS = {
-  get: k=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch{return null;}},
-  set: (k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}},
+  get: k=>{
+    let v=null;
+    try{v=localStorage.getItem(k);}catch{return null;}
+    if(v==null)return null;
+    try{return JSON.parse(v);}catch{
+      // נתון פגום — לשמר עותק גולמי לשחזור ולהזהיר, במקום להחזיר null בשקט (שנראה כמו "אין נתונים" והכתיבה הבאה דורסת)
+      try{if(!localStorage.getItem(k+"__corrupt"))localStorage.setItem(k+"__corrupt",v);}catch{}
+      try{window.dispatchEvent(new CustomEvent("shaati-data-corrupt",{detail:k}));}catch{}
+      return null;
+    }
+  },
+  set: (k,v)=>{
+    try{localStorage.setItem(k,JSON.stringify(v));return true;}
+    catch(e){
+      // כתיבה נכשלה (מכסה מלאה / מצב פרטי) — לא לבלוע בשקט; לאותת כלפי מעלה
+      try{window.dispatchEvent(new CustomEvent("shaati-save-failed",{detail:k}));}catch{}
+      return false;
+    }
+  },
 };
-const K={shifts:"wt-shifts-v5",cfg:"wt-cfg-v5",tpls:"wt-tpls-v2",als:"wt-als-v2",clockin:"wt-clockin-v1",vac:"wt-vac-v1",onboarded:"wt-onboarded-v1",privacy:"wt-privacy-v1",lang:"wt-lang-v1",theme:"wt-theme-v1",installDismissed:"wt-install-dismissed-v1",addAlsIds:"wt-addals-v1",clockAlsIds:"wt-clockals-v1",manualMonths:"wt-manual-months-v1",payslips:"wt-payslips-v1",lastVisit:"wt-last-visit-v1"};
+const K={shifts:"wt-shifts-v5",cfg:"wt-cfg-v5",tpls:"wt-tpls-v2",als:"wt-als-v2",clockin:"wt-clockin-v1",vac:"wt-vac-v1",onboarded:"wt-onboarded-v1",privacy:"wt-privacy-v1",lang:"wt-lang-v1",theme:"wt-theme-v1",installDismissed:"wt-install-dismissed-v1",addAlsIds:"wt-addals-v1",clockAlsIds:"wt-clockals-v1",manualMonths:"wt-manual-months-v1",payslips:"wt-payslips-v1",lastVisit:"wt-last-visit-v1",migShiftType:"wt-mig-shifttype-v1"};
 const LangCtx=React.createContext("he");
 const useT=()=>{const l=React.useContext(LangCtx);return k=>TR[l]?.[k]??TR.he[k]??k;};
 const TR={
@@ -316,9 +333,11 @@ const TR={
     sp_sick_23_lbl:"מחלה ימים 2-3",sp_sick_23_desc:"50% שכר בסיס, ללא תוספות ושעות נוספות",
     sp_sick_4p_lbl:"מחלה יום 4+",sp_sick_4p_desc:"100% שכר בסיס, ללא תוספות ושעות נוספות",
     // Calendar
-    cal_no_shift:"אין משמרת מוגדרת ליום זה",cal_edit:"✏️ ערוך",cal_holiday:"חג",cal_paid_hol:"חג בתשלום",
+    cal_no_shift:"אין משמרת מוגדרת ליום זה",cal_edit:"✏️ ערוך",cal_holiday:"חג",cal_paid_hol:"חג בתשלום",cal_del_yes:"מחק",cal_del_no:"ביטול",
     // App
     app_loading:"שעתי טוען...",app_privacy_show:"הצג סכומים",app_privacy_hide:"הסתר סכומים",
+    warn_save:"⚠ השמירה נכשלה — ייתכן שהנתונים לא נשמרו. בדוק שיש מקום אחסון פנוי, וגבה מיד (הגדרות ← גיבוי).",
+    warn_corrupt:"⚠ חלק מהנתונים לא נטענו (קובץ פגום). עותק גולמי נשמר לשחזור — אל תמחק נתונים ושחזר מגיבוי אם יש.",
     // Export
     ex_btn:"📄",ex_title:"דוח פיצול שעות",ex_print:"🖨️ הדפס / שמור כ-PDF",
     ex_day:"יום",ex_in:"כניסה",ex_out:"יציאה",ex_total_h:"מח\"כ",ex_reg:"ש.רגיל",
@@ -540,9 +559,11 @@ const TR={
     sp_sick_23_lbl:"Больничные дни 2-3",sp_sick_23_desc:"50% базовой ставки, без надбавок и сверхурочных",
     sp_sick_4p_lbl:"Больничный день 4+",sp_sick_4p_desc:"100% базовой ставки, без надбавок и сверхурочных",
     // Calendar
-    cal_no_shift:"Смена на этот день не определена",cal_edit:"✏️ Изменить",cal_holiday:"Праздник",cal_paid_hol:"Оплач. праздник",
+    cal_no_shift:"Смена на этот день не определена",cal_edit:"✏️ Изменить",cal_holiday:"Праздник",cal_paid_hol:"Оплач. праздник",cal_del_yes:"Удалить",cal_del_no:"Отмена",
     // App
     app_loading:"Shaati загружается...",app_privacy_show:"Показать суммы",app_privacy_hide:"Скрыть суммы",
+    warn_save:"⚠ Не удалось сохранить — данные могли не записаться. Проверьте свободное место и сделайте резервную копию (Настройки → Копия).",
+    warn_corrupt:"⚠ Часть данных не загрузилась (повреждённый файл). Исходная копия сохранена — не удаляйте данные и восстановите из резервной копии.",
     pwa_install:"Установить приложение",pwa_install_btn:"Установить",
     pwa_how:"Как установить:",pwa_ios:"Нажмите 📤 → 'На экран Домой'",pwa_android:"Нажмите ⋮ → 'Добавить на главный экран'",pwa_installed:"Установлено ✓",
     // Export
@@ -677,9 +698,11 @@ const TR={
     sp_sick_23_lbl:"مرض اليوم 2-3",sp_sick_23_desc:"50% من الراتب الأساسي، بدون بدلات وساعات إضافية",
     sp_sick_4p_lbl:"مرض اليوم 4+",sp_sick_4p_desc:"100% من الراتب الأساسي، بدون بدلات وساعات إضافية",
     // Calendar
-    cal_no_shift:"لم تُحدد وردية لهذا اليوم",cal_edit:"✏️ تعديل",cal_holiday:"عطلة",cal_paid_hol:"عطلة مدفوعة",
+    cal_no_shift:"لم تُحدد وردية لهذا اليوم",cal_edit:"✏️ تعديل",cal_holiday:"عطلة",cal_paid_hol:"عطلة مدفوعة",cal_del_yes:"حذف",cal_del_no:"إلغاء",
     // App
     app_loading:"Shaati يُحمَّل...",app_privacy_show:"عرض المبالغ",app_privacy_hide:"إخفاء المبالغ",
+    warn_save:"⚠ فشل الحفظ — قد لا تُحفظ البيانات. تحقق من توفر مساحة تخزين واعمل نسخة احتياطية فوراً (الإعدادات ← نسخة احتياطية).",
+    warn_corrupt:"⚠ لم يتم تحميل بعض البيانات (ملف تالف). حُفظت نسخة خام للاسترجاع — لا تحذف البيانات واستعد من نسخة احتياطية.",
     pwa_install:"تثبيت التطبيق",pwa_install_btn:"تثبيت",
     pwa_how:"كيفية التثبيت:",pwa_ios:"اضغط 📤 مشاركة ← 'إضافة إلى الشاشة الرئيسية'",pwa_android:"اضغط ⋮ ← 'إضافة إلى الشاشة الرئيسية'",pwa_installed:"مثبت ✓",
     // Header
@@ -1313,11 +1336,20 @@ function cp(hours,type,cfg,customMultPct,thresholdOverride){
 
 // Unified pay calc — handles both regular shifts and special days
 // שמשמרת עבודה ללא מכפיל מותאם: cpAuto מחשב אוטומטית לפי גבולות השעה
+// ── Per-shift rate snapshot ──
+// שדות ה-cfg שמשפיעים על חישוב הברוטו. נשמרים על כל משמרת בזמן היצירה (s.rc),
+// כדי ששינוי תעריף/הגדרות בעתיד לא ישכתב רטרואקטיבית משמרות עבר ששולמו.
+const RATE_KEYS=["baseRate","overtimeThreshold","overtime125Hours","weeklyOTThreshold","morningStart","afternoonStart","nightStart","morningMult","afternoonMult","nightMult","morningMultKnown","afternoonMultKnown","nightMultKnown","shabbatEnabled","shabbatStart","shabbatEnd","shabbatMult"];
+function snapshotRC(cfg){const o={};RATE_KEYS.forEach(k=>{if(cfg&&cfg[k]!==undefined)o[k]=cfg[k];});return o;}
+// cfg אפקטיבי לחישוב: אם למשמרת יש snapshot — הוא גובר; שדות חדשים שלא נשמרו נופלים ל-cfg הנוכחי
+function shiftCfg(s,cfg){return (s&&s.rc)?{...cfg,...s.rc}:cfg;}
+
 function getShiftPay(s,cfg,thresholdOverride){
+  const ec=shiftCfg(s,cfg);
   const h=ch(s.start,s.end);
-  if(isSpecialDay(s.type)) return {...calcSpecialPay(h,s.type,cfg), ot125H:0,ot150H:0};
-  if(s.customMult) return cp(h,s.type,cfg,s.customMult,thresholdOverride);
-  return cpAuto(s.start,s.end,cfg,thresholdOverride,s.date);
+  if(isSpecialDay(s.type)) return {...calcSpecialPay(h,s.type,ec), ot125H:0,ot150H:0};
+  if(s.customMult) return cp(h,s.type,ec,s.customMult,thresholdOverride);
+  return cpAuto(s.start,s.end,ec,thresholdOverride,s.date);
 }
 function getShiftTotal(s,cfg,als,thresholdOverride){
   const c=getShiftPay(s,cfg,thresholdOverride);
@@ -1792,7 +1824,10 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode,shifts,onStartChange})
   const startStr=`${String(startDate.getHours()).padStart(2,"0")}:${String(startDate.getMinutes()).padStart(2,"0")}:${String(startDate.getSeconds()).padStart(2,"0")}`;
   const diffSec=Math.max(0,Math.floor((now-startDate)/1000));
   const hours=diffSec/3600;
-  const nowStr2=`${String(new Date(now).getHours()).padStart(2,"0")}:${String(new Date(now).getMinutes()).padStart(2,"0")}:${String(new Date(now).getSeconds()).padStart(2,"0")}`;
+  // ch() מקפל משכי-זמן מעל 24ש׳ וגורם לברוטו לצנוח; מגבילים את שעת-הסיום המשוחזרת
+  // מעט מתחת ל-24ש׳ כדי שהרווח החי יגיע לרמה ויתייצב במקום לקרוס (מקרה של שכחת יציאה)
+  const cappedEnd=new Date(startDate.getTime()+Math.min(diffSec,24*3600-60)*1000);
+  const nowStr2=`${String(cappedEnd.getHours()).padStart(2,"0")}:${String(cappedEnd.getMinutes()).padStart(2,"0")}:${String(cappedEnd.getSeconds()).padStart(2,"0")}`;
   const wkKey=getWeekKey(clockIn.date,clockIn.time);
   const wkHoursBefore=(shifts||[]).filter(s=>!isSpecialDay(s.type)&&getWeekKey(s.date,s.start)===wkKey).reduce((a,s)=>a+ch(s.start,s.end),0);
   const wkRemaining=Math.max(0,(cfg.weeklyOTThreshold||42)-wkHoursBefore);
@@ -2046,6 +2081,14 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
 
   const handleClockOut=()=>{
     if(!clockIn) return;
+    // אם המשמרת רצה בפועל ≥24ש׳ (שכחת יציאה) — ch מקפל את המשך ל-mod-24 ותת-מחשב דרמטית.
+    // לא שומרים ערך מקופל בשקט; מפנים לזרימת קביעת שעת-סיום ידנית כדי שהמשתמש יאשר את הסיום האמיתי.
+    const realH=clockIn.iso?(Date.now()-new Date(clockIn.iso).getTime())/3600e3:null;
+    if(realH!==null&&realH>=24){
+      setShowFix(true);
+      if(!fixEnd)setFixEnd(nowTime());
+      return;
+    }
     const endTime=nowTime();
     const hours=ch(clockIn.time,endTime);
     if(hours<0.05){
@@ -2054,7 +2097,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
       setTimeout(()=>setShortMsg(null),2500);
       return;
     }
-    const shift={id:Date.now(),date:clockIn.date,start:clockIn.time,end:endTime,type:dominantShiftType(clockIn.time,endTime,cfg),allowanceIds:selAls,note,templateName:""};
+    const shift={id:Date.now(),date:clockIn.date,start:clockIn.time,end:endTime,type:dominantShiftType(clockIn.time,endTime,cfg),allowanceIds:selAls,note,templateName:"",rc:snapshotRC(cfg)};
     onShiftSaved(shift);
     setClockIn(null);
     LS.set(K.clockin,null);
@@ -2104,7 +2147,7 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
     if(!clockIn||!fixEnd)return;
     const hours=ch(clockIn.time,fixEnd);
     if(hours<0.05)return;
-    const shift={id:Date.now(),date:clockIn.date,start:clockIn.time,end:fixEnd,type:dominantShiftType(clockIn.time,fixEnd,cfg),allowanceIds:selAls,note,templateName:""};
+    const shift={id:Date.now(),date:clockIn.date,start:clockIn.time,end:fixEnd,type:dominantShiftType(clockIn.time,fixEnd,cfg),allowanceIds:selAls,note,templateName:"",rc:snapshotRC(cfg)};
     onShiftSaved(shift);
     setClockIn(null);LS.set(K.clockin,null);
     setSelAls([]);LS.set(K.clockAlsIds,null);setNote("");setShowNote(false);
@@ -2225,7 +2268,9 @@ function ClockScreen({clockIn,setClockIn,als,cfg,onShiftSaved,privacyMode,shifts
               const monthShifts=(shifts||[]).filter(s=>s.date.startsWith(ym));
               if(!monthShifts.length)return null;
               const mh=monthShifts.reduce((a,s)=>a+ch(s.start,s.end),0);
-              const mg=monthShifts.reduce((a,s)=>a+getShiftTotal(s,cfg,als),0);
+              // סף שבועי 42ש׳ — זהה לדשבורד, כדי שהסיכום ליד השעון יתאים
+              const wMap=buildWeeklyThresholdMap(shifts||[],cfg);
+              const mg=monthShifts.reduce((a,s)=>a+getShiftTotal(s,cfg,als,wMap[s.id]),0);
               return(
                 <div style={{marginTop:"18px",display:"inline-flex",alignItems:"center",gap:"8px",
                   background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.09)",
@@ -2520,11 +2565,12 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode,payslips,onSavePaysl
     const startStr=`${p2(startDate.getHours())}:${p2(startDate.getMinutes())}:${p2(startDate.getSeconds())}`;
     const diffSec=Math.max(0,Math.floor((liveNow-startDate)/1000));
     const hours=diffSec/3600;
-    const nowStr2=`${p2(liveNow.getHours())}:${p2(liveNow.getMinutes())}:${p2(liveNow.getSeconds())}`;
+    const cEnd=new Date(startDate.getTime()+Math.min(diffSec,24*3600-60)*1000);
+    const nowStr2=`${p2(cEnd.getHours())}:${p2(cEnd.getMinutes())}:${p2(cEnd.getSeconds())}`;
     const wkKey=getWeekKey(clockIn.date,clockIn.time);
     const wkHrsBefore=shifts.filter(s=>!isSpecialDay(s.type)&&getWeekKey(s.date,s.start)===wkKey).reduce((a,s)=>a+ch(s.start,s.end),0);
     const effThresh=Math.min(cfg.overtimeThreshold||8.6,Math.max(0,(cfg.weeklyOTThreshold||42)-wkHrsBefore));
-    return clockIn.customMult?cp(hours,clockIn.type,cfg,clockIn.customMult,effThresh).gross:cpAuto(startStr,nowStr2,cfg,effThresh).gross;
+    return clockIn.customMult?cp(hours,clockIn.type,cfg,clockIn.customMult,effThresh).gross:cpAuto(startStr,nowStr2,cfg,effThresh,clockIn.date).gross;
   })();
   const dedBase=tG+tA; // ברוטו כולל תוספות — בסיס לביטוח לאומי ומס הכנסה
   const ded=cfg.enableDeductions?cd(dedBase,cfg,tBase):null;
@@ -2774,6 +2820,7 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
   const uT=useT();
   const[open,setOpen]=useState(false);
   const[selectedDay,setSelectedDay]=useState(null); // date string for detail panel
+  const[confirmDel,setConfirmDel]=useState(null); // אישור מחיקה דו-שלבי (id המשמרת)
   const[viewDate,setViewDate]=useState(()=>{
     const d=value?new Date(value+"T12:00:00"):new Date();
     return{y:d.getFullYear(),m:d.getMonth()};
@@ -2951,8 +2998,15 @@ function ShiftCalendar({value,onChange,shifts,cfg,als,onEditShift,onDeleteShift,
                       <div style={{fontSize:"14px",fontWeight:"800",color:"#4ade80"}}>{fM(getShiftTotal(s,cfg,als,wMap[s.id]))}</div>
                     </div>
                     <div style={{display:"flex",gap:"6px"}}>
-                      <button onClick={()=>{onEditShift&&onEditShift(s);setOpen(false);setSelectedDay(null);}} style={{flex:1,padding:"7px",background:"#1e3a5f",border:"none",color:"#60a5fa",borderRadius:"8px",cursor:"pointer",fontWeight:"700",fontSize:"12px"}}>{uT("cal_edit")}</button>
-                      <button onClick={()=>{onDeleteShift&&onDeleteShift(s.id);if(selectedShifts.length<=1)setSelectedDay(null);}} style={{padding:"7px 10px",background:"#2d0505",border:"none",color:"#f87171",borderRadius:"8px",cursor:"pointer",fontWeight:"700",fontSize:"12px"}}>🗑</button>
+                      <button onClick={()=>{onEditShift&&onEditShift(s);setOpen(false);setSelectedDay(null);setConfirmDel(null);}} style={{flex:1,padding:"7px",background:"#1e3a5f",border:"none",color:"#60a5fa",borderRadius:"8px",cursor:"pointer",fontWeight:"700",fontSize:"12px"}}>{uT("cal_edit")}</button>
+                      {confirmDel===s.id?(
+                        <>
+                          <button onClick={()=>{onDeleteShift&&onDeleteShift(s.id);setConfirmDel(null);if(selectedShifts.length<=1)setSelectedDay(null);}} style={{padding:"7px 12px",background:"#dc2626",border:"none",color:"#fff",borderRadius:"8px",cursor:"pointer",fontWeight:"800",fontSize:"12px"}}>{uT("cal_del_yes")}</button>
+                          <button onClick={()=>setConfirmDel(null)} style={{padding:"7px 10px",background:"var(--divider)",border:"none",color:"var(--txt-d)",borderRadius:"8px",cursor:"pointer",fontWeight:"700",fontSize:"12px"}}>{uT("cal_del_no")}</button>
+                        </>
+                      ):(
+                        <button onClick={()=>setConfirmDel(s.id)} style={{padding:"7px 10px",background:"#2d0505",border:"none",color:"#f87171",borderRadius:"8px",cursor:"pointer",fontWeight:"700",fontSize:"12px"}}>🗑</button>
+                      )}
                     </div>
                   </div>
                 );
@@ -3035,7 +3089,7 @@ function AddShift({cfg,tpls,als,shifts,onAdd,onEdit,onDelete,privacyMode,form,on
     if(!isSpec&&(!start||!end)){setErr(uT("as_err_times"));return;}
     const h=ch(start,end);
     if(!isSpec&&h<0.1){setErr(uT("as_err_hours"));return;}
-    setErr("");onAdd({...form,id:Date.now(),start,end});setSaved(true);
+    setErr("");onAdd({...form,id:Date.now(),start,end,rc:snapshotRC(cfg)});setSaved(true);
     onResetForm();
     setTimeout(()=>setSaved(false),2000);
   };
@@ -3370,8 +3424,8 @@ function Graph({shifts,cfg,als,privacyMode,manualMonths,onSaveManual}){
       const sa=isSpecialDay(s.type)?0:csa(s.allowanceIds||[],als);
       gross+=c.gross;allow+=sa;count++;
       if(!isSpecialDay(s.type)){hours+=ch(s.start,s.end);workCount++;}
-      const baseMult=isSpecialDay(s.type)?1:(s.customMult?s.customMult/100:(ST[s.type]?.mult||1));
-      baseS+=(c.regH||0)*cfg.baseRate*baseMult;
+      // בסיס פנסיה זהה לדשבורד: שכר השעות הרגילות (regPay), לא regH×מכפיל-דומיננטי
+      baseS+=(c.regPay!==undefined?c.regPay:c.gross);
     });
     if(count>0) allow+=cma(als);
     const recDates=new Set(ms.map(s=>s.date));
@@ -4912,12 +4966,22 @@ function App(){
   const[nightMode,setNightMode]=useState(isNightTime);
 
   const[toast,setToast]=useState(null);
+  const[dataWarn,setDataWarn]=useState(null); // באנר אזהרה מתמשך: כשל שמירה / נתון פגום
   const scrollRef=useRef(null);
 
   const showToast=(msg,color="#22c55e")=>{
     setToast({msg,color});
     setTimeout(()=>setToast(null),2500);
   };
+
+  // אזהרות אמינות-נתונים: כשל כתיבה ל-localStorage או נתון פגום בטעינה
+  useEffect(()=>{
+    const onFail=()=>setDataWarn("save");
+    const onCorrupt=()=>setDataWarn(w=>w==="save"?w:"corrupt");
+    window.addEventListener("shaati-save-failed",onFail);
+    window.addEventListener("shaati-data-corrupt",onCorrupt);
+    return()=>{window.removeEventListener("shaati-save-failed",onFail);window.removeEventListener("shaati-data-corrupt",onCorrupt);};
+  },[]);
 
   const scrollTop=()=>{if(scrollRef.current)scrollRef.current.scrollTop=0;};
 
@@ -4958,12 +5022,17 @@ function App(){
   useEffect(()=>{
     const c=LS.get(K.cfg);const loadedCfg=c?{...DEF_CFG,...c}:DEF_CFG;if(c)setCfg(loadedCfg);
     const s=LS.get(K.shifts);if(s){
-      // one-time migration: recalculate shift types using dominant hours
-      const migrated=s.map(sh=>{
-        if(!sh.start||!sh.end||isSpecialDay(sh.type)||sh.customMult)return sh;
-        return{...sh,type:dominantShiftType(sh.start,sh.end,loadedCfg)};
-      });
-      setShifts(migrated);LS.set(K.shifts,migrated);
+      if(!LS.get(K.migShiftType)){
+        // מיגרציה חד-פעמית בלבד: חישוב-מחדש של סוג המשמרת לפי התקופה הדומיננטית.
+        // רצה פעם אחת (עם flag) ולא בכל טעינה — כדי ששינוי הגדרות שעות לא יסווג-מחדש וידרוס היסטוריה.
+        const migrated=s.map(sh=>{
+          if(!sh.start||!sh.end||isSpecialDay(sh.type)||sh.customMult)return sh;
+          return{...sh,type:dominantShiftType(sh.start,sh.end,loadedCfg)};
+        });
+        setShifts(migrated);LS.set(K.shifts,migrated);LS.set(K.migShiftType,true);
+      } else {
+        setShifts(s);
+      }
     }
     const t=LS.get(K.tpls);if(t)setTpls(t);
     const a=LS.get(K.als);if(a){setAls(a);const allIds=a.filter(x=>x.active&&x.type==="per_shift").map(x=>x.id);const saved=LS.get(K.addAlsIds);const ids=saved===null?allIds:allIds.filter(id=>saved.includes(id));setAddForm(f=>({...f,allowanceIds:ids}));}
@@ -5045,6 +5114,22 @@ function App(){
           boxShadow:`0 4px 20px ${toast.color}66`,
           animation:"slideInUp 0.25s ease-out",
         }}>{toast.msg}</div>
+      )}
+
+      {/* Data-reliability warning banner (persistent until dismissed) */}
+      {dataWarn&&(
+        <div style={{
+          position:"absolute",top:"env(safe-area-inset-top,28px)",left:"8px",right:"8px",
+          zIndex:998,background:"linear-gradient(145deg,#7f1d1d,#991b1b)",border:"1px solid #ef4444",
+          borderRadius:"12px",padding:"10px 14px",display:"flex",alignItems:"center",gap:"10px",
+          boxShadow:"0 4px 20px rgba(239,68,68,0.4)",animation:"slideInUp 0.25s ease-out",
+        }}>
+          <span style={{fontSize:"18px"}}>⚠️</span>
+          <span style={{flex:1,fontSize:"12px",fontWeight:"700",color:"#fecaca",lineHeight:1.4}}>
+            {appT(dataWarn==="save"?"warn_save":"warn_corrupt")}
+          </span>
+          <button onClick={()=>setDataWarn(null)} style={{background:"rgba(0,0,0,0.25)",border:"none",color:"#fecaca",borderRadius:"8px",padding:"4px 10px",fontSize:"12px",fontWeight:"800",cursor:"pointer"}}>✕</button>
+        </div>
       )}
 
       {/* Header - sticky at top */}
