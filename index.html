@@ -213,6 +213,9 @@ const TR={
     sg_privacy:"מצב פרטיות",sg_privacy_h:"מסתיר את כל הסכומים בכל המסכים",
     sg_reset:"הפעל מחדש את אשף ההגדרות",sg_reset_c:"לאפס את האשף הראשוני ולהגדיר מחדש?",
     sg_shabbat:"תוספת שבת",sg_shabbat_h:"זיהוי אוטומטי של משמרות שבת — התוספת תחול על השעות שבתוך חלון השבת",
+    sg_shabbat_add:"תוספת שבת מתווספת",sg_shabbat_add_h:"מודלק: שבת נוספת מעל תוספת המשמרת (לילה 140%+50%=190%). כבוי (ברירת מחדל): הגבוה מבין השניים.",
+    sg_night_day:"יום עבודה לילה מקוצר",sg_night_day_h:"לפי חוק, משמרת לילה = 7 שעות; מהשעה שאחרי מתחילות שעות נוספות.",sg_night_thresh:"סף שעות לילה",
+    sg_taxable:"חייב במס",sg_taxable_h:"כבוי = פטור ממס וביטוח לאומי (למשל החזר נסיעות)",
     sg_shabbat_from:"כניסת שבת (שישי)",sg_shabbat_to:"צאת שבת (מוצ״ש)",sg_shabbat_pct:"אחוז תוספת שבת",
     sg_backup:"גיבוי ושחזור",sg_backup_h:"הנתונים נשמרים רק במכשיר הזה — מומלץ לגבות מדי פעם",
     sg_exp_json:"⬇️ ייצוא גיבוי מלא",sg_imp_json:"⬆️ שחזור מגיבוי",sg_exp_csv:"📊 ייצוא משמרות (CSV)",
@@ -439,6 +442,9 @@ const TR={
     sg_privacy:"Режим приватности",sg_privacy_h:"Скрывает все суммы на всех экранах",
     sg_reset:"Перезапустить мастер настроек",sg_reset_c:"Сбросить мастер и настроить заново?",
     sg_shabbat:"Шаббатная надбавка",sg_shabbat_h:"Автоопределение смен в шаббат — надбавка на часы внутри окна шаббата",
+    sg_shabbat_add:"Надбавка шаббата суммируется",sg_shabbat_add_h:"Вкл: шаббат поверх надбавки смены (ночь 140%+50%=190%). Выкл (по умолч.): большая из двух.",
+    sg_night_day:"Сокращённый ночной день",sg_night_day_h:"По закону ночная смена = 7 часов; далее начинаются сверхурочные.",sg_night_thresh:"Порог ночных часов",
+    sg_taxable:"Облагается налогом",sg_taxable_h:"Выкл = освобождено от налога и страхования (напр. проезд)",
     sg_shabbat_from:"Начало шаббата (пятница)",sg_shabbat_to:"Конец шаббата (суббота)",sg_shabbat_pct:"Процент надбавки",
     sg_backup:"Резервное копирование",sg_backup_h:"Данные хранятся только на этом устройстве — делайте резервные копии",
     sg_exp_json:"⬇️ Экспорт полной копии",sg_imp_json:"⬆️ Восстановить из копии",sg_exp_csv:"📊 Экспорт смен (CSV)",
@@ -616,6 +622,9 @@ const TR={
     sg_privacy:"وضع الخصوصية",sg_privacy_h:"إخفاء جميع المبالغ في كل الشاشات",
     sg_reset:"إعادة تشغيل معالج الإعداد",sg_reset_c:"إعادة تعيين المعالج والإعداد من جديد؟",
     sg_shabbat:"علاوة السبت",sg_shabbat_h:"كشف تلقائي لورديات السبت — العلاوة على الساعات ضمن نافذة السبت",
+    sg_shabbat_add:"علاوة السبت تُضاف",sg_shabbat_add_h:"مُفعّل: السبت فوق علاوة الوردية (ليل 140%+50%=190%). مُطفأ (افتراضي): الأعلى منهما.",
+    sg_night_day:"يوم عمل ليلي مُقلّص",sg_night_day_h:"وفق القانون، الوردية الليلية = 7 ساعات؛ وبعدها تبدأ الساعات الإضافية.",sg_night_thresh:"عتبة ساعات الليل",
+    sg_taxable:"خاضع للضريبة",sg_taxable_h:"مُطفأ = معفى من الضريبة والتأمين الوطني (مثل بدل المواصلات)",
     sg_shabbat_from:"بداية السبت (الجمعة)",sg_shabbat_to:"نهاية السبت",sg_shabbat_pct:"نسبة العلاوة",
     sg_backup:"النسخ الاحتياطي",sg_backup_h:"البيانات محفوظة على هذا الجهاز فقط — يُنصح بالنسخ الاحتياطي",
     sg_exp_json:"⬇️ تصدير نسخة كاملة",sg_imp_json:"⬆️ استعادة من نسخة",sg_exp_csv:"📊 تصدير الورديات (CSV)",
@@ -856,7 +865,9 @@ const DEF_CFG={
   morningMult:100,afternoonMult:117,nightMult:140,
   morningMultKnown:true,afternoonMultKnown:true,nightMultKnown:true,
   // Shabbat premium: Friday evening → Saturday night
-  shabbatEnabled:false,shabbatStart:"18:00",shabbatEnd:"20:00",shabbatMult:150,
+  shabbatEnabled:false,shabbatStart:"18:00",shabbatEnd:"20:00",shabbatMult:150,shabbatAdditive:false,
+  // משמרת לילה = יום עבודה מקוצר (7ש׳ לפי חוק); השעה שאחריה כבר נוספת
+  nightDayEnabled:true,nightDayThreshold:7,
 };
 const DEF_ALS=[];
 const ST={
@@ -1192,6 +1203,21 @@ function getShiftMult(type,cfg){
 // ── Calc ──
 function pt(t){if(!t)return 0;const parts=t.split(":").map(Number);return parts[0]*60+(parts[1]||0)+(parts[2]||0)/60;}
 function ch(s,e){let d=pt(e)-pt(s);if(d<0)d+=1440;return Math.max(0,d/60);}
+// עבודת לילה לפי חוק: משמרת עם ≥2 שעות בחלון הלילה (nightStart→morningStart)
+function isNightWork(startTime,endTime,cfg){
+  if(!startTime||!endTime)return false;
+  const mf_=pt(cfg?.morningStart||"06:00"),nf_=pt(cfg?.nightStart||"22:00");
+  const sM=pt(startTime),tot=ch(startTime,endTime)*60,eM=sM+tot;
+  let dayMin=0;
+  for(const day of[0,1440]){dayMin+=Math.max(0,Math.min(eM,nf_+day)-Math.max(sM,mf_+day));}
+  return (tot-dayMin)>=120;
+}
+// סף יומי אפקטיבי: 7ש׳ למשמרת לילה (אם מופעל), אחרת הסף הרגיל
+function dayThreshFor(startTime,endTime,cfg){
+  const base=(cfg&&cfg.overtimeThreshold)||8.6;
+  if(cfg&&cfg.nightDayEnabled!==false&&isNightWork(startTime,endTime,cfg))return cfg.nightDayThreshold||7;
+  return base;
+}
 
 // ── שעות נוספות שבועיות ──
 // מחזיר key של השבוע (יום ראשון) לפי תאריך
@@ -1204,13 +1230,13 @@ function getWeekKey(dateStr,startTime){
 // צו הרחבה 2018: 42 שעות שבועיות. מעבר לכך — שעות נוספות.
 function buildWeeklyThresholdMap(allShifts,cfg){
   const wt=cfg.weeklyOTThreshold||42;
-  const dt=cfg.overtimeThreshold||8.6;
   const workShifts=[...allShifts]
     .filter(s=>!isSpecialDay(s.type))
     .sort((a,b)=>a.date.localeCompare(b.date));
   const weekHours={};
   const map={};
   workShifts.forEach(s=>{
+    const dt=dayThreshFor(s.start,s.end,shiftCfg(s,cfg)); // סף יומי מודע-לילה + snapshot של המשמרת
     const wk=getWeekKey(s.date,s.start);
     if(!weekHours[wk])weekHours[wk]=0;
     const remaining=Math.max(0,wt-weekHours[wk]);
@@ -1249,7 +1275,7 @@ function cpAuto(startTime,endTime,cfg,thresholdOverride,dateStr){
   const startM=pt(startTime);
   const totalH=ch(startTime,endTime);
   const endM=startM+totalH*60;
-  const dailyThreshold=thresholdOverride!==undefined?thresholdOverride:(cfg.overtimeThreshold||8.6);
+  const dailyThreshold=thresholdOverride!==undefined?thresholdOverride:dayThreshFor(startTime,endTime,cfg);
   const ot125Hrs=cfg.overtime125Hours||2;
   const br=cfg.baseRate;
   // תקופות בדקות מחצות — גבולות לפי הגדרות משתמש
@@ -1292,7 +1318,10 @@ function cpAuto(startTime,endTime,cfg,thresholdOverride,dateStr){
         const mid=(f+t)/2;
         const inShab=shab.some(([a,b])=>mid>=a&&mid<b);
         if(inShab)shabbatH+=(t-f)/60;
-        split.push({from:f,hours:(t-f)/60,mult:inShab?Math.max(seg.mult,sMult):seg.mult});
+        // ברירת מחדל (חוק): שבת מחליפה — הגבוה מבין תוספת המשמרת לתוספת השבת.
+        // shabbatAdditive: שבת מתווספת מעל תוספת המשמרת (למשל לילה 140% + 50% = 190%).
+        const shabMult=cfg.shabbatAdditive?(seg.mult+(sMult-1)):Math.max(seg.mult,sMult);
+        split.push({from:f,hours:(t-f)/60,mult:inShab?shabMult:seg.mult});
       }
     }
     segs.length=0;segs.push(...split);
@@ -1319,7 +1348,7 @@ function cpAuto(startTime,endTime,cfg,thresholdOverride,dateStr){
 // Fixed: overtime on night shifts = 140% * 125% = 175%, afternoon = 117% * 125% = 146.25%
 function cp(hours,type,cfg,customMultPct,thresholdOverride){
   const{baseRate,overtimeThreshold,overtime125Hours}=cfg;
-  const dailyThreshold=thresholdOverride!==undefined?thresholdOverride:overtimeThreshold;
+  const dailyThreshold=thresholdOverride!==undefined?thresholdOverride:(cfg.nightDayEnabled!==false&&type==="night"?(cfg.nightDayThreshold||7):overtimeThreshold);
   const baseMult=customMultPct?(customMultPct/100):getShiftMult(type,cfg);
   const regH=Math.min(hours,dailyThreshold);
   const ot=Math.max(0,hours-dailyThreshold);
@@ -1339,7 +1368,7 @@ function cp(hours,type,cfg,customMultPct,thresholdOverride){
 // ── Per-shift rate snapshot ──
 // שדות ה-cfg שמשפיעים על חישוב הברוטו. נשמרים על כל משמרת בזמן היצירה (s.rc),
 // כדי ששינוי תעריף/הגדרות בעתיד לא ישכתב רטרואקטיבית משמרות עבר ששולמו.
-const RATE_KEYS=["baseRate","overtimeThreshold","overtime125Hours","weeklyOTThreshold","morningStart","afternoonStart","nightStart","morningMult","afternoonMult","nightMult","morningMultKnown","afternoonMultKnown","nightMultKnown","shabbatEnabled","shabbatStart","shabbatEnd","shabbatMult"];
+const RATE_KEYS=["baseRate","overtimeThreshold","overtime125Hours","weeklyOTThreshold","morningStart","afternoonStart","nightStart","morningMult","afternoonMult","nightMult","morningMultKnown","afternoonMultKnown","nightMultKnown","shabbatEnabled","shabbatStart","shabbatEnd","shabbatMult","shabbatAdditive","nightDayEnabled","nightDayThreshold"];
 function snapshotRC(cfg){const o={};RATE_KEYS.forEach(k=>{if(cfg&&cfg[k]!==undefined)o[k]=cfg[k];});return o;}
 // cfg אפקטיבי לחישוב: אם למשמרת יש snapshot — הוא גובר; שדות חדשים שלא נשמרו נופלים ל-cfg הנוכחי
 function shiftCfg(s,cfg){return (s&&s.rc)?{...cfg,...s.rc}:cfg;}
@@ -1358,6 +1387,9 @@ function getShiftTotal(s,cfg,als,thresholdOverride){
 }
 function csa(ids=[],als){return als.filter(a=>a.active&&a.type==="per_shift"&&ids.includes(a.id)).reduce((s,a)=>s+a.amount,0);}
 function cma(als){return als.filter(a=>a.active&&a.type==="per_month").reduce((s,a)=>s+a.amount,0);}
+// חלק התוספות הפטור ממס/ב"ל (taxable===false) — לא נכנס לבסיס הניכויים אך נשאר בנטו
+function csaExempt(ids=[],als){return als.filter(a=>a.active&&a.type==="per_shift"&&a.taxable===false&&ids.includes(a.id)).reduce((s,a)=>s+a.amount,0);}
+function cmaExempt(als){return als.filter(a=>a.active&&a.type==="per_month"&&a.taxable===false).reduce((s,a)=>s+a.amount,0);}
 // baseSalary = שכר בסיס בלבד (ללא שעות נוספות ותוספות) — בסיס לפנסיה וקרן השתלמות
 // gross = סה"כ ברוטו (כולל שעות נוספות) — בסיס לביטוח לאומי ומס הכנסה
 // תקרת ביטוח לאומי 2026: 49,030 ₪/חודש (לפי btl.gov.il)
@@ -1831,7 +1863,7 @@ function LiveEarnings({clockIn,cfg,selAls,als,privacyMode,shifts,onStartChange})
   const wkKey=getWeekKey(clockIn.date,clockIn.time);
   const wkHoursBefore=(shifts||[]).filter(s=>!isSpecialDay(s.type)&&getWeekKey(s.date,s.start)===wkKey).reduce((a,s)=>a+ch(s.start,s.end),0);
   const wkRemaining=Math.max(0,(cfg.weeklyOTThreshold||42)-wkHoursBefore);
-  const effectiveDailyThresh=Math.min(cfg.overtimeThreshold||8.6,wkRemaining);
+  const effectiveDailyThresh=Math.min(clockIn.customMult?(cfg.nightDayEnabled!==false&&clockIn.type==="night"?(cfg.nightDayThreshold||7):(cfg.overtimeThreshold||8.6)):dayThreshFor(startStr,nowStr2,cfg),wkRemaining);
   const c=clockIn.customMult?cp(hours,clockIn.type,cfg,clockIn.customMult,effectiveDailyThresh):cpAuto(startStr,nowStr2,cfg,effectiveDailyThresh,clockIn.date);
   const gross=c.gross;
   const baseSalary=c.regPay!==undefined?c.regPay:(c.regH||0)*cfg.baseRate;
@@ -2530,12 +2562,12 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode,payslips,onSavePaysl
   },[clockIn?.iso]);
   const ms=shifts.filter(s=>s.date.startsWith(selM));
   const wMap=buildWeeklyThresholdMap(shifts,cfg);
-  let tG=0,tA=0,tH=0,regH=0,aftH=0,ngtH=0,ot125=0,ot150=0,tBase=0;
+  let tG=0,tA=0,tAex=0,tH=0,regH=0,aftH=0,ngtH=0,ot125=0,ot150=0,tBase=0;
   ms.forEach(s=>{
     const h=ch(s.start,s.end);
     const c=getShiftPay(s,cfg,wMap[s.id]);
     const sa=isSpecialDay(s.type)?0:csa(s.allowanceIds||[],als);
-    tG+=c.gross;tA+=sa;if(!isSpecialDay(s.type))tH+=h;
+    tG+=c.gross;tA+=sa;tAex+=isSpecialDay(s.type)?0:csaExempt(s.allowanceIds||[],als);if(!isSpecialDay(s.type))tH+=h;
     // שכר בסיס = שעות רגילות בלבד (ללא שעות נוספות) — בסיס לפנסיה וקרן השתלמות
     tBase+=(c.regPay!==undefined?c.regPay:c.gross);
     // פירוט שעות לפי תקופה: cpAuto מחזיר periodH, cp מחזיר רק type
@@ -2547,7 +2579,7 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode,payslips,onSavePaysl
     }
     ot125+=c.ot125H||0;ot150+=c.ot150H||0;
   });
-  tA+=cma(als);
+  tA+=cma(als);tAex+=cmaExempt(als);
   // חגים בתשלום אוטומטיים — חגים שאין עבורם אף משמרת מוגדרת
   const recordedDates=new Set(ms.map(s=>s.date));
   const autoHolDays=Object.entries(IL_HOLIDAYS).filter(([d,h])=>d.startsWith(selM)&&h.paid&&!recordedDates.has(d));
@@ -2569,12 +2601,15 @@ function Dashboard({shifts,cfg,als,selM,setSelM,privacyMode,payslips,onSavePaysl
     const nowStr2=`${p2(cEnd.getHours())}:${p2(cEnd.getMinutes())}:${p2(cEnd.getSeconds())}`;
     const wkKey=getWeekKey(clockIn.date,clockIn.time);
     const wkHrsBefore=shifts.filter(s=>!isSpecialDay(s.type)&&getWeekKey(s.date,s.start)===wkKey).reduce((a,s)=>a+ch(s.start,s.end),0);
-    const effThresh=Math.min(cfg.overtimeThreshold||8.6,Math.max(0,(cfg.weeklyOTThreshold||42)-wkHrsBefore));
+    const baseThresh=clockIn.customMult?(cfg.nightDayEnabled!==false&&clockIn.type==="night"?(cfg.nightDayThreshold||7):(cfg.overtimeThreshold||8.6)):dayThreshFor(startStr,nowStr2,cfg);
+    const effThresh=Math.min(baseThresh,Math.max(0,(cfg.weeklyOTThreshold||42)-wkHrsBefore));
     return clockIn.customMult?cp(hours,clockIn.type,cfg,clockIn.customMult,effThresh).gross:cpAuto(startStr,nowStr2,cfg,effThresh,clockIn.date).gross;
   })();
-  const dedBase=tG+tA; // ברוטו כולל תוספות — בסיס לביטוח לאומי ומס הכנסה
+  // בסיס חייב במס/ב"ל — ברוטו + תוספות חייבות בלבד (תוספות פטורות כמו נסיעות פטורות מוחרגות)
+  const dedBase=tG+tA-tAex;
   const ded=cfg.enableDeductions?cd(dedBase,cfg,tBase):null;
-  const net=ded?dedBase-ded.tot:dedBase;
+  // נטו = כל ההכנסה (כולל תוספות פטורות) פחות הניכויים שחושבו על הבסיס החייב בלבד
+  const net=ded?(tG+tA-ded.tot):(tG+tA);
   const nav=(dir)=>{const[y,m]=selM.split("-").map(Number);const d=new Date(y,m-1+dir);setSelM(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`);};
 
   // Live OT detection
@@ -3418,21 +3453,22 @@ function Graph({shifts,cfg,als,privacyMode,manualMonths,onSaveManual}){
   const months=Array.from({length:12},(_,i)=>{
     const ym=`${viewYear}-${String(i+1).padStart(2,"0")}`;
     const ms=shifts.filter(s=>s.date.startsWith(ym));
-    let gross=0,hours=0,allow=0,count=0,workCount=0,baseS=0;
+    let gross=0,hours=0,allow=0,allowEx=0,count=0,workCount=0,baseS=0;
     ms.forEach(s=>{
       const c=getShiftPay(s,cfg,wMap[s.id]);
       const sa=isSpecialDay(s.type)?0:csa(s.allowanceIds||[],als);
-      gross+=c.gross;allow+=sa;count++;
+      gross+=c.gross;allow+=sa;allowEx+=isSpecialDay(s.type)?0:csaExempt(s.allowanceIds||[],als);count++;
       if(!isSpecialDay(s.type)){hours+=ch(s.start,s.end);workCount++;}
       // בסיס פנסיה זהה לדשבורד: שכר השעות הרגילות (regPay), לא regH×מכפיל-דומיננטי
       baseS+=(c.regPay!==undefined?c.regPay:c.gross);
     });
-    if(count>0) allow+=cma(als);
+    if(count>0){allow+=cma(als);allowEx+=cmaExempt(als);}
     const recDates=new Set(ms.map(s=>s.date));
     const holPay=Object.entries(IL_HOLIDAYS).filter(([d,h])=>d.startsWith(ym)&&h.paid&&!recDates.has(d)).length*(cfg.baseRate||34.32)*8;
     gross+=holPay;baseS+=holPay;
     const total=gross+allow;
-    const ded=cfg.enableDeductions&&total>0?cd(total,cfg,baseS):null;
+    const taxable=gross+allow-allowEx; // בסיס חייב — ללא תוספות פטורות
+    const ded=cfg.enableDeductions&&taxable>0?cd(taxable,cfg,baseS):null;
     const net=ded?total-ded.tot:total;
     const manualEntry=(manualMonths||{})[ym];
     const isManual=count===0&&!!manualEntry;
@@ -4151,6 +4187,33 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
                   <NumInput value={form.shabbatMult??150} onChange={v=>setForm(f=>({...f,shabbatMult:v}))} step={1} min={100} max={300}/>
                   <span style={{color:"var(--txt)",fontWeight:"800",fontSize:"16px"}}>%</span>
                 </div>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:"12px"}}>
+                  <div style={{flex:1,paddingLeft:"10px"}}>
+                    <div style={{fontSize:"12px",fontWeight:"700",color:"var(--txt)"}}>{uT("sg_shabbat_add")}</div>
+                    <div style={{fontSize:"10px",color:"var(--txt-dd)",marginTop:"1px"}}>{uT("sg_shabbat_add_h")}</div>
+                  </div>
+                  <Toggle on={!!form.shabbatAdditive} onToggle={()=>setForm(f=>({...f,shabbatAdditive:!f.shabbatAdditive}))}/>
+                </div>
+              </>
+            )}
+          </div>
+          {/* Night shift = shortened 7h workday */}
+          <div style={{...CARD,marginBottom:"12px",opacity:form.nightDayEnabled!==false?1:0.6}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"6px"}}>
+              <div style={{fontSize:"14px",fontWeight:"800",color:"var(--txt)",display:"flex",alignItems:"center",gap:"7px"}}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                {uT("sg_night_day")}
+              </div>
+              <Toggle on={form.nightDayEnabled!==false} onToggle={()=>setForm(f=>({...f,nightDayEnabled:f.nightDayEnabled===false}))}/>
+            </div>
+            <div style={{fontSize:"11px",color:"var(--txt-dd)",marginBottom:form.nightDayEnabled!==false?"12px":"0"}}>{uT("sg_night_day_h")}</div>
+            {form.nightDayEnabled!==false&&(
+              <>
+                <div style={{fontSize:"11px",color:"var(--txt-d)",fontWeight:"700",marginBottom:"6px"}}>{uT("sg_night_thresh")}</div>
+                <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                  <NumInput value={form.nightDayThreshold??7} onChange={v=>setForm(f=>({...f,nightDayThreshold:v}))} step={0.5} min={4} max={12}/>
+                  <span style={{color:"var(--txt)",fontWeight:"800",fontSize:"14px"}}>{uT("hr")}</span>
+                </div>
               </>
             )}
           </div>
@@ -4228,6 +4291,13 @@ function Settings({cfg,tpls,als,shifts,vacCfg,onSaveCfg,onSaveTpls,onSaveAls,onS
                         <option value="per_month">{uT("sg_per_month")}</option>
                       </select>
                     </div>
+                  </div>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:"10px",opacity:a.active?1:0.4}}>
+                    <div>
+                      <div style={{fontSize:"12px",fontWeight:"700",color:"var(--txt)"}}>{uT("sg_taxable")}</div>
+                      <div style={{fontSize:"10px",color:"var(--txt-dd)",marginTop:"1px"}}>{uT("sg_taxable_h")}</div>
+                    </div>
+                    <Toggle on={a.taxable!==false} onToggle={()=>updA(a.id,"taxable",a.taxable===false)}/>
                   </div>
                 </div>
               ))}
